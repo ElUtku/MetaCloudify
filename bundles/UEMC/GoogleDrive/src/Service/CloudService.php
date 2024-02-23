@@ -15,7 +15,7 @@ use Masbug\Flysystem\GoogleDriveAdapter;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 
-use UEMC\core\Service\CloudService as Core;
+use UEMC\Core\Service\CloudService as Core;
 
 class CloudService
 {

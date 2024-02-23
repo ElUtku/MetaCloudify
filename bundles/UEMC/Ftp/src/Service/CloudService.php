@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use League\Flysystem\Ftp\FtpAdapter;
 use Symfony\Component\HttpFoundation\Response;
 
-use UEMC\core\Service\CloudService as Core;
+use UEMC\Core\Service\CloudService as Core;
 
 class CloudService
 {

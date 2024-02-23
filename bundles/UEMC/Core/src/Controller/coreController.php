@@ -5,11 +5,10 @@ namespace UEMC\Core\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use UEMC\core\Service\CloudService;
+use UEMC\Core\Service\CloudService;
 
 class coreController extends AbstractController
 {
-
     /**
      * @Route("/core", name="core_index")
      */
@@ -17,6 +16,5 @@ class coreController extends AbstractController
     {
         return $this;
     }
-
 
 }

@@ -11,7 +11,7 @@ return [
     Symfony\Bundle\SecurityBundle\SecurityBundle::class => ['all' => true],
     Symfony\Bundle\MonologBundle\MonologBundle::class => ['all' => true],
     Symfony\Bundle\MakerBundle\MakerBundle::class => ['dev' => true],
-    UEMC\core\UEMCCoreBundle::class => ['all' => true],
+    UEMC\Core\UEMCCoreBundle::class => ['all' => true],
     UEMC\OneDrive\UEMCOneDriveBundle::class => ['all' => true],
     UEMC\OwnCloud\UEMCOwnCloudBundle::class => ['all' => true],
     UEMC\GoogleDrive\UEMCGoogleDriveBundle::class => ['all' => true],
