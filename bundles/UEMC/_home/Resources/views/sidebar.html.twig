@@ -1,0 +1,84 @@
+<div class="flex-shrink-0 p-3" style="width: 280px;">
+    <div class="d-flex align-items-baseline justify-content-start">
+        <i class="bi-lg bi-person-fill mx-2 fs-4"></i>
+        <h4>Accounts</h4>
+    </div>
+    <ul class="list-unstyled ps-0">
+
+        {% if app.session.has('googleSession') and app.session.get('googleSession')['googleUser'] is defined %}
+
+            <li class="mb-1">
+                <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed text-start"  data-bs-toggle="collapse" data-bs-target="#home-collapse" aria-expanded="true">
+                    Google - {{ app.session.get('googleSession')['googleUser']['name'] }}
+                </button>
+                <div class="collapse show" id="home-collapse">
+                    <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                        <li><a onclick="event.preventDefault();controller='{{ path('GoogleDrive_drive') }}'; loadData('');" class="btn d-inline-flex align-items-center rounded border-0">Drive</a></li>
+                        <li><a href="{{ path('GoogleDrive_logout') }}" class="link-body-emphasis d-inline-flex text-decoration-none rounded">LogOut</a></li>
+                    </ul>
+                </div>
+            </li>
+
+        {% endif %}
+
+        {% if app.session.has('onedriveSession') and app.session.get('onedriveSession')['oneDriveUser'] is defined %}
+
+            <li class="mb-1">
+                <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed text-start" data-bs-toggle="collapse" data-bs-target="#dashboard-collapse" aria-expanded="false">
+                    OneDrive - {{ app.session.get('onedriveSession')['oneDriveUser']['displayName'] }}
+                </button>
+                <div class="collapse" id="dashboard-collapse">
+                    <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                        <li><a onclick="event.preventDefault();controller='{{ path('onedrive_drive') }}'; loadData('');" class="btn d-inline-flex align-items-center rounded border-0">Drive</a></li>
+                        <li><a href="{{ path('onedrive_logout') }}" class="link-body-emphasis d-inline-flex text-decoration-none rounded">LogOut</a></li>
+                    </ul>
+                </div>
+            </li>
+
+        {% endif %}
+
+        {% if app.session.has('owncloudSession') and app.session.get('owncloudSession')['ownCloudUser'] is defined %}
+
+            <li class="mb-1">
+                <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed text-start" data-bs-toggle="collapse" data-bs-target="#orders-collapse" aria-expanded="false">
+                    OwnCloud - {{ app.session.get('owncloudSession')['ownCloudUser']['userName'] }}
+                </button>
+                <div class="collapse" id="orders-collapse">
+                    <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                        <li><a onclick="event.preventDefault();controller='{{ path('owncloud_drive') }}'; loadData('');" class="btn d-inline-flex align-items-center rounded border-0">Drive</a></li>
+                        <li><a href="{{ path('owncloud_logout') }}" class="link-body-emphasis d-inline-flex text-decoration-none rounded">LogOut</a></li>
+                    </ul>
+                </div>
+            </li>
+
+        {% endif %}
+
+        {% if app.session.has('ftpSession') and app.session.get('ftpSession')['ftpUser'] is defined %}
+
+            <li class="mb-1">
+                <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed text-start" data-bs-toggle="collapse" data-bs-target="#orders-collapse" aria-expanded="false">
+                    FTP - {{ app.session.get('ftpSession')['ftpUser']['user'] }}
+                </button>
+                <div class="collapse" id="orders-collapse">
+                    <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                        <li><a onclick="event.preventDefault();controller='{{ path('ftp_listDirecories') }}'; loadData('/');" class="btn d-inline-flex align-items-center rounded border-0">Drive</a></li>
+                        <li><a href="{{ path('ftp_logout') }}" class="link-body-emphasis d-inline-flex text-decoration-none rounded">LogOut</a></li>
+                    </ul>
+                </div>
+            </li>
+
+        {% endif %}
+
+        <li class="border-top my-3"></li>
+        <li class="mb-1">
+            {% if not ( app.session.has('googleSession') or
+                app.session.has('onedriveSession') or
+                app.session.has('owncloudSession') or
+                app.session.has('ftpSession')   )
+            %}
+                <p>Por favor, inicia sesión en algún servicio para poder continuar.</p>
+            {% endif %}
+            <button id="btLogin" class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#modalSignin">Login</button>
+        </li>
+    </ul>
+</div>

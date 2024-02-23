@@ -1,0 +1,30 @@
+<div class="d-none position-absolute d-flex flex-column flex-md-row p-4 gap-4 py-md-5 align-items-center justify-content-center" id="contextMenu">
+    <ul class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 shadow w-220px" data-bs-theme="light">
+        <li><a id="buttonDlt" onclick="event.preventDefault();" class="dropdown-item rounded-2" href="#">Eliminar</a></li>
+    </ul>
+</div>
+<script>
+    /*$(document).ready(function() {
+        var contextMenu = $('#contextMenu');
+
+        $(document).on('contextmenu', function(event) {
+            event.preventDefault();
+
+            contextMenu.removeClass('d-none').addClass('d-block');
+            contextMenu.css({
+                left: event.clientX-27 ,
+                top: event.clientY-50
+            });
+
+            // Agregar un evento de clic fuera del menú
+            $(document).on('click.menuClose', function(event) {
+                // Verificar si el clic fue fuera del menú contextual
+                if (!contextMenu.is(event.target) && contextMenu.has(event.target).length === 0) {
+                    contextMenu.addClass('d-none').removeClass('d-block');
+                    // Remover el evento de clic fuera del menú una vez que se ha ejecutado
+                    $(document).off('click.menuClose');
+                }
+            });
+        });
+    });*/
+</script>

@@ -1,0 +1,4 @@
+# src/UEMC/Core/Resources/config/services.yaml
+services:
+  uemc_core.CloudService:
+    class: UEMC\Core\Services\CloudService

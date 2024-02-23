@@ -1,0 +1,6 @@
+.no-select {
+    user-select: none;
+}
+.underline-on-hover:hover {
+    text-decoration: underline;
+}

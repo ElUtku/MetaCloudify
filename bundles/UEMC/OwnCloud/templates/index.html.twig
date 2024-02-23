@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello OwnCloudController!{% endblock %}
+
+{% block body %}
+<style>
+    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
+    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
+</style>
+    <div class="container">
+        <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
+            <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+                <li><a href="{{ path('owncloud_indexGET') }}" class="nav-link px-2 link-secondary">Home</a></li>
+                <li><a href="#" class="nav-link px-2">Features</a></li>
+                <li><a href="#" class="nav-link px-2">Pricing</a></li>
+                <li><a href="#" class="nav-link px-2">FAQs</a></li>
+                <li><a href="#" class="nav-link px-2">About</a></li>
+            </ul>
+
+            <div class="col-md-4">
+                {% if not app.session.has('user') %}
+                    <a href="{{ path('owncloud_loginGET') }}" class="btn btn-primary">Login</a>
+                {% else %}
+                    <div class="container">
+                        <div class="row col-md-12 border border-solid border-1 border-gray rounded d-flex align-items-center text-center justify-content-end" id="userProfile">
+                            <div class="col-md-2 p-1 m-0">
+                            </div>
+                            <div class="col-md-7 d-flex flex-column align-items-center p-1">
+                                <div class="col-md-12">
+                                    <h4 class="small m-0">{{ app.session.get('user').user }}</h4>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Mas
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-dark">
+                                    <li><a class="dropdown-item" href="{{ path('owncloud_drive') }}">Drive</a></li>
+                                    <li><a class="dropdown-item" href="{{ path('owncloud_logout') }}">Logout</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                {% endif %}
+            </div>
+        </header>
+    </div>
+        {{ dump(test) }}
+{% endblock %}

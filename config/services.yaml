@@ -1,0 +1,63 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+
+    UEMC\Core\:
+        resource: '../bundles/UEMC/Core/src/'
+
+    UEMC\OneDrive\:
+        resource: '../bundles/UEMC/OneDrive/src/'
+
+    UEMC\OwnCloud\:
+        resource: '../bundles/UEMC/OwnCloud/src/'
+
+    UEMC\GoogleDrive\:
+        resource: '../bundles/UEMC/GoogleDrive/src/'
+
+    UEMC\Ftp\:
+        resource: '../bundles/UEMC/Ftp/src/'
+
+    UEMC\_home\:
+        resource: '../bundles/UEMC/_home/src/'
+
+    #  service definitions
+
+    UEMC\Core\Service\CloudService:
+        public: true
+        autowire: true
+
+    UEMC\OneDrive\Service\CloudService:
+        public: true
+        autowire: true
+
+    UEMC\OwnCloud\Service\CloudService:
+        public: true
+        autowire: true
+
+    UEMC\GoogleDrive\Service\CloudService:
+        public: true
+        autowire: true
+
+    UEMC\Ftp\Service\CloudService:
+        public: true
+        autowire: true
+
+    UEMC\_home\Service\CloudService:
+        public: true
+        autowire: true

@@ -1,0 +1,12 @@
+twig:
+    default_path: '%kernel.project_dir%/templates'
+    paths:
+        '%kernel.project_dir%/bundles/UEMC/OneDrive/templates': UEMCOneDriveBundle
+        '%kernel.project_dir%/bundles/UEMC/OwnCloud/templates': UEMCOwnCloudBundle
+        '%kernel.project_dir%/bundles/UEMC/GoogleDrive/templates': UEMCGoogleDriveBundle
+        '%kernel.project_dir%/bundles/UEMC/Ftp/templates': UEMCFtpBundle
+        '%kernel.project_dir%/bundles/UEMC/_home/templates': UEMC_homeBundle
+
+when@test:
+    twig:
+        strict_variables: true

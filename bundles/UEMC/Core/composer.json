@@ -1,0 +1,18 @@
+{
+  "name": "uemc/core",
+  "description": "Operations for clouds services",
+  "bin": [
+    "bin/core"
+  ],
+  "require": {
+    "php": ">=8.2.4",
+    "league/flysystem": "^3.23.0"
+  },
+  "autoload": {
+    "psr-4": {"UEMC\\core\\": "src/"}
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "license": "Test"
+}

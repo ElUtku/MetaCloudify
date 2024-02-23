@@ -1,0 +1,106 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello GoogleDriveController!{% endblock %}
+{% block javascripts %}
+{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
+        .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
+        .profile
+        {
+            width: 200px;
+            height: 30px;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            flex-wrap: nowrap;
+            border: 1px solid grey;
+            border-radius: 10px;
+            padding: 7px;
+            align-items: center;
+        }
+        .profile p
+        {
+            width: 100%;
+        }
+        .profile img
+        {
+            height: 100%;
+            border-radius: 50%;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+
+    <div class="container">
+        <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
+            <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+                <li><a href="#" class="nav-link px-2 link-secondary">Home</a></li>
+                <li><a href="#" class="nav-link px-2">Features</a></li>
+                <li><a href="#" class="nav-link px-2">Pricing</a></li>
+                <li><a href="#" class="nav-link px-2">FAQs</a></li>
+                <li><a href="#" class="nav-link px-2">About</a></li>
+            </ul>
+
+            <div class="col-md-4">
+                {% if not app.session.has('user') %}
+                    <script src="https://accounts.google.com/gsi/client" async></script>
+                    <div id="g_id_onload"
+                         data-client_id="{{ client_id }}"
+                         data-context="use"
+                         data-close_on_tap_outside="false"
+                         data-ux_mode="popup"
+                         data-login_uri="{{ redirect_uri_accesTap }}"
+                         data-itp_support="true"
+                         data-auto_prompt="false"
+                         data-auto_select="false">
+                        <!-- auto_prompt =True --activa One Tap -->
+                        <!-- auto_select =True --activa One Tap automatico -->
+                    </div>
+
+                    <div class="g_id_signin"
+                         data-type="standard"
+                         data-shape="rectangular"
+                         data-theme="outline"
+                         data-text="signin_with"
+                         data-size="large"
+                         data-logo_alignment="left">
+                    </div>
+
+                {% else %}
+                    <div class="container">
+                        <div class="row col-md-12 border border-solid border-1 border-gray rounded d-flex align-items-center text-center justify-content-end" id="userProfile">
+                            <div class="col-md-2 p-1 m-0">
+                                <img id="pictureProfile" class="" src="{{ app.session.get('user')['picture'] }}" alt="Imagen del perfil" style="height:35px; border-radius:50%;">
+                            </div>
+                            <div class="col-md-7 d-flex flex-column align-items-center p-1">
+                                <div class="col-md-12">
+                                    <h4 class="small m-0">{{ app.session.get('user')['name'] }}</h4>
+                                </div>
+                                <div class="col-md-12">
+                                    <p class="small m-0">{{ app.session.get('user')['email'] }}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                        <button class="btn btn-dark dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                            Mas
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-dark">
+                                            <li><a class="dropdown-item" href="{{ path('GoogleDrive_drive') }}">Drive</a></li>
+                                            <li><a class="dropdown-item" href="{{ path('GoogleDrive_logout') }}">Logout</a></li>
+                                        </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                {% endif %}
+            </div>
+        </header>
+    </div>
+
+    {{ dump(test) }}
+
+{% endblock %}

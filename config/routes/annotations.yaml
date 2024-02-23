@@ -1,0 +1,31 @@
+controllers:
+    resource: ../../src/Controller/
+    type: annotation
+
+kernel:
+    resource: ../../src/Kernel.php
+    type: annotation
+
+uemc_core:
+    # loads routes from the given routing file stored in some bundle
+    resource: '@UEMCCoreBundle/config/routing.yaml'
+
+uemc_onedrive:
+    # loads routes from the given routing file stored in some bundle
+    resource: '@UEMCOneDriveBundle/config/routing.yaml'
+
+uemc_owncloud:
+    # loads routes from the given routing file stored in some bundle
+    resource: '@UEMCOwnCloudBundle/config/routing.yaml'
+
+uemc_googledrive:
+    # loads routes from the given routing file stored in some bundle
+    resource: '@UEMCGoogleDriveBundle/config/routing.yaml'
+
+uemc_ftp:
+    # loads routes from the given routing file stored in some bundle
+    resource: '@UEMCFtpBundle/config/routing.yaml'
+
+uemc__home:
+    # loads routes from the given routing file stored in some bundle
+    resource: '@UEMC_homeBundle/config/routing.yaml'
