@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use League\Flysystem\Ftp\FtpAdapter;
 use Symfony\Component\HttpFoundation\Response;
 
-use UEMC\Core\Service\CloudService as Core;
+use UEMC\core\Service\CloudService as Core;
 
 class CloudService
 {
@@ -139,6 +139,7 @@ class CloudService
             return self::$core->upload($filesystem, $path, $content);
 
         }
+        return 'KO';
     }
 
     public function logout(SessionInterface $session, Request $request)

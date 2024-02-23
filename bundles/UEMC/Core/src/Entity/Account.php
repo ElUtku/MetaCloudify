@@ -2,7 +2,7 @@
 
 namespace UEMC\Core\Entity;
 
-use UEMC\Core\AccountRepository;
+use UEMC\Core\Repository\AccountRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: AccountRepository::class)]

@@ -15,7 +15,7 @@ use Masbug\Flysystem\GoogleDriveAdapter;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 
-use UEMC\Core\Service\CloudService as Core;
+use UEMC\core\Service\CloudService as Core;
 
 class CloudService
 {
@@ -150,7 +150,7 @@ class CloudService
             $token=$client->getAccessToken();
             //$session->set('accessToken',$token);
             $googleSesion['googleUser']=$payload;
-            $session->set('googleSession',$this->getGoogleSesion());
+            //$session->set('googleSession',$this->getGoogleSesion());
             //return $payload;
             return $this->auth($session,$request);
         } else {

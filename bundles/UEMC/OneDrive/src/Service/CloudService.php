@@ -17,7 +17,7 @@ use Stevenmaguire\OAuth2\Client\Provider\Microsoft;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 
-use UEMC\Core\Service\CloudService as Core;
+use UEMC\core\Service\CloudService as Core;
 
 class CloudService
 {

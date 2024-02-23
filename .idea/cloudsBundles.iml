@@ -2,7 +2,7 @@
 <module type="WEB_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/bundles/UEMC/Core/src" isTestSource="false" packagePrefix="UEMC\core\" />
+      <sourceFolder url="file://$MODULE_DIR$/bundles/UEMC/Core/src" isTestSource="false" packagePrefix="UEMC\Core\" />
       <sourceFolder url="file://$MODULE_DIR$/bundles/UEMC/Ftp/src" isTestSource="false" packagePrefix="UEMC\Ftp\" />
       <sourceFolder url="file://$MODULE_DIR$/bundles/UEMC/GoogleDrive/src" isTestSource="false" packagePrefix="UEMC\GoogleDrive\" />
       <sourceFolder url="file://$MODULE_DIR$/bundles/UEMC/OneDrive/src" isTestSource="false" packagePrefix="UEMC\OneDrive\" />
@@ -194,5 +194,9 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="bootstrap" level="application" />
+    <orderEntry type="library" name="bootstrap-icons" level="application" />
+    <orderEntry type="library" name="jquery-3.7.1" level="application" />
+    <orderEntry type="library" name="popper.js" level="application" />
   </component>
 </module>

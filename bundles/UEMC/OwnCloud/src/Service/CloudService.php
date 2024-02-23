@@ -13,7 +13,7 @@ use Sabre\DAV\Client;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
-use UEMC\Core\Service\CloudService as Core;
+use UEMC\core\Service\CloudService as Core;
 use UEMC\OwnCloud\Entity\Owncloud_Options;
 
 use  Psr\Log\LoggerInterface;

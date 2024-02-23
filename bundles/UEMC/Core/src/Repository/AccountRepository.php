@@ -2,9 +2,9 @@
 
 namespace UEMC\Core\Repository;
 
-use App\Entity\Account;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use UEMC\Core\Entity\Account;
 
 /**
  * @extends ServiceEntityRepository<Account>
