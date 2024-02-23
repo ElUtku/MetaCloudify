@@ -13,3 +13,8 @@
 /phpunit.xml
 .phpunit.result.cache
 ###< phpunit/phpunit ###
+
+
+###> JetBrains/phpStorm ###
+/.idea
+###< JetBrains/phpStorm ###
