@@ -44,11 +44,11 @@
                         <label for="return" style="cursor: pointer">Volver atras</label>
                     </div>
                     <div class="col-3 me-auto d-flex flex-row align-items-center">
-                        <a href="" onclick="event.preventDefault();$('#newNameButton').attr('onclick','createDir($(\'#newName\').val());')" class="link-body-emphasis d-inline-flex text-decoration-none rounded" data-bs-toggle="modal" data-bs-target="#newDirFileModal">
+                        <a id="crearCarpeta" href="" onclick="event.preventDefault();$('#newNameButton').attr('onclick','createDir($(\'#newName\').val());')" class="link-body-emphasis d-inline-flex text-decoration-none rounded" data-bs-toggle="modal" data-bs-target="#newDirFileModal">
                             <i class="bi bi-folder-fill me-1"></i>
                             Crear carpeta
                         </a>
-                        <a href="" onclick="event.preventDefault();$('#newNameButton').attr('onclick','createFile($(\'#newName\').val());')" class="link-body-emphasis d-inline-flex text-decoration-none rounded" data-bs-toggle="modal" data-bs-target="#newDirFileModal">
+                        <a id="crearFichero" href="" onclick="event.preventDefault();$('#newNameButton').attr('onclick','createFile($(\'#newName\').val());')" class="link-body-emphasis d-inline-flex text-decoration-none rounded" data-bs-toggle="modal" data-bs-target="#newDirFileModal">
                             <i class="bi bi-file-earmark-text me-1"></i>
                             Crear fichero
                         </a>

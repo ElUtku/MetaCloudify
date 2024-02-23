@@ -1,6 +1,15 @@
 var parent;
 var controller;
 var pathActual;
+
+
+$(document).ready(function() {
+
+});
+
+
+
+
 function loadData(path) {
     pathActual=path;
 
