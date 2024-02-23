@@ -21,7 +21,6 @@ class GoogleDriveController extends AbstractController
     {
         return $this->render('@UEMCGoogleDriveBundle/index.html.twig', [
             'controller_name' => 'GoogleDriveController',
-            'service' => $cloud->hello(),
             'client_id' => $cloud->getClientID(),
             'redirect_uri_accesTap' => $cloud->getRedirectUriAccessTap(),
             'test' => "nada Por Aqui"
