@@ -2,8 +2,7 @@
   "name": "uemc/owncloud",
   "type": "library",
   "require": {
-    "php": "^8.2.4",
-    "../../../vendor/symfony/framework-bundle": "^5.4"
+    "php": "^8.2.4"
   },
   "version": "v1.0.0",
   "autoload": {

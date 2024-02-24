@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 use UEMC\Core\Service\CloudService as Core;
-use UEMC\OwnCloud\Entity\Owncloud_Options;
+use UEMC\OwnCloud\Entity\Owncloud;
 
 use  Psr\Log\LoggerInterface;
 
@@ -24,16 +24,16 @@ use  Psr\Log\LoggerInterface;
 class CloudService
 {
 
-    static $core;
-    private $owncloud;
-    private $loggerUEMC;
+    static Core $core;
+    private Owncloud $owncloud;
+    private LoggerInterface $loggerUEMC;
 
 
     public function __construct(LoggerInterface $uemcLogger)
     {
         $this->loggerUEMC = $uemcLogger;
         self::$core = new Core();
-        $this->owncloud = new Owncloud_Options();
+        $this->owncloud = new Owncloud();
     }
 
 
@@ -48,6 +48,9 @@ class CloudService
         $adapter = new WebDAVAdapter($client);
         try {
             $filesystem = new Filesystem($adapter);
+
+
+
             $owncloudSession['client']=$options;
             $owncloudSession['ownCloudUser']=[
                 'userName'=>$request->get('userName')
