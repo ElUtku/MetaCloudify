@@ -14,17 +14,6 @@ use UEMC\OneDrive\Service\CloudService;
 
 class OneDriveController extends AbstractController
 {
-
-    /**
-     * @Route("/onedrive", name="onedrive_index")
-     */
-    public function index(): Response
-    {
-        return $this->render('@UEMCOneDriveBundle/index.html.twig', [
-            'test' => "Todo bien"
-        ]);
-    }
-
     /**
      * @Route("/onedrive/access", name="onedrive_access")
      */
@@ -44,17 +33,6 @@ class OneDriveController extends AbstractController
     {
         return $this->redirectToRoute('_home_index', [
             'status' => $cloud->logout($session,$request)
-        ]);
-    }
-
-    /**
-     * @Route("/onedrive/user", name="onedrive_user")
-     */
-    public function user_info(SessionInterface $session, Request $request, CloudService $cloud): Response
-    {
-
-        return $this->render('@UEMCOneDriveBundle/index.html.twig', [
-            'test' => $cloud->getUserInfo($session,$request)
         ]);
     }
 

@@ -1,0 +1,19 @@
+# src/UEMC/_home/Resources/config/services.yaml
+
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  UEMC\_home\:
+    resource: '../../'
+
+  UEMC\_home\Controller\:
+    resource: '../../Controller/'
+    public: true
+
+  # Configura la carpeta de los public (vistas, CSS, JS, imágenes, etc.)
+  UEMC\_home\Resources\:
+    resource: '../'
+    public: true

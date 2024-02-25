@@ -1,0 +1,103 @@
+{% extends '@UEMC_homeBundle/base.html.twig' %}
+
+{% block title %}Hello _homeController!{% endblock %}
+
+        {% block stylesheets %}
+            <link rel="stylesheet" href="{{ asset('bundles/uemc_home/css/sidebar.css') }}">
+            <link rel="stylesheet" href="{{ asset('bundles/uemc_home/css/_home.css') }}">
+
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/10.7.0/css/jquery.fileupload.min.css">
+        {% endblock %}
+
+        {% block javascripts %}
+
+            <!-- Tooltip de bootstrap -->
+            <script src="{{ asset('bundles/uemc_home/js/tooltipBS5.js') }}"></script>
+
+            <!-- Manejo de directorios y ficheros -->
+            <script src="{{ asset('bundles/uemc_home/js/cloud.js') }}"></script>
+
+            <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/10.7.0/js/vendor/jquery.ui.widget.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/10.7.0/js/jquery.iframe-transport.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/10.7.0/js/jquery.fileupload.min.js"></script>
+        {% endblock %}
+
+{% block body %}
+
+    <!-- HEADER -->
+    {% include '@UEMC_homeBundle/Includes/header.html.twig' %}
+
+    <!-- MAIN -->
+    <div class="d-flex flex-nowrap">
+
+        <!-- SIDEBAR -->
+        {{ include('@UEMC_homeBundle/Includes/sidebar.html.twig') }}
+
+        <!-- MAIN BLOCK -->
+        <div id="mainContent" class="min-vh-auto col-md-10 d-flex flex-column flex-wrap align-items-start justify-content-start border-start"  style="width: 69.5%;">
+            <div class="container col-md-12">
+                <h1>Bienvenido</h1>
+                <div id="divRuta" class="d-none btn-toggle-nav  col-12 flex-row align-items-center d-flex mb-2 pb-3 border-bottom">
+                    <div class="col-auto me-auto no-select" role="button" onclick="loadData(parent.toString())">
+                        <i id="return" class="bi bi-arrow-return-left"></i>
+                        <label for="return" style="cursor: pointer">Volver atras</label>
+                    </div>
+                    <div class="col-3 me-auto d-flex flex-row align-items-center">
+                        <a id="crearCarpeta" href="" onclick="event.preventDefault();$('#newNameButton').attr('onclick','createDir($(\'#newName\').val());')" class="link-body-emphasis d-inline-flex text-decoration-none rounded" data-bs-toggle="modal" data-bs-target="#newDirFileModal">
+                            <i class="bi bi-folder-fill me-1"></i>
+                            Crear carpeta
+                        </a>
+                        <a id="crearFichero" href="" onclick="event.preventDefault();$('#newNameButton').attr('onclick','createFile($(\'#newName\').val());')" class="link-body-emphasis d-inline-flex text-decoration-none rounded" data-bs-toggle="modal" data-bs-target="#newDirFileModal">
+                            <i class="bi bi-file-earmark-text me-1"></i>
+                            Crear fichero
+                        </a>
+
+                    </div>
+                    <div class="col-6 d-flex flex-row align-items-center">
+                        <label class="col-2" for="path" id="lpath" >Ruta actual</label>
+                        <input class="form-control" id="path" type="text" placeholder="">
+                        <button class="btn btn-outline-secondary d-inline-flex align-items-center ms-2" type="button" onclick="loadData($('#path').val());">
+                            Ir
+                            <i class="bi bi-arrow-right-short"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="explorer1" class="container d-flex flex-column col-md-12 mt-2">
+
+            </div>
+
+            <div id="divUpload" class="d-none border-top m-2 pt-2">
+                <form id="fileupload" method="POST" enctype="multipart/form-data">
+                    <div class="mb-3 d-flex align-items-center">
+                        <input class="form-control form-control-sm me-2" id="formFile" type="file" name="content" multiple>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="enviarBtn" onclick="upload();">Enviar</button>
+                    </div>
+                </form>
+                <!-- Contenedor para mostrar la progresión de la carga -->
+                <div id="progress"></div>
+                <!-- Lista de archivos cargados -->
+                <div id="files"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ALERTS -->
+    {{ include('@UEMC_homeBundle/Includes/alerts.html.twig') }}
+
+    <!-- MODAL SIGN IN -->
+    {{ include('@UEMC_homeBundle/Includes/modalSignIn.html.twig') }}
+
+    <!-- Modal file/directoy name -->
+    {{ include('@UEMC_homeBundle/Includes/modalDirFileName.html.twig') }}
+
+    <!-- Context Menu Mouse -->
+    {{ include('@UEMC_homeBundle/Includes/contextMenu.html.twig') }}
+
+    <!-- FOOTER -->
+    {{ include('@UEMC_homeBundle/Includes/footer.html.twig') }}
+{% endblock %}

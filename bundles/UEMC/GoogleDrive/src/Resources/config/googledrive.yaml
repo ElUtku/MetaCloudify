@@ -1,0 +1,12 @@
+clientId: '423818169355-mjhnjfqs6ue9m2ni9eldol8h8oibgr8f.apps.googleusercontent.com'
+clientSecret: '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'
+redirectUri: 'http://localhost/cloudBundles5.4/public/index.php/GoogleDrive/login'
+redirectUriAccessTap: 'http://localhost/cloudBundles5.4/public/index.php/GoogleDrive/accessTap'
+scopes:
+  - 'https://www.googleapis.com/auth/drive.appdata'
+  - 'https://www.googleapis.com/auth/drive.appfolder'
+  - 'https://www.googleapis.com/auth/drive.install'
+  - 'https://www.googleapis.com/auth/drive.file'
+  - 'https://www.googleapis.com/auth/drive.readonly'
+  - 'https://www.googleapis.com/auth/drive'
+  - 'https://www.googleapis.com/auth/userinfo.profile'

@@ -8,24 +8,24 @@ kernel:
 
 uemc_core:
     # loads routes from the given routing file stored in some bundle
-    resource: '@UEMCCoreBundle/config/routing.yaml'
+    resource: '@UEMCCoreBundle/src/Resources/config/routing.yaml'
 
 uemc_onedrive:
     # loads routes from the given routing file stored in some bundle
-    resource: '@UEMCOneDriveBundle/config/routing.yaml'
+    resource: '@UEMCOneDriveBundle/src/Resources/config/routing.yaml'
 
 uemc_owncloud:
     # loads routes from the given routing file stored in some bundle
-    resource: '@UEMCOwnCloudBundle/config/routing.yaml'
+    resource: '@UEMCOwnCloudBundle/src/Resources/config/routing.yaml'
 
 uemc_googledrive:
     # loads routes from the given routing file stored in some bundle
-    resource: '@UEMCGoogleDriveBundle/config/routing.yaml'
+    resource: '@UEMCGoogleDriveBundle/src/Resources/config/routing.yaml'
 
 uemc_ftp:
     # loads routes from the given routing file stored in some bundle
-    resource: '@UEMCFtpBundle/config/routing.yaml'
+    resource: '@UEMCFtpBundle/src/Resources/config/routing.yaml'
 
 uemc__home:
     # loads routes from the given routing file stored in some bundle
-    resource: '@UEMC_homeBundle/config/routing.yaml'
+    resource: '@UEMC_homeBundle/src/Resources/config/routing.yaml'

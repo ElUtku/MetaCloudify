@@ -3,29 +3,33 @@
 namespace UEMC\OneDrive\Service;
 
 use Exception;
-
 use GuzzleHttp\Exception\GuzzleException;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemException;
 use League\Flysystem\UnableToCreateDirectory;
-use League\Flysystem\UnableToWriteFile;
 use Microsoft\Graph\Exception\GraphException;
+use Psr\Log\LoggerInterface;
 use ShitwareLtd\FlysystemMsGraph\Adapter;
 use Microsoft\Graph\Graph;
 use Microsoft\Graph\Model;
 use Stevenmaguire\OAuth2\Client\Provider\Microsoft;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
+use Symfony\Component\Yaml\Yaml;
 use UEMC\Core\Service\CloudService as Core;
+use UEMC\OneDrive\UEMCOneDriveBundle;
 
 class CloudService
 {
-    static $core;
+    private $core;
+    private LoggerInterface $loggerUEMC;
 
-    public function __construct()
+    public function __construct(LoggerInterface $uemcLogger)
     {
-        self::$core = new Core();
+        $this->loggerUEMC = $uemcLogger;
+        $this->core = new Core();
     }
 
     public function listDirectories($session,$request)
@@ -39,7 +43,7 @@ class CloudService
         $filesystem = new Filesystem($adapter);
         $path = $request->get('path');
 
-        return self::$core->listDirectory($filesystem,$path);
+        return $this->core->listDirectory($filesystem,$path);
     }
 
     public function download($session,$request)
@@ -56,7 +60,7 @@ class CloudService
         $path = $request->get('path');
         $name = basename($path);
 
-        return self::$core->download($filesystem,$path,$name);
+        return $this->core->download($filesystem,$path,$name);
     }
 
     public function createDirectory($session,$request)
@@ -73,7 +77,7 @@ class CloudService
         $path = $request->get('path');
         $name = $request->get('name');
 
-        return self::$core->createDir($filesystem,$path,$name);
+        return $this->core->createDir($filesystem,$path,$name);
     }
 
     public function createFile($session,$request)
@@ -123,7 +127,7 @@ class CloudService
 
         $path = $request->get('path');
 
-        return self::$core->delete($filesystem,$path);
+        return $this->core->delete($filesystem,$path);
     }
 
     public function upload($session,Request $request)
@@ -142,7 +146,7 @@ class CloudService
 
         if ($content instanceof UploadedFile) {
 
-            return self::$core->upload($filesystem, $path, $content);
+            return $this->core->upload($filesystem, $path, $content);
 
         }
 
@@ -152,15 +156,16 @@ class CloudService
 
     public function token($session,$request)
     {
+        $config = Yaml::parseFile(__DIR__.'\..\Resources\config\onedrive.yaml');
+
         $provider = new Microsoft([
             // Required
-            'clientId'                  => '84d85895-150a-47cb-92a1-4484f034dbac',
-            'clientSecret'              => '_FC8Q~xVOOcc0EzeH1eCWHSpFaiDdTFvt1cm0aYs',
-            'redirectUri'               => 'http://localhost/cloudBundles5.4/public/index.php/onedrive/access',
-            // Optional
-            'urlAuthorize'              => 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
-            'urlAccessToken'            => 'https://login.microsoftonline.com/common/oauth2/v2.0/token',
-            'urlResourceOwnerDetails'   => 'https://outlook.office.com/api/v2.0/me'
+            'clientId'                => $config['clientId'],
+            'clientSecret'            => $config['clientSecret'],
+            'redirectUri'             => $config['redirectUri'],
+            'urlAuthorize'            => $config['urlAuthorize'],
+            'urlAccessToken'          => $config['urlAccessToken'],
+            'urlResourceOwnerDetails' => $config['urlResourceOwnerDetails'],
         ]);
         $options = [
                     'scope' => ['User.Read', 'openid', 'Files.ReadWrite.All','offline_access','Mail.Read'] // array or string
@@ -189,7 +194,6 @@ class CloudService
                 $onedriveSession['token']=$token->jsonSerialize();
                 $session->set('onedriveSession',$onedriveSession);
 
-                //$session->set('user',$this->getUserInfo($request->get('code')));
 
             } catch (Exception $e) {
                 return($e);

@@ -24,7 +24,7 @@ use  Psr\Log\LoggerInterface;
 class CloudService
 {
 
-    static Core $core;
+    private Core $core;
     private Owncloud $owncloud;
     private LoggerInterface $loggerUEMC;
 
@@ -32,7 +32,7 @@ class CloudService
     public function __construct(LoggerInterface $uemcLogger)
     {
         $this->loggerUEMC = $uemcLogger;
-        self::$core = new Core();
+        $this->core = new Core();
         $this->owncloud = new Owncloud();
     }
 
@@ -65,12 +65,12 @@ class CloudService
 
     public function listDirectories(SessionInterface $session, Request $request)
     {
-        $this->owncloud->setPassword($session->get('owncloudSession')['client']['password']);
+        //$this->owncloud->setPassword($session->get('owncloudSession')['client']['password']);
         $this->loggerUEMC->debug(var_export($this->owncloud,true));
         $filesystem = $this->getFilesystem($session);
         $path=$request->get('path');
 
-        return self::$core->listDirectory($filesystem,$path);
+        return $this->core->listDirectory($filesystem,$path);
     }
 
     public function download(SessionInterface $session, Request $request)
@@ -81,7 +81,7 @@ class CloudService
         $path = $request->get('path');
         $name = basename($path);
 
-        return self::$core->download($filesystem,$path,$name);
+        return $this->core->download($filesystem,$path,$name);
     }
 
     public function createDirectory(SessionInterface $session, Request $request)
@@ -92,7 +92,7 @@ class CloudService
         $path = $request->get('path');
         $name = $request->get('name');
 
-        return self::$core->createDir($filesystem,$path,$name);
+        return $this->core->createDir($filesystem,$path,$name);
     }
 
     public function createFile(SessionInterface $session, Request $request)
@@ -103,7 +103,7 @@ class CloudService
         $path = $request->get('path');
         $name = $request->get('name');
 
-        return self::$core->createFile($filesystem,$path,$name);
+        return $this->core->createFile($filesystem,$path,$name);
 
     }
 
@@ -114,7 +114,7 @@ class CloudService
 
         $path = $request->get('path');
 
-        return self::$core->delete($filesystem,$path);
+        return $this->core->delete($filesystem,$path);
     }
     public function upload(SessionInterface $session, Request $request): string
     {
