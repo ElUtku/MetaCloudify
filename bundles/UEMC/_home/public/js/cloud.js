@@ -196,11 +196,11 @@ function upload()
         done: function () {
             loadData(pathActual);
         },
-        progressall: function (e, data) {
+        /*progressall: function (e, data) {
             // Actualiza la barra de progreso
             var progress = parseInt(data.loaded / data.total * 100, 10);
             $('#progress').css('width', progress + '%');
-        },
+        },*/
         fail: function (e, data) {
             console.log('Error al cargar el archivo:', data.errorThrown);
         }
