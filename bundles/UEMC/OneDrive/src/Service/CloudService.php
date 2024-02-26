@@ -19,6 +19,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Yaml\Yaml;
 
 
+use Twig\Token;
 use UEMC\Core\Service\CloudService as Core;
 
 class CloudService
@@ -116,7 +117,7 @@ class CloudService
 
     public function token($session,$request)
     {
-        $config = Yaml::parseFile(__DIR__.'\..\Resources\config\onedrive.yaml');
+        $config = Yaml::parseFile(__DIR__.'\..\Resources\config\onedrive.yaml'); //Configuraicon de la nube
 
         $provider = new Microsoft([
             // Required
@@ -127,10 +128,7 @@ class CloudService
             'urlAccessToken'          => $config['urlAccessToken'],
             'urlResourceOwnerDetails' => $config['urlResourceOwnerDetails'],
         ]);
-        $options = [
-                    'scope' => ['User.Read', 'openid', 'Files.ReadWrite.All','offline_access','Mail.Read'] // array or string
-        ];
-
+        $options = [ 'scope' => $config['scope'] ];
         if (empty($request->get('code'))) {
             // If we don't have an authorization code then get one
             $authUrl = $provider->getAuthorizationUrl($options);

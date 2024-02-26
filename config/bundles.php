@@ -17,4 +17,5 @@ return [
     UEMC\GoogleDrive\UEMCGoogleDriveBundle::class => ['all' => true],
     UEMC\Ftp\UEMCFtpBundle::class => ['all' => true],
     UEMC\_home\UEMC_homeBundle::class => ['all' => true],
+    Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle::class => ['all' => true],
 ];
