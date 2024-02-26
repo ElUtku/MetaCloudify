@@ -88,7 +88,7 @@ function updatePageContent(data) {
                 download(item.path);
             }
         });
-        row.on('contextmenu', function() {
+        row.on('contextmenu', function(event) {
             event.preventDefault();
 
             var contextMenu = $('#contextMenu');

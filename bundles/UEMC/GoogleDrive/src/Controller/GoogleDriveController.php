@@ -15,19 +15,6 @@ class GoogleDriveController extends AbstractController
 {
 
     /**
-     * @Route("/GoogleDrive/", name="GoogleDrive_index", methods={"GET"})
-     */
-    public function index(SessionInterface $session, Request $request, CloudService $cloud): Response
-    {
-        return $this->render('@UEMCGoogleDriveBundle/index.html.twig', [
-            'controller_name' => 'GoogleDriveController',
-            'client_id' => $cloud->getClientID(),
-            'redirect_uri_accesTap' => $cloud->getRedirectUriAccessTap(),
-            'test' => "nada Por Aqui"
-        ]);
-    }
-
-    /**
      * @Route("/GoogleDrive/login", name="GoogleDrive_login", methods={"GET"})
      */
     public function access(SessionInterface $session, Request $request, CloudService $cloud): Response
