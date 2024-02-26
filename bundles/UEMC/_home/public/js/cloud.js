@@ -1,6 +1,6 @@
-var parent;
-var controller;
-var pathActual;
+let parent;
+let controller;
+let pathActual;
 
 
 $(document).ready(function() {
@@ -22,9 +22,9 @@ function loadData(path) {
         parent = '';
     }
 
-    var ruta = $("#path");
+    let ruta = $("#path");
     ruta.val(path);
-    var divRuta = $("#divRuta");
+    let divRuta = $("#divRuta");
     divRuta.addClass('d-flex');
     divRuta.removeClass('d-none');
 
@@ -59,15 +59,15 @@ function cleanOwncloudData(data)
 }
 
 function updatePageContent(data) {
-    var container = $('#explorer1');
+    let container = $('#explorer1');
     container.empty();
 
     $.each(data, function(index, item) {
         item.path=item.path.replace(/\//g, '\\');
-        var parts=item.path.split('\\');
-        var name = parts[parts.length - 1];
+        let parts=item.path.split('\\');
+        let name = parts[parts.length - 1];
 
-        var row = $('<div class="row d-inline-block no-select underline-on-hover" role="button" data-bs-toggle="tooltip" title="' + item.path + '"></div>');
+        let row = $('<div class="row d-inline-block no-select underline-on-hover" role="button" data-bs-toggle="tooltip" title="' + item.path + '"></div>');
 
         if (item.type === 'dir') {
             row.append('<i class="bi bi-folder-fill"></i>');
@@ -90,8 +90,8 @@ function updatePageContent(data) {
         row.on('contextmenu', function(event) {
             event.preventDefault();
 
-            var contextMenu = $('#contextMenu');
-            var clickedElement = {
+            let contextMenu = $('#contextMenu');
+            let clickedElement = {
                 'path': item.path,
                 'name': name
         }; //Se guarda el elemento sobre el que se hizo click
@@ -225,12 +225,12 @@ function download(path)
         success: function (data) {
 
             //Se obtiene el nombre del archivo a descargar
-            var pathSplit = path.split('\\');
-            var name = pathSplit[pathSplit.length - 1];
+            let pathSplit = path.split('\\');
+            let name = pathSplit[pathSplit.length - 1];
 
             //Se descarga el archivo
-            var blob = new Blob([data], { type: 'application/octet-stream' });
-            var link = document.createElement('a');
+            let blob = new Blob([data], { type: 'application/octet-stream' });
+            let link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
             link.download = name;
             document.body.appendChild(link);
