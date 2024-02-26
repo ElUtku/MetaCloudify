@@ -9,7 +9,7 @@ use League\Flysystem\UnableToWriteFile;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
 
-class CloudService
+class CloudService extends UemcLogger
 {
 
     /**
@@ -23,6 +23,7 @@ class CloudService
      */
     public function listDirectory(Filesystem $filesystem, $path)
     {
+        $this->loggerUEMC->debug("Listing directory " . $path);
         try {
             $contents = $filesystem->listContents($path ?? '', false);
             $contenido=[];
@@ -49,6 +50,8 @@ class CloudService
     public function createDir(Filesystem $filesystem, $path, $name)
     {
         $newPath = $path. '/'. $name;
+
+        $this->loggerUEMC->info("Creating Directory " . $newPath);
 
         try {
             if($filesystem->directoryExists($newPath))
@@ -78,6 +81,9 @@ class CloudService
     public function createFile(Filesystem $filesystem, $path, $name)
     {
         $newPath = '/'.$path. '/'. $name;
+
+        $this->loggerUEMC->info("Creating File ".$newPath);
+
         try {
             if($filesystem->directoryExists($path)) //Comprobamos si existe el directorio
             {
@@ -108,6 +114,8 @@ class CloudService
      */
     public function delete(Filesystem $filesystem, $path)
     {
+        $this->loggerUEMC->info("Deleting " . $path);
+
         try {
             $filesystem->delete($path);
         } catch (FilesystemException | UnableToWriteFile $exception) {
@@ -128,6 +136,9 @@ class CloudService
      */
     public function upload(Filesystem $filesystem, $path, UploadedFile $content)
     {
+        $this->loggerUEMC->info("Uploading ".$content->getPathname());
+
+
         $stream = fopen($content->getPathname(), 'r');
 
         if ($stream) {
@@ -155,6 +166,9 @@ class CloudService
      */
     public function download(Filesystem $filesystem, $path, $name)
     {
+
+        $this->loggerUEMC->info("Downloading ".$path);
+
         try {
             $contents = $filesystem->read($path);
             //file_put_contents("/test.mp4", $contents); //Ver si el problema esta aqui

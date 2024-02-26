@@ -15,15 +15,15 @@ use Microsoft\Graph\Model;
 use Stevenmaguire\OAuth2\Client\Provider\Microsoft;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Yaml\Yaml;
+
+
 use UEMC\Core\Service\CloudService as Core;
-use UEMC\OneDrive\UEMCOneDriveBundle;
 
 class CloudService
 {
-    private $core;
+    private Core $core;
     private LoggerInterface $loggerUEMC;
 
     public function __construct(LoggerInterface $uemcLogger)
@@ -34,13 +34,8 @@ class CloudService
 
     public function listDirectories($session,$request)
     {
-        $onedriveSession=$session->get('onedriveSession');
-        $access_token= $request->get('access_token') ?? $onedriveSession['token']['access_token']; //Si se proporciona un access_token se usa ese si no, el de la seision
+        $filesystem=$this->getFileSystem($session,$request);
 
-        $graph = new Graph();
-        $graph->setAccessToken($access_token);
-        $adapter = new Adapter($graph, 'me');
-        $filesystem = new Filesystem($adapter);
         $path = $request->get('path');
 
         return $this->core->listDirectory($filesystem,$path);
@@ -48,14 +43,7 @@ class CloudService
 
     public function download($session,$request)
     {
-        $onedriveSession=$session->get('onedriveSession');
-        $access_token= $request->get('access_token') ?? $onedriveSession['token']['access_token']; //Si se proporciona un access_token se usa ese si no, el de la seision
-
-        $graph = new Graph();
-        $graph->setAccessToken($access_token);
-        $adapter = new Adapter($graph, 'me');
-
-        $filesystem = new Filesystem($adapter);
+        $filesystem=$this->getFileSystem($session,$request);
 
         $path = $request->get('path');
         $name = basename($path);
@@ -65,14 +53,7 @@ class CloudService
 
     public function createDirectory($session,$request)
     {
-        $onedriveSession=$session->get('onedriveSession');
-        $access_token= $request->get('access_token') ?? $onedriveSession['token']['access_token']; //Si se proporciona un access_token se usa ese si no, el de la seision
-
-        $graph = new Graph();
-        $graph->setAccessToken($access_token);
-        $adapter = new Adapter($graph, 'me');
-
-        $filesystem = new Filesystem($adapter);
+        $filesystem=$this->getFileSystem($session,$request);
 
         $path = $request->get('path');
         $name = $request->get('name');
@@ -82,14 +63,7 @@ class CloudService
 
     public function createFile($session,$request)
     {
-        $onedriveSession=$session->get('onedriveSession');
-        $access_token= $request->get('access_token') ?? $onedriveSession['token']['access_token']; //Si se proporciona un access_token se usa ese si no, el de la seision
-
-        $graph = new Graph();
-        $graph->setAccessToken($access_token);
-        $adapter = new Adapter($graph, 'me');
-
-        $filesystem = new Filesystem($adapter);
+        $filesystem=$this->getFileSystem($session,$request);
 
         $path = $request->get('path');
         $name = $request->get('name');
@@ -116,14 +90,7 @@ class CloudService
 
     public function delete($session,$request)
     {
-        $onedriveSession=$session->get('onedriveSession');
-        $access_token= $request->get('access_token') ?? $onedriveSession['token']['access_token']; //Si se proporciona un access_token se usa ese si no, el de la seision
-
-        $graph = new Graph();
-        $graph->setAccessToken($access_token);
-        $adapter = new Adapter($graph, 'me');
-
-        $filesystem = new Filesystem($adapter);
+        $filesystem=$this->getFileSystem($session,$request);
 
         $path = $request->get('path');
 
@@ -132,14 +99,7 @@ class CloudService
 
     public function upload($session,Request $request)
     {
-        $onedriveSession=$session->get('onedriveSession');
-        $access_token= $request->get('access_token') ?? $onedriveSession['token']['access_token']; //Si se proporciona un access_token se usa ese si no, el de la seision
-
-        $graph = new Graph();
-        $graph->setAccessToken($access_token);
-        $adapter = new Adapter($graph, 'me');
-
-        $filesystem = new Filesystem($adapter);
+        $filesystem=$this->getFileSystem($session,$request);
 
         $path = $request->get('path');
         $content = $request->files->get('content');
@@ -221,10 +181,20 @@ class CloudService
 
     }
 
-
-    public function logout($session, $request)
+    public function logout($session, $request): string
     {
         $session->remove('onedriveSession');
         return "Sesion limpia";
+    }
+
+    private function getFileSystem(SessionInterface $session, Request $request): Filesystem
+    {
+        $onedriveSession=$session->get('onedriveSession');
+        $access_token= $request->get('access_token') ?? $onedriveSession['token']['access_token']; //Si se proporciona un access_token se usa ese si no, el de la seision
+
+        $graph = new Graph();
+        $graph->setAccessToken($access_token);
+        $adapter = new Adapter($graph, 'me');
+        return new Filesystem($adapter);
     }
 }
