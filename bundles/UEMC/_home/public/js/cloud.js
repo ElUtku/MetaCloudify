@@ -52,11 +52,10 @@ function loadData(path) {
 //Se debe eliminar remote.php/dav/files/{user} para poder navegar por los directorios
 function cleanOwncloudData(data)
 {
-    var cleanData = data.map(function(elemento) {
+    return data.map(function (elemento) {
         elemento.path = elemento.path.replace(/remote\.php\/dav\/files\/\w+\//g, '');
         return elemento;
     });
-    return cleanData;
 }
 
 function updatePageContent(data) {
@@ -135,7 +134,7 @@ function createDir(name)
             path: pathActual,
             name: name
         },
-        success: function (data) {
+        success: function () {
             // Actualiza dinámicamente el contenido en la página
             loadData(pathActual);
         },
@@ -154,7 +153,7 @@ function createFile(name)
             path: pathActual,
             name: name
         },
-        success: function (data) {
+        success: function () {
             // Actualiza dinámicamente el contenido en la página
             loadData(pathActual);
         },
@@ -173,7 +172,7 @@ function dlt(data)
             path: data.path,
             name: data.name
         },
-        success: function (data) {
+        success: function () {
             // Actualiza dinámicamente el contenido en la página
             loadData(pathActual);
         },
@@ -189,11 +188,12 @@ function dlt(data)
 
 function upload()
 {
-    $('#fileupload').fileupload({
+    let fileupload = $('#fileupload');
+    fileupload.fileupload({
         url: controller+'/upload',
         dataType: 'json',
         formData: { path: pathActual },
-        done: function (e, data) {
+        done: function () {
             loadData(pathActual);
         },
         progressall: function (e, data) {
@@ -207,10 +207,10 @@ function upload()
     });
 
     // Desactiva el envío automático del formulario
-    $('#fileupload').prop('action', '');
+    fileupload.prop('action', '');
 
     // Inicia la carga del archivo
-    $('#fileupload').fileupload('send', { files: $('#formFile')[0].files });
+    fileupload.fileupload('send', { files: $('#formFile')[0].files });
 }
 
 function download(path)
