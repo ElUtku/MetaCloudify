@@ -9,12 +9,6 @@ use UEMC\Core\Service\CloudService;
 
 class coreController extends AbstractController
 {
-    /**
-     * @Route("/core", name="core_index")
-     */
-    public function index(CloudService $cloud): Response
-    {
-        return $this;
-    }
+
 
 }
