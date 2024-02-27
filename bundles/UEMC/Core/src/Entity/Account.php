@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Entity;
+namespace UEMC\Core\Entity;
 
-use App\Repository\AcountRepository;
 use Doctrine\ORM\Mapping as ORM;
+use UEMC\Core\Repository\AccountRepository;
 
-#[ORM\Entity(repositoryClass: AcountRepository::class)]
-class Acount
+#[ORM\Entity(repositoryClass: AccountRepository::class)]
+class Account
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]

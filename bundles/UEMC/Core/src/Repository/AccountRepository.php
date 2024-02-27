@@ -1,28 +1,28 @@
 <?php
 
-namespace App\Repository;
+namespace UEMC\Core\Repository;
 
-use App\Entity\Acount;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use UEMC\Core\Entity\Account;
 
 /**
- * @extends ServiceEntityRepository<Acount>
+ * @extends ServiceEntityRepository<Account>
  *
- * @method Acount|null find($id, $lockMode = null, $lockVersion = null)
- * @method Acount|null findOneBy(array $criteria, array $orderBy = null)
- * @method Acount[]    findAll()
- * @method Acount[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Account|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Account|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Account[]    findAll()
+ * @method Account[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class AcountRepository extends ServiceEntityRepository
+class AccountRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Acount::class);
+        parent::__construct($registry, Account::class);
     }
 
 //    /**
-//     * @return Acount[] Returns an array of Acount objects
+//     * @return Account[] Returns an array of Account objects
 //     */
 //    public function findByExampleField($value): array
 //    {
@@ -36,7 +36,7 @@ class AcountRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Acount
+//    public function findOneBySomeField($value): ?Account
 //    {
 //        return $this->createQueryBuilder('a')
 //            ->andWhere('a.exampleField = :val')

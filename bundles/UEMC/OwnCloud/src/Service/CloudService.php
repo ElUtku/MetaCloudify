@@ -4,8 +4,6 @@ namespace UEMC\OwnCloud\Service;
 
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemException;
-use phpDocumentor\Reflection\Types\Self_;
-use PHPUnit\Util\Exception;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use League\Flysystem\UnableToWriteFile;
 use League\Flysystem\WebDAV\WebDAVAdapter;
@@ -14,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 use UEMC\Core\Service\CloudService as Core;
-use UEMC\OwnCloud\Entity\Owncloud;
+use UEMC\OwnCloud\Entity\OwnCloudAccount;
 
 use  Psr\Log\LoggerInterface;
 
@@ -25,7 +23,7 @@ class CloudService
 {
 
     private Core $core;
-    private Owncloud $owncloud;
+    private OwnCloudAccount $owncloud;
     private LoggerInterface $loggerUEMC;
 
 
@@ -33,7 +31,7 @@ class CloudService
     {
         $this->loggerUEMC = $uemcLogger;
         $this->core = new Core();
-        $this->owncloud = new Owncloud();
+        $this->owncloud = new OwnCloudAccount();
     }
 
 
@@ -65,8 +63,6 @@ class CloudService
 
     public function listDirectories(SessionInterface $session, Request $request)
     {
-        //$this->owncloud->setPassword($session->get('owncloudSession')['client']['password']);
-        $this->loggerUEMC->debug(var_export($this->owncloud,true));
         $filesystem = $this->getFilesystem($session);
         $path=$request->get('path');
 
@@ -77,7 +73,6 @@ class CloudService
     {
 
         $filesystem = $this->getFilesystem($session);
-
         $path = $request->get('path');
         $name = basename($path);
 
@@ -88,7 +83,6 @@ class CloudService
     {
 
         $filesystem = $this->getFilesystem($session);
-
         $path = $request->get('path');
         $name = $request->get('name');
 
@@ -99,7 +93,6 @@ class CloudService
     {
 
         $filesystem = $this->getFilesystem($session);
-
         $path = $request->get('path');
         $name = $request->get('name');
 
@@ -111,7 +104,6 @@ class CloudService
     {
 
         $filesystem = $this->getFilesystem($session);
-
         $path = $request->get('path');
 
         return $this->core->delete($filesystem,$path);
@@ -120,7 +112,6 @@ class CloudService
     {
 
         $filesystem = $this->getFilesystem($session);
-
         $path = $request->get('path');
         $content = $request->files->get('content');
 
