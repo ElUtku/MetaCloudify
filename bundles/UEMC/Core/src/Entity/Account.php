@@ -11,16 +11,16 @@ class Account
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private ?int $id = null;
+    public ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $user = null;
+    public ?string $user = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $email = null;
+    public ?string $email = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $openid = null;
+    public ?string $openid = null;
 
     public function getId(): ?int
     {

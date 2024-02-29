@@ -6,11 +6,29 @@ use League\Flysystem\FilesystemException;
 use League\Flysystem\Filesystem;
 use League\Flysystem\UnableToCreateDirectory;
 use League\Flysystem\UnableToWriteFile;
+use Sabre\DAV\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
 
-class CloudService extends UemcLogger
+abstract class CloudService extends UemcLogger
 {
+    public Filesystem $filesystem;
+
+    /**
+     * @return Filesystem
+     */
+    public function getFilesystem(): Filesystem
+    {
+        return $this->filesystem;
+    }
+
+    /**
+     * @param Filesystem $filesystem
+     */
+    public function setFilesystem(Filesystem $filesystem): void
+    {
+        $this->filesystem = $filesystem;
+    }
 
     /**
      *
@@ -21,9 +39,12 @@ class CloudService extends UemcLogger
      *
      * @return array|string
      */
-    public function listDirectory(Filesystem $filesystem, $path)
+    public function listDirectory(String $path)
     {
         $this->loggerUEMC->debug("Listing directory " . $path);
+
+        $filesystem=$this->getFilesystem();
+
         try {
             $contents = $filesystem->listContents($path ?? '', false);
             $contenido=[];
@@ -47,11 +68,13 @@ class CloudService extends UemcLogger
      *
      * @return \Exception|FilesystemException|UnableToCreateDirectory|string
      */
-    public function createDir(Filesystem $filesystem, $path, $name)
+    public function createDir(String $path, String $name)
     {
         $newPath = $path. '/'. $name;
 
         $this->loggerUEMC->info("Creating Directory " . $newPath);
+
+        $filesystem=$this->getFilesystem();
 
         try {
             if($filesystem->directoryExists($newPath))
@@ -78,11 +101,13 @@ class CloudService extends UemcLogger
      *
      * @return \Exception|FilesystemException|UnableToCreateDirectory|string
      */
-    public function createFile(Filesystem $filesystem, $path, $name)
+    public function createFile(String $path, String $name)
     {
         $newPath = '/'.$path. '/'. $name;
 
         $this->loggerUEMC->info("Creating File ".$newPath);
+
+        $filesystem=$this->getFilesystem();
 
         try {
             if($filesystem->directoryExists($path)) //Comprobamos si existe el directorio
@@ -112,9 +137,11 @@ class CloudService extends UemcLogger
      *
      * @return \Exception|FilesystemException|UnableToWriteFile|string
      */
-    public function delete(Filesystem $filesystem, $path)
+    public function delete(String $path)
     {
         $this->loggerUEMC->info("Deleting " . $path);
+
+        $filesystem=$this->getFilesystem();
 
         try {
             $filesystem->delete($path);
@@ -134,10 +161,11 @@ class CloudService extends UemcLogger
      *
      * @return string
      */
-    public function upload(Filesystem $filesystem, $path, UploadedFile $content)
+    public function upload(String $path, UploadedFile $content)
     {
         $this->loggerUEMC->info("Uploading ".$content->getPathname());
 
+        $filesystem=$this->getFilesystem();
 
         $stream = fopen($content->getPathname(), 'r');
 
@@ -164,8 +192,10 @@ class CloudService extends UemcLogger
      *
      * @return string|Response
      */
-    public function download(Filesystem $filesystem, $path, $name)
+    public function download(String $path, String $name): string|Response
     {
+
+        $filesystem=$this->getFilesystem();
 
         $this->loggerUEMC->info("Downloading ".$path);
 
@@ -182,7 +212,7 @@ class CloudService extends UemcLogger
 
             return $response;
         } catch (FilesystemException $e) {
-            return $e->getMessage();
+            return new Response($e->getMessage());
         }
     }
 }

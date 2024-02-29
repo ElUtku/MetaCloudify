@@ -37,21 +37,23 @@
 
         {% endif %}
 
-        {% if app.session.has('owncloudSession') and app.session.get('owncloudSession')['ownCloudUser'] is defined %}
-
-            <li class="mb-1">
-                <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed text-start" data-bs-toggle="collapse" data-bs-target="#orders-collapse" aria-expanded="false">
-                    OwnCloud - {{ app.session.get('owncloudSession')['ownCloudUser']['userName'] }}
-                </button>
-                <div class="collapse" id="orders-collapse">
-                    <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-                        <li><a onclick="event.preventDefault();controller='{{ path('owncloud_drive') }}'; loadData('');" class="btn d-inline-flex align-items-center rounded border-0">Drive</a></li>
-                        <li><a href="{{ path('owncloud_logout') }}" class="link-body-emphasis d-inline-flex text-decoration-none rounded">LogOut</a></li>
-                    </ul>
-                </div>
-            </li>
-
+        {% if app.session.has('owncloudAccounts') %}
+            {% for accountId, account in app.session.get('owncloudAccounts') %}
+                <li class="mb-1">
+                    <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed text-start" data-bs-toggle="collapse" data-bs-target="#owncloud{{ accountId }}-collapse" aria-expanded="false">
+                        OwnCloud - {{ account.user }}
+                    </button>
+                    <div class="collapse" id="owncloud{{ accountId }}-collapse">
+                        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                            <li><a onclick="event.preventDefault();controller='{{ path('owncloud_drive') }}' ;loadData('','{{ accountId }}');" class="btn d-inline-flex align-items-center rounded border-0">Drive</a></li>
+                            <li><a onclick="controller='{{ path('owncloud_logout') }}'; logout('{{ accountId }}');" class="btn link-body-emphasis d-inline-flex text-decoration-none rounded">LogOut</a></li>
+                        </ul>
+                    </div>
+                </li>
+            {% endfor %}
         {% endif %}
+
+
 
         {% if app.session.has('ftpSession') and app.session.get('ftpSession')['ftpUser'] is defined %}
 

@@ -2,7 +2,6 @@ let parent;
 let controller;
 let pathActual;
 
-
 $(document).ready(function() {
 
 });
@@ -10,7 +9,7 @@ $(document).ready(function() {
 
 
 
-function loadData(path) {
+function loadData(path,id) {
     pathActual=path;
 
     try {
@@ -31,7 +30,8 @@ function loadData(path) {
     $.ajax({
         url: controller,
         method: 'POST',
-        data: { path: path },
+        data: { path: path,
+                id: id},
         dataType: 'json',
         success: function (data) {
             if(controller.indexOf("owncloud")!==-1 )
@@ -39,7 +39,7 @@ function loadData(path) {
                 data=cleanOwncloudData(data);
             }
 
-            updatePageContent(data);
+            updatePageContent(data,id);
 
             $('#divUpload').removeClass('d-none').addClass('d-block');
         },
@@ -58,7 +58,7 @@ function cleanOwncloudData(data)
     });
 }
 
-function updatePageContent(data) {
+function updatePageContent(data,id) {
     let container = $('#explorer1');
     container.empty();
 
@@ -81,10 +81,10 @@ function updatePageContent(data) {
         row.on('dblclick', function() {
             if (item.type==='dir')
             {
-                loadData(item.path.charAt(0) === '\\' ? item.path.slice(1) : item.path);
+                loadData(item.path.charAt(0) === '\\' ? item.path.slice(1) : item.path,id);
             }else if (item.type==='file')
             {
-                download(item.path);
+                download(item.path,name,id);
             }
         });
         row.on('contextmenu', function(event) {
@@ -93,8 +93,9 @@ function updatePageContent(data) {
             let contextMenu = $('#contextMenu');
             let clickedElement = {
                 'path': item.path,
-                'name': name
-        }; //Se guarda el elemento sobre el que se hizo click
+                'name': name,
+                'id': id
+            }; //Se guarda el elemento sobre el que se hizo click
 
             contextMenu.removeClass('d-none').addClass('d-block');
             contextMenu.css({
@@ -125,18 +126,19 @@ function updatePageContent(data) {
 
 }
 
-function createDir(name)
+function createDir(name,id)
 {
     $.ajax({
         url: controller+"/createDir",
         method: 'POST',
         data: {
             path: pathActual,
-            name: name
+            name: name,
+            id: id
         },
         success: function () {
             // Actualiza dinámicamente el contenido en la página
-            loadData(pathActual);
+            loadData(pathActual,id);
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -144,18 +146,19 @@ function createDir(name)
     });
 }
 
-function createFile(name)
+function createFile(name,id)
 {
     $.ajax({
         url: controller+"/createFile",
         method: 'POST',
         data: {
             path: pathActual,
-            name: name
+            name: name,
+            id: id
         },
         success: function () {
             // Actualiza dinámicamente el contenido en la página
-            loadData(pathActual);
+            loadData(pathActual,id);
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -163,18 +166,19 @@ function createFile(name)
     });
 }
 
-function dlt(data)
+function dlt(data,id)
 {
     $.ajax({
         url: controller+"/delete",
         method: 'POST',
         data: {
             path: data.path,
-            name: data.name
+            name: data.name,
+            id: id
         },
         success: function () {
             // Actualiza dinámicamente el contenido en la página
-            loadData(pathActual);
+            loadData(pathActual,id);
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -186,15 +190,16 @@ function dlt(data)
     $(document).off('click.menuClose');
 }
 
-function upload()
+function upload(id)
 {
     let fileupload = $('#fileupload');
     fileupload.fileupload({
         url: controller+'/upload',
         dataType: 'json',
-        formData: { path: pathActual },
+        formData: { path: pathActual,
+                    id: id  },
         done: function () {
-            loadData(pathActual);
+            loadData(pathActual,id);
         },
         /*progressall: function (e, data) {
             // Actualiza la barra de progreso
@@ -213,14 +218,15 @@ function upload()
     fileupload.fileupload('send', { files: $('#formFile')[0].files });
 }
 
-function download(path)
+function download(path,name,id)
 {
-    console.log(path);
     $.ajax({
         url: controller+"/download",
         method: 'POST',
         data: {
-            path: path
+            path: path,
+            name: name,
+            id: id
         },
         success: function (data) {
 
@@ -237,6 +243,24 @@ function download(path)
             link.click();
             // Se limpia el enlace después de la descarga
             document.body.removeChild(link);
+        },
+        error: function (xhr, status, error) {
+            console.error(error);
+        }
+    });
+}
+
+function logout(id)
+{
+    $.ajax({
+        url: controller,
+        method: 'POST',
+        data: {
+            id: id
+        },
+        success: function () {
+            // Actualiza dinámicamente el contenido en la página
+            location.reload();
         },
         error: function (xhr, status, error) {
             console.error(error);
