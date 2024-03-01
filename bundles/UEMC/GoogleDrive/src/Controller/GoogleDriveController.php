@@ -3,10 +3,12 @@
 namespace UEMC\GoogleDrive\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use UEMC\GoogleDrive\Service\CloudService;
+use UEMC\GoogleDrive\Entity\GoogleDriveAccount;
+use UEMC\GoogleDrive\Service\CloudService as GoogleDriveCore;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 
@@ -14,38 +16,55 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 class GoogleDriveController extends AbstractController
 {
 
-    /**
-     * @Route("/GoogleDrive/login", name="GoogleDrive_login", methods={"GET"})
-     */
-    public function access(SessionInterface $session, Request $request, CloudService $cloud): Response
+    private GoogleDriveAccount $googleDriveAccount;
+    private GoogleDriveCore $googleDriveCore;
+
+    public function __construct(RequestStack $requestStack)
     {
-        $cloud->auth($session,$request);
-        return $this->redirectToRoute('_home_index');
+        $request=$requestStack->getCurrentRequest();
+
+        $session=$request->getSession();
+
+        //$session->remove('googledriveAccounts');
+        $this->googleDriveCore=new GoogleDriveCore();
+        $this->googleDriveAccount=new GoogleDriveAccount();
+
+        $ruta=$request->attributes->get('_route');
+        $id = $request->query->get('id') ?? $request->request->get('id') ?? null;
+
+        $this->googleDriveCore->loggerUEMC->debug('Controller: '.$ruta. ' y el id : '.$id);
+        if($session->has('googledriveAccounts') and $ruta !== 'GoogleDrive_login' )
+        {
+            $this->googleDriveAccount=$this->googleDriveAccount->arrayToObject($session->get('googledriveAccounts')[$id]);
+            $filesystem=$this->googleDriveCore->constructFilesystem($this->googleDriveAccount);
+            $this->googleDriveCore->setFilesystem($filesystem);
+        }
     }
 
     /**
-     * @Route("/GoogleDrive/accessTap", name="GoogleDrive_accessTap")
+     * @Route("/GoogleDrive/login", name="GoogleDrive_login", methods={"GET"})
      */
-    public function accessTap(SessionInterface $session, Request $request, CloudService $cloud): Response
+    public function login(SessionInterface $session, Request $request): Response
     {
-        $cloud->authTap($session,$request);
-        return $this->redirectToRoute('GoogleDrive_index');
+        $this->googleDriveAccount->login($session,$request);
+        $this->googleDriveCore->loggerUEMC->debug('5');
+        return $this->redirectToRoute('_home_index');
     }
 
     /**
      * @Route("/GoogleDrive/drive", name="GoogleDrive_drive")
      */
-    public function drive(SessionInterface $session, Request $request, CloudService $cloud): Response
+    public function drive(Request $request): Response
     {
-        return $this->json($cloud->listDirectories($session,$request));
+        return $this->json($this->googleDriveCore->listDirectory($request->get('path')));
     }
 
     /**
      * @Route("/GoogleDrive/drive/download", name="GoogleDrive_download")
      */
-    public function download(SessionInterface $session, Request $request, CloudService $cloud): Response
+    public function download(Request $request): Response
     {
-        return $cloud->download($session,$request);
+        return $this->json($this->googleDriveCore->download($request->get('path'),$request->get('name')));
     }
 
     /**
@@ -53,40 +72,39 @@ class GoogleDriveController extends AbstractController
      */
     public function createDir(SessionInterface $session, Request $request, CloudService $cloud): Response
     {
-        return $this->json($cloud->createDirectory($session,$request));
+        return $this->json($this->googleDriveCore->createDir($request->get('path'),$request->get('name')));
     }
 
     /**
      * @Route("/GoogleDrive/drive/createFile", name="GoogleDrive_createFile")
      */
-    public function createFile(SessionInterface $session, Request $request, CloudService $cloud): Response
+    public function createFile(Request $request): Response
     {
-        return $this->json($cloud->createFile($session,$request));
+        return $this->json($this->googleDriveCore->createFile($request->get('path'),$request->get('name')));
     }
 
     /**
      * @Route("/GoogleDrive/drive/delete", name="GoogleDrive_delete")
      */
-    public function delete(SessionInterface $session, Request $request, CloudService $cloud): Response
+    public function delete(Request $request): Response
     {
-        return $this->json($cloud->delete($session,$request));
+        return $this->json($this->googleDriveCore->delete($request->get('path')));
     }
 
     /**
      * @Route("/GoogleDrive/drive/upload", name="GoogleDrive_upload")
      */
-    public function upload(SessionInterface $session, Request $request, CloudService $cloud): Response
+    public function upload(Request $request): Response
     {
-        return $this->json($cloud->upload($session,$request));
+        return $this->json($this->googleDriveCore->upload($request->get('path'),$request->files->get('content')));
     }
 
     /**
      * @Route("/GoogleDrive/logout", name="GoogleDrive_logout", methods={"GET"})
      */
-    public function logout(SessionInterface $session, Request $request, CloudService $cloud): Response
+    public function logout(SessionInterface $session, Request $request): Response
     {
-        return $this->redirectToRoute('_home_index', [
-            'status' => $cloud->logout($session,$request)
-        ]);
+        return $this->redirectToRoute('_home_index',['status' => $this->googleDriveAccount->logout($session,$request)]);
+
     }
 }
