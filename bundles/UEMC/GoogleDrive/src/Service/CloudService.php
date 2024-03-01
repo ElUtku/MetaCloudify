@@ -19,88 +19,8 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Yaml\Yaml;
 use UEMC\Core\Service\CloudService as Core;
 
-class CloudService
+class CloudService extends Core
 {
-
-
-    private Core $core;
-
-
-    public function __construct()
-    {
-        $this->core = new Core();
-    }
-
-    public function auth($session, $request)
-    {
-        $config = Yaml::parseFile(__DIR__.'\..\Resources\config\googledrive.yaml');
-
-        $provider = new Google([
-            'clientId'     => $config['clientId'],
-            'clientSecret' => $config['clientSecret'],
-            'redirectUri'  => $config['redirectUri']
-        ]);
-
-        if (!empty($request->get('error'))) {
-
-            // Got an error, probably user denied access
-            exit('Got error: ' . htmlspecialchars($request->get('error'), ENT_QUOTES, 'UTF-8'));
-
-        } elseif (empty($request->get('code'))) {
-
-            $authUrl = $provider->getAuthorizationUrl([
-                'scope' => $config['scopes'],
-            ]);
-            $googleSesion['oauth2state']=$provider->getState();
-            $session->set('googleSession',$googleSesion);
-            header('Location: ' . $authUrl);
-            exit();
-
-        } elseif (empty($request->get('state')) || ($request->get('state') !== $session->get('googleSession')['oauth2state'])) {
-
-            // Situacion de ataque CSRF
-            $session->remove('googleSession');
-            return ('Invalid state');
-
-        } else {
-            $token = $provider->getAccessToken('authorization_code', [
-                'code' => $request->get('code')
-            ]);
-            try {
-                //$values = $token->getValues();
-                //$googleSesion['code']=$request->get('code');
-                $googleSesion['token']=$token->jsonSerialize();
-                $session->set('googleSession',$googleSesion);
-            } catch (Exception $e) {
-                return ('Something went wrong: ' . $e->getMessage());
-            }
-            $googleSesion['googleUser']=$provider->getResourceOwner($token)->toArray();
-            $session->set('googleSession',$googleSesion);
-            return $token->getToken();
-        }
-    }
-
-    public function authTap($session, $request)
-    {
-        $config = Yaml::parseFile(__DIR__.'\..\Resources\config\googledrive.yaml');
-
-        $client = new Google_Client();  // Specify the CLIENT_ID of the app that accesses the backend
-        $client->setClientId($config['clientId']);
-
-        $client->setAccessToken($request->get('credential'));
-        $payload = $client->verifyIdToken($request->get('credential'));
-        if ($payload) {
-            $userid = $payload['sub'];
-            $token=$client->getAccessToken();
-            //$session->set('accessToken',$token);
-            $googleSesion['googleUser']=$payload;
-            //$session->set('googleSession',$this->getGoogleSesion());
-            //return $payload;
-            return $this->auth($session,$request);
-        } else {
-            return "no funciona";
-        }
-    }
 
     public function listDirectories($session, $request)
     {
