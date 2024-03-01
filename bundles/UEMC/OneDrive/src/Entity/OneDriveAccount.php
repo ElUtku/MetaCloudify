@@ -2,14 +2,17 @@
 
 namespace UEMC\OneDrive\Entity;
 
+use Exception;
 use GuzzleHttp\Exception\GuzzleException;
-use Microsoft\Graph\Exception\GraphException;
-use Microsoft\Graph\Graph;
+
+use GuzzleHttp\Client;
 use Stevenmaguire\OAuth2\Client\Provider\Microsoft;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Yaml\Yaml;
 use UEMC\OneDrive\Repository\OneDriveAccountRepository;
 use Doctrine\ORM\Mapping as ORM;
 use UEMC\Core\Entity\Account;
+use Symfony\Component\HttpFoundation\Request;
 
 #[ORM\Entity(repositoryClass: OneDriveAccountRepository::class)]
 class OneDriveAccount extends Account
@@ -29,7 +32,7 @@ class OneDriveAccount extends Account
         return $this;
     }
 
-    public function login($session,$request)
+    public function login(SessionInterface $session,Request $request)
     {
         $config = Yaml::parseFile(__DIR__.'\..\Resources\config\onedrive.yaml'); //Configuraicon de la nube
 
@@ -43,7 +46,6 @@ class OneDriveAccount extends Account
             'urlResourceOwnerDetails' => $config['urlResourceOwnerDetails'],
         ]);
         $options = [ 'scope' => $config['scope'] ];
-
         if (empty($request->get('code'))) {
             // If we don't have an authorization code then get one
             $authUrl = $provider->getAuthorizationUrl($options);
@@ -53,10 +55,8 @@ class OneDriveAccount extends Account
             exit();
 // Check given state against previously stored one to mitigate CSRF attack
         } elseif (empty($request->get('state')) || ($request->get('state') !== $session->get('onedriveSession')['oauth2state'])) {
-
             $session->remove('onedriveSession');
             return('Invalid state');
-
         } else {
             try {
                 //$session->set('code',$request->get('code'));
@@ -64,10 +64,11 @@ class OneDriveAccount extends Account
                 $token = $provider->getAccessToken('authorization_code', [
                     'code' => $request->get('code')
                 ]);
-                $onedriveSession['token']=$token->jsonSerialize();
-                $session->set('onedriveSession',$onedriveSession);
-
-
+                $user=$this->getUserInfo($token);
+                $account=$this->arrayToObject($user);
+                $account->setToken($token);
+                $onedriveAccounts[uniqid()]=get_object_vars($account);
+                $session->set('onedriveAccounts',$onedriveAccounts);
             } catch (Exception $e) {
                 return($e);
             }
@@ -75,25 +76,37 @@ class OneDriveAccount extends Account
         }
     }
 
-    public function getUserInfo($session,$request)
+    public function getUserInfo($token)
     {
-        $onedriveSession=$session->get('onedriveSession');
-        $graph = new Graph();
-        $graph->setAccessToken($onedriveSession['token']['access_token']);
-
+        $client = new Client();
         try {
-            $user = $graph->createRequest('GET', '/me')
-                ->setReturnType(Model\User::class)
-                ->execute();
-            $onedriveSession['oneDriveUser']=json_decode(json_encode($user), true);
-            $session->set('onedriveSession',$onedriveSession);
-            return "OK";
-        } catch (GuzzleException|GraphException $e) {
+            $response = $client->request('GET', "https://graph.microsoft.com/v1.0/me", [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $token,
+                    'Accept' => 'application/json'
+                ]
+            ]);
+            if ($response->getStatusCode() == 200) {
+                $userData = json_decode($response->getBody(), true);
+                return $userData;
+            }
+            else
+            {
+                return "KO";
+            }
+        } catch (GuzzleException $e) {
             return $e;
         }
 
     }
-
+    function arrayToObject($array): OneDriveAccount
+    {
+        $object = new OneDriveAccount();
+        $object->setUser($array['displayName']);
+        $object->setEmail($array['mail']);
+        $object->setOpenid($array['id']);
+        return $object;
+    }
     public function logout($session, $request): string
     {
         $onedriveAccounts = $session->get('onedriveAccounts');

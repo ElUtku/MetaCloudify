@@ -4,6 +4,7 @@ namespace UEMC\Core\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use UEMC\Core\Repository\AccountRepository;
+use UEMC\Core\Service\UemcLogger;
 
 #[ORM\Entity(repositoryClass: AccountRepository::class)]
 class Account
