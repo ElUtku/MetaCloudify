@@ -67,6 +67,7 @@ class OneDriveAccount extends Account
                 $user=$this->getUserInfo($token);
                 $account=$this->arrayToObject($user);
                 $account->setToken($token);
+                $onedriveAccounts=$session->get('onedriveAccounts');
                 $onedriveAccounts[uniqid()]=get_object_vars($account);
                 $session->set('onedriveAccounts',$onedriveAccounts);
             } catch (Exception $e) {
@@ -120,7 +121,7 @@ class OneDriveAccount extends Account
         $object->setUser($array['displayName'] ?? $array['user']);
         $object->setEmail($array['mail'] ?? $array['email']);
         $object->setOpenid($array['id'] ?? $array['openid']);
-        $object->setToken($array['token'] ?? null);
+        $object->setToken($array['token'] ?? '');
         return $object;
     }
     public function logout($session, $request): string
