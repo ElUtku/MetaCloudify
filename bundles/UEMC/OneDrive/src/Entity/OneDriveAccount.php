@@ -76,6 +76,13 @@ class OneDriveAccount extends Account
         }
     }
 
+
+    /**
+     * Proporciona información básica del usuario gracias a la API de Microsoft /me.
+     *
+     * @param $token
+     * @return Exception|GuzzleException|mixed|string
+     */
     public function getUserInfo($token)
     {
         $client = new Client();
@@ -99,12 +106,21 @@ class OneDriveAccount extends Account
         }
 
     }
+
+    /**
+     * Convierte un array al objeto de la clase
+     *
+     * @param $array | Array con los parametros de la cuenta (Existen dos verisones, si se invoca desde getUserInfo los
+     *                 parametros tienen un nombre y si se invoca desde sesion, tienen otro.)
+     * @return OneDriveAccount
+     */
     function arrayToObject($array): OneDriveAccount
     {
         $object = new OneDriveAccount();
-        $object->setUser($array['displayName']);
-        $object->setEmail($array['mail']);
-        $object->setOpenid($array['id']);
+        $object->setUser($array['displayName'] ?? $array['user']);
+        $object->setEmail($array['mail'] ?? $array['email']);
+        $object->setOpenid($array['id'] ?? $array['openid']);
+        $object->setToken($array['token'] ?? null);
         return $object;
     }
     public function logout($session, $request): string

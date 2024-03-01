@@ -9,7 +9,6 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\SerializerInterface;
 use UEMC\OwnCloud\Service\CloudService as OwncloudCore;
 use UEMC\OwnCloud\Entity\OwnCloudAccount;
 

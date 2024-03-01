@@ -33,12 +33,9 @@ class OneDriveController extends AbstractController
         $ruta=$request->attributes->get('_route');
         $id = $request->query->get('id') ?? $request->request->get('id') ?? null;
 
-        //$this->oneDriveCore->loggerUEMC->debug('Controller: '.$ruta. ' y el id : '.$id);
-        //$this->oneDriveCore->loggerUEMC->debug('Satete: '.$request->get('state'));
-        $this->oneDriveCore->loggerUEMC->debug('1');
+        $this->oneDriveCore->loggerUEMC->debug('Controller: '.$ruta. ' y el id : '.$id);
         if($session->has('onedriveAccounts') and $ruta !== 'onedrive_access' )
         {
-            $this->oneDriveCore->loggerUEMC->debug('1.1');
             $this->oneDriveAccount=$this->oneDriveAccount->arrayToObject($session->get('onedriveAccounts')[$id]);
             $filesystem=$this->oneDriveCore->constructFilesystem($this->oneDriveAccount);
             $this->oneDriveCore->setFilesystem($filesystem);
@@ -50,8 +47,7 @@ class OneDriveController extends AbstractController
      */
     public function access(SessionInterface $session, Request $request): Response
     {
-        $tokenRespones=$this->oneDriveAccount->login($session,$request);
-        //$this->oneDriveCore->loggerUEMC->debug('Error: '.$tokenRespones);
+        $this->oneDriveAccount->login($session,$request);
         $this->oneDriveCore->loggerUEMC->debug('5');
         return $this->redirectToRoute('_home_index');
     }
@@ -59,58 +55,56 @@ class OneDriveController extends AbstractController
     /**
      * @Route("/onedrive/logout", name="onedrive_logout", methods={"GET"})
      */
-    public function logout(SessionInterface $session, Request $request, CloudService $cloud): Response
+    public function logout(SessionInterface $session, Request $request): Response
     {
-        return $this->redirectToRoute('_home_index', [
-            'status' => $cloud->logout($session,$request)
-        ]);
+        return $this->redirectToRoute('_home_index',['status' => $this->oneDriveAccount->logout($session,$request)]);
     }
 
     /**
      * @Route("/onedrive/drive", name="onedrive_drive")
      */
-    public function drive(SessionInterface $session, Request $request, CloudService $cloud): Response
+    public function drive(Request $request): Response
     {
-        return $this->json($cloud->listDirectories($session,$request));
+        return $this->json($this->oneDriveCore->listDirectory($request->get('path')));
     }
 
     /**
      * @Route("/onedrive/drive/download", name="onedrive_download")
      */
-    public function download(SessionInterface $session, Request $request, CloudService $cloud): Response
+    public function download(Request $request): Response
     {
-        return $cloud->download($session,$request);
+        return $this->json($this->oneDriveCore->download($request->get('path'),$request->get('name')));
     }
 
     /**
      * @Route("/onedrive/drive/createDir", name="onedrive_createDir")
      */
-    public function createDir(SessionInterface $session, Request $request, CloudService $cloud): Response
+    public function createDir(Request $request): Response
     {
-        return $this->json($cloud->createDirectory($session,$request));
+        return $this->json($this->oneDriveCore->createDir($request->get('path'),$request->get('name')));
     }
 
     /**
      * @Route("/onedrive/drive/createFile", name="onedrive_createFile")
      */
-    public function createFile(SessionInterface $session, Request $request, CloudService $cloud): Response
+    public function createFile(Request $request): Response
     {
-        return $this->json($cloud->createFile($session,$request));
+        return $this->json($this->oneDriveCore->createFile($request->get('path'),$request->get('name')));
     }
 
     /**
      * @Route("/onedrive/drive/delete", name="onedrive_delete")
      */
-    public function delete(SessionInterface $session, Request $request, CloudService $cloud): Response
+    public function delete(Request $request): Response
     {
-        return $this->json($cloud->delete($session,$request));
+        return $this->json($this->oneDriveCore->delete($request->get('path')));
     }
 
     /**
      * @Route("/onedrive/drive/upload", name="onedrive_upload")
      */
-    public function upload(SessionInterface $session, Request $request, CloudService $cloud): Response
+    public function upload(Request $request): Response
     {
-        return $this->json($cloud->upload($session,$request));
+        return $this->json($this->oneDriveCore->upload($request->get('path'),$request->files->get('content')));
     }
 }
