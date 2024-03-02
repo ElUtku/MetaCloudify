@@ -37,9 +37,7 @@
 
         <!-- MAIN BLOCK -->
         <div id="mainContent" class="min-vh-auto col-md-10 d-flex flex-column flex-wrap align-items-start justify-content-start border-start"  style="width: 69.5%;">
-
-            <div id="window1" class="container col-md-12">
-                <div class="col-md-12">
+                <div class="container col-md-12">
                     <h1>Bienvenido</h1>
                     <div id="divRuta" class="d-none btn-toggle-nav  col-12 flex-row align-items-center d-flex mb-2 pb-3 border-bottom">
                         <div class="col-auto me-auto no-select" role="button" onclick="loadData(parent.toString())">
@@ -67,9 +65,25 @@
                         </div>
                     </div>
                 </div>
-                <div id="explorer1" class="container d-flex flex-column col-md-12 mt-2">
+
+                <div class="container d-flex flex-column col-md-12 mt-2">
+                    <table id="explorer" class="table table-striped d-none">
+                        <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Fecha</th>
+                            <th>Propietario</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                        </tbody>
+                    </table>
                 </div>
-                <div id="divUpload" class="d-none col-md-5 border-top m-2 pt-2">
+
+                <div id="explorer" class="container d-flex flex-column col-md-12 mt-2">
+                </div>
+
+                <div id="divUpload" class="d-none col-md-5 border-top m-3 pt-2">
                     <form id="fileupload" method="POST" enctype="multipart/form-data">
                         <div class="mb-3 d-flex align-items-center">
                             <input class="form-control form-control-sm me-2" id="formFile" type="file" name="content" multiple>
@@ -81,7 +95,6 @@
                     <!-- Lista de archivos cargados -->
                     <div id="files"></div>
                 </div>
-            </div>
 
         </div>
 

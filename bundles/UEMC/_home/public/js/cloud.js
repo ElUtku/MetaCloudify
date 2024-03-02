@@ -12,11 +12,14 @@ $(document).ready(function() {
 
 });
 
-function loadData(accountId) {
+function loadData(accountId,path) {
+
+    path = (typeof path !== 'undefined') ? path : '';
+
     let account = getAccount(accountId)
     try {
         //test/a/b/c -> [test],[a],[b],[c] -> [test],[a],[b] -> test/a/b
-        account.parent=account.path.split('\\');
+        account.parent=path.split('\\');
         account.parent.pop();
         account.parent=account.parent.join('\\');
     } catch (e)
@@ -32,7 +35,7 @@ function loadData(accountId) {
     $.ajax({
         url: account.controller+'/drive',
         method: 'POST',
-        data: { path: ruta,
+        data: { path: path,
                 id: accountId},
         dataType: 'json',
         success: function (data) {
@@ -41,7 +44,7 @@ function loadData(accountId) {
                 data=cleanOwncloudData(data);
             }
             account.pathActual=ruta;
-            updatePageContent(data,accountId);
+            updatePageContent(data,accountId,account);
 
             $('#divUpload').removeClass('d-none').addClass('d-block');
         },
@@ -60,43 +63,82 @@ function cleanOwncloudData(data)
     });
 }
 
-function updatePageContent(data,id) {
-    let container = $('#explorer1');
-    container.empty();
+function formatDate(timestamp)
+{
+    let fecha = new Date();
+    fecha.setTime(timestamp * 1000);
+
+    let opcionesDeFormato = {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    };
+
+    let format = new Intl.DateTimeFormat('es-ES', opcionesDeFormato);
+
+   return  format.format(fecha);
+}
+function updatePageContent(data,accountId,account) {
+    $('#explorer').removeClass('d-none');
+
+    let table=$('#tableBody');
+    table.empty();
 
     $.each(data, function(index, item) {
+
         item.path=item.path.replace(/\//g, '\\');
         let parts=item.path.split('\\');
         let name = parts[parts.length - 1];
 
-        let row = $('<div class="row d-inline-block no-select underline-on-hover" role="button" data-bs-toggle="tooltip" title="' + item.path + '"></div>');
+        let fecha = formatDate(item.last_modified);
 
-        if (item.type === 'dir') {
-            row.append('<i class="bi bi-folder-fill"></i>');
-        } else if (item.type === 'file') {
-            row.append('<i class="bi bi-file-text-fill"></i>');
-        }
+        let col = $('<tr></tr>');
 
-        row.append(name); // Se agrega el nombre del fichero/directorio
+            if (item.type === 'dir') {
+                col.append('<td role="button"  class="no-select underline-on-hover" data-bs-toggle="tooltip" title="' + item.path + '"><i class="bi bi-folder-fill me-2"></i>'+name+'</td>');
+            } else if (item.type === 'file') {
+                col.append('<td role="button"  class="no-select underline-on-hover" data-bs-toggle="tooltip" title="' + item.path + '"><i class="bi bi-file-text-fill me-2"></i>'+name+'</td>');
+            }
+
+            col.append('<td>' + fecha + '</td>');
+
+            switch(account.controller) {
+                case 'ftp':
+                    col.append('<td title="' + account.controller + '"><i class="bi bi-hdd-rack me-2"></i>'+account.user+'</td>');
+                    break;
+                case 'onedrive':
+                    col.append('<td title="' + account.controller + '"><i class="bi bi-microsoft me-2"></i>'+account.user+'</td>');
+                    break;
+                case 'googledrive':
+                    col.append('<td title="' + account.controller + '"><i class="bi bi-google me-2"></i>'+account.user+'</td>');
+                    break;
+                case 'owncloud':
+                    col.append('<td title="' + account.controller + '"><i class="bi bi-clouds me-2"></i>'+account.user+'</td>');
+                    break;
+                default:
+            }
+
 
         // Si se hace click en un elemento seleccionado se recarga la pagina
-        row.on('dblclick', function() {
+        col.on('dblclick', function() {
             if (item.type==='dir')
             {
-                loadData(item.path.charAt(0) === '\\' ? item.path.slice(1) : item.path, id);
+                loadData(accountId,item.path.charAt(0) === '\\' ? item.path.slice(1) : item.path);
             }else if (item.type==='file')
             {
-                download(item.path,name,id);
+                download(item.path,name,accountId);
             }
         });
-        row.on('contextmenu', function(event) {
+        col.on('contextmenu', function(event) {
             event.preventDefault();
 
             let contextMenu = $('#contextMenu');
             let clickedElement = {
                 'path': item.path,
                 'name': name,
-                'id': id
+                'id': accountId
             }; //Se guarda el elemento sobre el que se hizo click
 
             contextMenu.removeClass('d-none').addClass('d-block');
@@ -123,7 +165,7 @@ function updatePageContent(data,id) {
             });
 
         });
-        container.append(row);
+        table.append(col);
     });
 
 }
@@ -142,7 +184,7 @@ function createDir(name,accountId)
         },
         success: function () {
             // Actualiza dinámicamente el contenido en la página
-            loadData(account.pathActual,id);
+            loadData(accountId,account.pathActual);
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -164,7 +206,7 @@ function createFile(name,accountId)
         },
         success: function () {
             // Actualiza dinámicamente el contenido en la página
-            loadData(account.pathActual, id);
+            loadData(accountId,account.pathActual);
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -186,7 +228,7 @@ function dlt(data,accountId)
         },
         success: function () {
             // Actualiza dinámicamente el contenido en la página
-            loadData(account.pathActual,id);
+            loadData(accountId,account.pathActual);
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -210,7 +252,7 @@ function upload(accountId)
                     id: accountId
         },
         done: function () {
-            loadData(account.pathActual,accountId);
+            loadData(accountId,account.pathActual);
         },
         /*progressall: function (e, data) {
             // Actualiza la barra de progreso

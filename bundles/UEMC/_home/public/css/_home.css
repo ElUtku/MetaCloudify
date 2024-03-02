@@ -4,3 +4,12 @@
 .underline-on-hover:hover {
     text-decoration: underline;
 }
+
+.table {
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    border: none;
+}
