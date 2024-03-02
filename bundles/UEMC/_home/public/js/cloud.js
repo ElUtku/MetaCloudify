@@ -1,45 +1,47 @@
-let parent;
-let controller;
-let pathActual;
+function Account(controller,user,root,pathActual,parent)
+{
+    this.controller=controller;
+    this.user=user;
+    this.root=root;
+    this.pathActual=pathActual ?? undefined;
+    this.parent=parent ?? undefined;
+}
+
 
 $(document).ready(function() {
 
 });
 
-
-
-
-function loadData(path,id) {
-    pathActual=path;
-
+function loadData(accountId) {
+    let account = getAccount(accountId)
     try {
-        parent=path.split('\\');
-        parent.pop();
-        parent=parent.join('\\');
+        //test/a/b/c -> [test],[a],[b],[c] -> [test],[a],[b] -> test/a/b
+        account.parent=account.path.split('\\');
+        account.parent.pop();
+        account.parent=account.parent.join('\\');
     } catch (e)
     {
-        parent = '';
+        account.parent = '';
     }
 
-    let ruta = $("#path");
-    ruta.val(path);
+    let ruta = $("#path").val();
     let divRuta = $("#divRuta");
     divRuta.addClass('d-flex');
     divRuta.removeClass('d-none');
 
     $.ajax({
-        url: controller,
+        url: account.controller+'/drive',
         method: 'POST',
-        data: { path: path,
-                id: id},
+        data: { path: ruta,
+                id: accountId},
         dataType: 'json',
         success: function (data) {
-            if(controller.indexOf("owncloud")!==-1 )
+            if(account.controller.indexOf("owncloud")!==-1 )
             {
                 data=cleanOwncloudData(data);
             }
-
-            updatePageContent(data,id);
+            account.pathActual=ruta;
+            updatePageContent(data,accountId);
 
             $('#divUpload').removeClass('d-none').addClass('d-block');
         },
@@ -81,7 +83,7 @@ function updatePageContent(data,id) {
         row.on('dblclick', function() {
             if (item.type==='dir')
             {
-                loadData(item.path.charAt(0) === '\\' ? item.path.slice(1) : item.path,id);
+                loadData(item.path.charAt(0) === '\\' ? item.path.slice(1) : item.path, id);
             }else if (item.type==='file')
             {
                 download(item.path,name,id);
@@ -126,19 +128,21 @@ function updatePageContent(data,id) {
 
 }
 
-function createDir(name,id)
+function createDir(name,accountId)
 {
+    let account = getAccount(accountId)
+
     $.ajax({
-        url: controller+"/createDir",
+        url: account.controller+"/createDir",
         method: 'POST',
         data: {
-            path: pathActual,
+            path: account.pathActual,
             name: name,
-            id: id
+            id: accountId
         },
         success: function () {
             // Actualiza dinámicamente el contenido en la página
-            loadData(pathActual,id);
+            loadData(account.pathActual,id);
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -146,19 +150,21 @@ function createDir(name,id)
     });
 }
 
-function createFile(name,id)
+function createFile(name,accountId)
 {
+    let account = getAccount(accountId)
+
     $.ajax({
-        url: controller+"/createFile",
+        url: account.controller+"/createFile",
         method: 'POST',
         data: {
-            path: pathActual,
+            path: account.pathActual,
             name: name,
-            id: id
+            id: accountId
         },
         success: function () {
             // Actualiza dinámicamente el contenido en la página
-            loadData(pathActual,id);
+            loadData(account.pathActual, id);
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -166,19 +172,21 @@ function createFile(name,id)
     });
 }
 
-function dlt(data,id)
+function dlt(data,accountId)
 {
+    let account = getAccount(accountId)
+
     $.ajax({
-        url: controller+"/delete",
+        url: account.controller+"/delete",
         method: 'POST',
         data: {
             path: data.path,
             name: data.name,
-            id: id
+            id: accountId
         },
         success: function () {
             // Actualiza dinámicamente el contenido en la página
-            loadData(pathActual,id);
+            loadData(account.pathActual,id);
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -190,16 +198,19 @@ function dlt(data,id)
     $(document).off('click.menuClose');
 }
 
-function upload(id)
+function upload(accountId)
 {
+    let account = getAccount(accountId)
+
     let fileupload = $('#fileupload');
     fileupload.fileupload({
-        url: controller+'/upload',
+        url: account.controller+'/upload',
         dataType: 'json',
-        formData: { path: pathActual,
-                    id: id  },
+        formData: { path: account.pathActual,
+                    id: accountId
+        },
         done: function () {
-            loadData(pathActual,id);
+            loadData(account.pathActual,accountId);
         },
         /*progressall: function (e, data) {
             // Actualiza la barra de progreso
@@ -218,15 +229,17 @@ function upload(id)
     fileupload.fileupload('send', { files: $('#formFile')[0].files });
 }
 
-function download(path,name,id)
+function download(path,name,accountId)
 {
+    let account = getAccount(accountId)
+
     $.ajax({
-        url: controller+"/download",
+        url: account.controller+"/download",
         method: 'POST',
         data: {
             path: path,
             name: name,
-            id: id
+            id: accountId
         },
         success: function (data) {
 
@@ -250,13 +263,15 @@ function download(path,name,id)
     });
 }
 
-function logout(id)
+function logout(accountId)
 {
+    let account = getAccount(accountId)
+
     $.ajax({
-        url: controller,
+        url: account.controller+'/logout',
         method: 'POST',
         data: {
-            id: id
+            id: accountId
         },
         success: function () {
             // Actualiza dinámicamente el contenido en la página

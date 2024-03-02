@@ -34,7 +34,7 @@ class OwnCloudController extends AbstractController
         $this->owncloudCore->loggerUEMC->debug($ruta.$id);
 
         if($session->has('owncloudAccounts') and
-            ($ruta !== 'owncloud_loginGET' and $ruta !== 'owncloud_loginPOST'))
+            ($ruta !== 'owncloud_login' and $ruta !== 'owncloud_loginPOST'))
         {
             $this->ownCloudAccount=$this->ownCloudAccount->arrayToObject($session->get('owncloudAccounts')[$id]);
             $filesystem=$this->owncloudCore->constructFilesystem($this->ownCloudAccount);
@@ -91,7 +91,7 @@ class OwnCloudController extends AbstractController
     }
 
     /**
-     * @Route("/owncloud/login", name="owncloud_loginGET", methods={"GET"})
+     * @Route("/owncloud/login", name="owncloud_login", methods={"GET"})
      */
     public function loginGET(): Response
     {

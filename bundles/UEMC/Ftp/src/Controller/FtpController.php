@@ -27,14 +27,13 @@ class FtpController extends AbstractController
         $ruta=$request->attributes->get('_route');
         $id = $request->query->get('id') ?? $request->request->get('id');
 
-        //$session->remove('owncloudAccounts');
         $this->ftpCore=new FtpCore();
         $this->ftpAccount=new FtpAccount();
 
         $this->ftpCore->loggerUEMC->debug($ruta.$id);
 
         if($session->has('ftpAccounts') and
-            ($ruta !== 'ftp_loginGET' and $ruta !== 'ftp_loginPOST'))
+            ($ruta !== 'ftp_login' and $ruta !== 'ftp_loginPOST'))
         {
             $this->ftpAccount=$this->ftpAccount->arrayToObject($session->get('ftpAccounts')[$id]);
             $filesystem=$this->ftpCore->constructFilesystem($this->ftpAccount);
@@ -92,7 +91,7 @@ class FtpController extends AbstractController
 
 
     /**
-     * @Route("/ftp/login", name="ftp_loginGET", methods={"GET"})
+     * @Route("/ftp/login", name="ftp_login", methods={"GET"})
      */
     public function loginGET(): Response
     {
@@ -116,7 +115,7 @@ class FtpController extends AbstractController
     }
 
     /**
-     * @Route("/ftp/logout", name="ftp_logout", methods={"POST"})
+     * @Route("/ftp/logout", name="ftp_logout")
      */
     public function logout(SessionInterface $session, Request $request): Response
     {

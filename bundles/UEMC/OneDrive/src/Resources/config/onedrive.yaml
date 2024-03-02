@@ -1,6 +1,6 @@
 clientId: '84d85895-150a-47cb-92a1-4484f034dbac'
 clientSecret: '_FC8Q~xVOOcc0EzeH1eCWHSpFaiDdTFvt1cm0aYs'
-redirectUri: 'http://localhost/cloudBundles5.4/public/index.php/onedrive/access'
+redirectUri: 'http://localhost/cloudBundles5.4/public/index.php/onedrive/login'
 urlAuthorize: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize'
 urlAccessToken: 'https://login.microsoftonline.com/common/oauth2/v2.0/token'
 urlResourceOwnerDetails: 'https://outlook.office.com/api/v2.0/me'

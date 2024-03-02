@@ -33,7 +33,7 @@ class GoogleDriveController extends AbstractController
         $id = $request->query->get('id') ?? $request->request->get('id') ?? null;
 
         $this->googleDriveCore->loggerUEMC->debug('Controller: '.$ruta. ' y el id : '.$id);
-        if($session->has('googledriveAccounts') and $ruta !== 'GoogleDrive_login' )
+        if($session->has('googledriveAccounts') and $ruta !== 'googledrive_login' )
         {
             $this->googleDriveAccount=$this->googleDriveAccount->arrayToObject($session->get('googledriveAccounts')[$id]);
             $filesystem=$this->googleDriveCore->constructFilesystem($this->googleDriveAccount);
@@ -42,7 +42,7 @@ class GoogleDriveController extends AbstractController
     }
 
     /**
-     * @Route("/GoogleDrive/login", name="GoogleDrive_login", methods={"GET"})
+     * @Route("/googledrive/login", name="googledrive_login", methods={"GET"})
      */
     public function login(SessionInterface $session, Request $request): Response
     {
@@ -52,7 +52,7 @@ class GoogleDriveController extends AbstractController
     }
 
     /**
-     * @Route("/GoogleDrive/drive", name="GoogleDrive_drive")
+     * @Route("/googledrive/drive", name="googledrive_drive")
      */
     public function drive(Request $request): Response
     {
@@ -60,7 +60,7 @@ class GoogleDriveController extends AbstractController
     }
 
     /**
-     * @Route("/GoogleDrive/drive/download", name="GoogleDrive_download")
+     * @Route("/googledrive/drive/download", name="googledrive_download")
      */
     public function download(Request $request): Response
     {
@@ -68,15 +68,15 @@ class GoogleDriveController extends AbstractController
     }
 
     /**
-     * @Route("/GoogleDrive/drive/createDir", name="GoogleDrive_createDir")
+     * @Route("/googledrive/drive/createDir", name="googledrive_createDir")
      */
-    public function createDir(SessionInterface $session, Request $request, CloudService $cloud): Response
+    public function createDir(Request $request): Response
     {
         return $this->json($this->googleDriveCore->createDir($request->get('path'),$request->get('name')));
     }
 
     /**
-     * @Route("/GoogleDrive/drive/createFile", name="GoogleDrive_createFile")
+     * @Route("/googledrive/drive/createFile", name="googledrive_createFile")
      */
     public function createFile(Request $request): Response
     {
@@ -84,7 +84,7 @@ class GoogleDriveController extends AbstractController
     }
 
     /**
-     * @Route("/GoogleDrive/drive/delete", name="GoogleDrive_delete")
+     * @Route("/googledrive/drive/delete", name="googledrive_delete")
      */
     public function delete(Request $request): Response
     {
@@ -92,7 +92,7 @@ class GoogleDriveController extends AbstractController
     }
 
     /**
-     * @Route("/GoogleDrive/drive/upload", name="GoogleDrive_upload")
+     * @Route("/googledrive/drive/upload", name="googledrive_upload")
      */
     public function upload(Request $request): Response
     {
@@ -100,7 +100,7 @@ class GoogleDriveController extends AbstractController
     }
 
     /**
-     * @Route("/GoogleDrive/logout", name="GoogleDrive_logout", methods={"GET"})
+     * @Route("/googledrive/logout", name="googledrive_logout")
      */
     public function logout(SessionInterface $session, Request $request): Response
     {

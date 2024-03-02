@@ -34,7 +34,7 @@ class OneDriveController extends AbstractController
         $id = $request->query->get('id') ?? $request->request->get('id') ?? null;
 
         $this->oneDriveCore->loggerUEMC->debug('Controller: '.$ruta. ' y el id : '.$id);
-        if($session->has('onedriveAccounts') and $ruta !== 'onedrive_access' )
+        if($session->has('onedriveAccounts') and $ruta !== 'onedrive_login' )
         {
             $this->oneDriveAccount=$this->oneDriveAccount->arrayToObject($session->get('onedriveAccounts')[$id]);
             $filesystem=$this->oneDriveCore->constructFilesystem($this->oneDriveAccount);
@@ -43,17 +43,16 @@ class OneDriveController extends AbstractController
     }
 
     /**
-     * @Route("/onedrive/access", name="onedrive_access")
+     * @Route("/onedrive/login", name="onedrive_login")
      */
-    public function access(SessionInterface $session, Request $request): Response
+    public function login(SessionInterface $session, Request $request): Response
     {
         $this->oneDriveAccount->login($session,$request);
-        $this->oneDriveCore->loggerUEMC->debug('5');
         return $this->redirectToRoute('_home_index');
     }
 
     /**
-     * @Route("/onedrive/logout", name="onedrive_logout", methods={"GET"})
+     * @Route("/onedrive/logout", name="onedrive_logout", methods={"POST"})
      */
     public function logout(SessionInterface $session, Request $request): Response
     {
