@@ -40,16 +40,16 @@
                 <div class="container col-md-12">
                     <h1>Bienvenido</h1>
                     <div id="divRuta" class="d-none btn-toggle-nav  col-12 flex-row align-items-center d-flex mb-2 pb-3 border-bottom">
-                        <div class="col-auto me-auto no-select" role="button" onclick="loadData(accountE1,parent.toString())">
+                        <div class="col-auto me-auto no-select" role="button" onclick="back();">
                             <i id="return" class="bi bi-arrow-return-left"></i>
                             <label for="return" style="cursor: pointer">Volver atras</label>
                         </div>
                         <div class="col-3 me-auto d-flex flex-row align-items-center">
-                            <a id="crearCarpeta" href="" onclick="event.preventDefault();$('#newNameButton').attr('onclick','createDir(accountE1,$(\'#newName\').val());')" class="link-body-emphasis d-inline-flex text-decoration-none rounded" data-bs-toggle="modal" data-bs-target="#newDirFileModal">
+                            <a id="crearCarpeta" href="" onclick="event.preventDefault();$('#newNameButton').attr('onclick','createDir($(\'#newName\').val());')" class="link-body-emphasis d-inline-flex text-decoration-none rounded" data-bs-toggle="modal" data-bs-target="#newDirFileModal">
                                 <i class="bi bi-folder-fill me-1"></i>
                                 Crear carpeta
                             </a>
-                            <a id="crearFichero" href="" onclick="event.preventDefault();$('#newNameButton').attr('onclick','createFile(accountE1,$(\'#newName\').val());')" class="link-body-emphasis d-inline-flex text-decoration-none rounded" data-bs-toggle="modal" data-bs-target="#newDirFileModal">
+                            <a id="crearFichero" href="" onclick="event.preventDefault();$('#newNameButton').attr('onclick','createFile($(\'#newName\').val());')" class="link-body-emphasis d-inline-flex text-decoration-none rounded" data-bs-toggle="modal" data-bs-target="#newDirFileModal">
                                 <i class="bi bi-file-earmark-text me-1"></i>
                                 Crear fichero
                             </a>
@@ -58,7 +58,7 @@
                         <div class="col-6 d-flex flex-row align-items-center">
                             <label class="col-2" for="path" id="lpath" >Ruta actual</label>
                             <input class="form-control" id="path" type="text" placeholder="">
-                            <button class="btn btn-outline-secondary d-inline-flex align-items-center ms-2" type="button" onclick="loadData(accountE1,$('#path').val());">
+                            <button class="btn btn-outline-secondary d-inline-flex align-items-center ms-2" type="button" onclick="loadData(accountE1.accountId,$('#path').val());">
                                 Ir
                                 <i class="bi bi-arrow-right-short"></i>
                             </button>

@@ -1,5 +1,6 @@
-function Account(controller,user,root,pathActual,parent)
+function Account(accountId,controller,user,root,pathActual,parent)
 {
+    this.accountId=accountId;
     this.controller=controller;
     this.user=user;
     this.root=root;
@@ -18,7 +19,7 @@ function loadData(accountId,path) {
     path = (typeof path !== 'undefined') ? path : '';
 
     let account = getAccount(accountId);
-    accountE1=accountId;
+    accountE1=account;
     try {
         //test/a/b/c -> [test],[a],[b],[c] -> [test],[a],[b] -> test/a/b
         account.parent=path.split('\\');
@@ -29,7 +30,8 @@ function loadData(accountId,path) {
         account.parent = '';
     }
 
-    let ruta = $("#path").val();
+    let ruta = path;
+    $("#path").val(path);
     let divRuta = $("#divRuta");
     divRuta.addClass('d-flex');
     divRuta.removeClass('d-none');
@@ -172,9 +174,9 @@ function updatePageContent(data,accountId,account) {
 
 }
 
-function createDir(name,accountId)
+function createDir(name)
 {
-    let account = getAccount(accountId)
+    let account = accountE1;
 
     $.ajax({
         url: account.controller+"/drive/createDir",
@@ -182,11 +184,11 @@ function createDir(name,accountId)
         data: {
             path: account.pathActual,
             name: name,
-            id: accountId
+            id: account.accountId
         },
         success: function () {
             // Actualiza dinámicamente el contenido en la página
-            loadData(accountId,account.pathActual);
+            loadData(account.accountId,account.pathActual);
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -194,9 +196,9 @@ function createDir(name,accountId)
     });
 }
 
-function createFile(name,accountId)
+function createFile(name)
 {
-    let account = getAccount(accountId)
+    let account = accountE1;
 
     $.ajax({
         url: account.controller+"/drive/createFile",
@@ -204,11 +206,11 @@ function createFile(name,accountId)
         data: {
             path: account.pathActual,
             name: name,
-            id: accountId
+            id: account.accountId
         },
         success: function () {
             // Actualiza dinámicamente el contenido en la página
-            loadData(accountId,account.pathActual);
+            loadData(account.accountId,account.pathActual);
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -216,9 +218,9 @@ function createFile(name,accountId)
     });
 }
 
-function dlt(data,accountId)
+function dlt(data)
 {
-    let account = getAccount(accountId)
+    let account = accountE1;
 
     $.ajax({
         url: account.controller+"/drive/delete",
@@ -226,11 +228,11 @@ function dlt(data,accountId)
         data: {
             path: data.path,
             name: data.name,
-            id: accountId
+            id: account.accountId
         },
         success: function () {
             // Actualiza dinámicamente el contenido en la página
-            loadData(accountId,account.pathActual);
+            loadData(account.accountId,account.pathActual);
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -325,4 +327,9 @@ function logout(accountId)
             console.error(error);
         }
     });
+}
+
+function back()
+{
+    loadData(accountE1.accountId,accountE1.parent);
 }

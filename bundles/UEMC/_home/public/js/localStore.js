@@ -1,8 +1,9 @@
 function storeAccount(accountId,accountUser,controller,root)
 {
-    var storedAccounts = JSON.parse(localStorage.getItem('storedAccounts')) || {};
+    let storedAccounts = JSON.parse(localStorage.getItem('storedAccounts')) || {};
     if (!storedAccounts[accountId]) {
-        var account = new Account(
+        let account = new Account(
+            accountId, //accountId
             controller,        // controller
             accountUser, // user
             root,                // root
