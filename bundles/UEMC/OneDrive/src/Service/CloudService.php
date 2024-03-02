@@ -6,8 +6,6 @@ use League\Flysystem\Filesystem;
 use ShitwareLtd\FlysystemMsGraph\Adapter;
 use Microsoft\Graph\Graph;
 
-
-use Twig\Token;
 use UEMC\Core\Service\CloudService as Core;
 use UEMC\OneDrive\Entity\OneDriveAccount;
 

@@ -68,6 +68,7 @@ class OwnCloudAccount extends Account
         $this->setPassword($request->get('password'));
         $this->setUser($request->get('userName'));
         $this->setURL($request->get('URL'));
+        $this->setPort($request->get('port') ?? '');
 
         try {
             $owncloudAccounts = $session->get('owncloudAccounts');

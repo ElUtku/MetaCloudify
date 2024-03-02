@@ -4,18 +4,12 @@ namespace UEMC\GoogleDrive\Service;
 
 // include 'vendor/autoload.php';
 
-use Exception;
 use Google_Client;
 use Google\Service\Drive;
 use League\Flysystem\Config;
 use League\Flysystem\Filesystem;
 use League\Flysystem\Visibility;
-use League\OAuth2\Client\Provider\Google;
 use Masbug\Flysystem\GoogleDriveAdapter;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\HttpFoundation\Request;
-
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Yaml\Yaml;
 use UEMC\Core\Service\CloudService as Core;
 use UEMC\GoogleDrive\Entity\GoogleDriveAccount;
