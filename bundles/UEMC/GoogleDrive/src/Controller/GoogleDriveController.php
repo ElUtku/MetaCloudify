@@ -30,12 +30,12 @@ class GoogleDriveController extends AbstractController
         $this->googleDriveAccount=new GoogleDriveAccount();
 
         $ruta=$request->attributes->get('_route');
-        $id = $request->query->get('id') ?? $request->request->get('id') ?? null;
+        $accountId = $request->query->get('accountId') ?? $request->request->get('accountId') ?? null;
 
-        $this->googleDriveCore->loggerUEMC->debug('Controller: '.$ruta. ' y el id : '.$id);
+        $this->googleDriveCore->loggerUEMC->debug('Controller: '.$ruta. ' y el id : '.$accountId);
         if($session->has('googledriveAccounts') and $ruta !== 'googledrive_login' )
         {
-            $this->googleDriveAccount=$this->googleDriveAccount->arrayToObject($session->get('googledriveAccounts')[$id]);
+            $this->googleDriveAccount=$this->googleDriveAccount->arrayToObject($session->get('googledriveAccounts')[$accountId]);
             $filesystem=$this->googleDriveCore->constructFilesystem($this->googleDriveAccount);
             $this->googleDriveCore->setFilesystem($filesystem);
         }

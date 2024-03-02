@@ -25,17 +25,17 @@ class FtpController extends AbstractController
         $session=$request->getSession();
 
         $ruta=$request->attributes->get('_route');
-        $id = $request->query->get('id') ?? $request->request->get('id');
+        $accountId = $request->query->get('accountId') ?? $request->request->get('accountId');
 
         $this->ftpCore=new FtpCore();
         $this->ftpAccount=new FtpAccount();
 
-        $this->ftpCore->loggerUEMC->debug($ruta.$id);
+        $this->ftpCore->loggerUEMC->debug($ruta.$accountId);
 
         if($session->has('ftpAccounts') and
             ($ruta !== 'ftp_login' and $ruta !== 'ftp_loginPOST'))
         {
-            $this->ftpAccount=$this->ftpAccount->arrayToObject($session->get('ftpAccounts')[$id]);
+            $this->ftpAccount=$this->ftpAccount->arrayToObject($session->get('ftpAccounts')[$accountId]);
             $filesystem=$this->ftpCore->constructFilesystem($this->ftpAccount);
             $this->ftpCore->setFilesystem($filesystem);
         }

@@ -25,18 +25,18 @@ class OwnCloudController extends AbstractController
         $session=$request->getSession();
 
         $ruta=$request->attributes->get('_route');
-        $id = $request->query->get('id') ?? $request->request->get('id');
+        $accountId = $request->query->get('accountId') ?? $request->request->get('accountId');
 
         //$session->remove('owncloudAccounts');
         $this->owncloudCore=new OwncloudCore();
         $this->ownCloudAccount=new OwncloudAccount();
 
-        $this->owncloudCore->loggerUEMC->debug($ruta.$id);
+        $this->owncloudCore->loggerUEMC->debug($ruta.$accountId);
 
         if($session->has('owncloudAccounts') and
             ($ruta !== 'owncloud_login' and $ruta !== 'owncloud_loginPOST'))
         {
-            $this->ownCloudAccount=$this->ownCloudAccount->arrayToObject($session->get('owncloudAccounts')[$id]);
+            $this->ownCloudAccount=$this->ownCloudAccount->arrayToObject($session->get('owncloudAccounts')[$accountId]);
             $filesystem=$this->owncloudCore->constructFilesystem($this->ownCloudAccount);
             $this->owncloudCore->setFilesystem($filesystem);
         }

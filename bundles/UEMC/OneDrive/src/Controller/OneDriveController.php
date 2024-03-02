@@ -31,12 +31,12 @@ class OneDriveController extends AbstractController
         $this->oneDriveAccount=new OneDriveAccount();
 
         $ruta=$request->attributes->get('_route');
-        $id = $request->query->get('id') ?? $request->request->get('id') ?? null;
+        $accountId = $request->query->get('accountId') ?? $request->request->get('accountId') ?? null;
 
-        $this->oneDriveCore->loggerUEMC->debug('Controller: '.$ruta. ' y el id : '.$id);
+        $this->oneDriveCore->loggerUEMC->debug('Controller: '.$ruta. ' y el accountId : '.$accountId);
         if($session->has('onedriveAccounts') and $ruta !== 'onedrive_login' )
         {
-            $this->oneDriveAccount=$this->oneDriveAccount->arrayToObject($session->get('onedriveAccounts')[$id]);
+            $this->oneDriveAccount=$this->oneDriveAccount->arrayToObject($session->get('onedriveAccounts')[$accountId]);
             $filesystem=$this->oneDriveCore->constructFilesystem($this->oneDriveAccount);
             $this->oneDriveCore->setFilesystem($filesystem);
         }

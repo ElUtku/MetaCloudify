@@ -1,6 +1,6 @@
 function storeAccount(accountId,accountUser,controller,root)
 {
-    let storedAccounts = JSON.parse(localStorage.getItem('storedAccounts')) || {};
+    let storedAccounts = JSON.parse(sessionStorage.getItem('storedAccounts')) || {};
     if (!storedAccounts[accountId]) {
         let account = new Account(
             accountId, //accountId
@@ -11,11 +11,11 @@ function storeAccount(accountId,accountUser,controller,root)
             root                 // parent
         );
         storedAccounts[accountId] = account;
-        localStorage.setItem('storedAccounts', JSON.stringify(storedAccounts));
+        sessionStorage.setItem('storedAccounts', JSON.stringify(storedAccounts));
     }
 }
 
 function getAccount(accountId)
 {
-    return JSON.parse(localStorage.getItem('storedAccounts'))[accountId];
+    return JSON.parse(sessionStorage.getItem('storedAccounts'))[accountId];
 }

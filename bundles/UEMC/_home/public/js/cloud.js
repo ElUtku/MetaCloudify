@@ -40,7 +40,8 @@ function loadData(accountId,path) {
         url: account.controller+'/drive',
         method: 'POST',
         data: { path: path,
-                id: accountId},
+                accountId: accountId
+        },
         dataType: 'json',
         success: function (data) {
             if(account.controller.indexOf("owncloud")!==-1 )
@@ -184,7 +185,7 @@ function createDir(name)
         data: {
             path: account.pathActual,
             name: name,
-            id: account.accountId
+            accountId: account.accountId
         },
         success: function () {
             // Actualiza dinámicamente el contenido en la página
@@ -206,7 +207,7 @@ function createFile(name)
         data: {
             path: account.pathActual,
             name: name,
-            id: account.accountId
+            accountId: account.accountId
         },
         success: function () {
             // Actualiza dinámicamente el contenido en la página
@@ -228,7 +229,7 @@ function dlt(data)
         data: {
             path: data.path,
             name: data.name,
-            id: account.accountId
+            accountId: account.accountId
         },
         success: function () {
             // Actualiza dinámicamente el contenido en la página
@@ -253,7 +254,7 @@ function upload(accountId)
         url: account.controller+'/drive/upload',
         dataType: 'json',
         formData: { path: account.pathActual,
-                    id: accountId
+                    accountId: accountId
         },
         done: function () {
             loadData(accountId,account.pathActual);
@@ -285,7 +286,7 @@ function download(path,name,accountId)
         data: {
             path: path,
             name: name,
-            id: accountId
+            accountId: accountId
         },
         success: function (data) {
 
@@ -317,7 +318,7 @@ function logout(accountId)
         url: account.controller+'/logout',
         method: 'POST',
         data: {
-            id: accountId
+            accountId: accountId
         },
         success: function () {
             // Actualiza dinámicamente el contenido en la página
