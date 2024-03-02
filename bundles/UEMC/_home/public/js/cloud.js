@@ -7,6 +7,7 @@ function Account(controller,user,root,pathActual,parent)
     this.parent=parent ?? undefined;
 }
 
+let accountE1;
 
 $(document).ready(function() {
 
@@ -16,7 +17,8 @@ function loadData(accountId,path) {
 
     path = (typeof path !== 'undefined') ? path : '';
 
-    let account = getAccount(accountId)
+    let account = getAccount(accountId);
+    accountE1=accountId;
     try {
         //test/a/b/c -> [test],[a],[b],[c] -> [test],[a],[b] -> test/a/b
         account.parent=path.split('\\');
@@ -175,7 +177,7 @@ function createDir(name,accountId)
     let account = getAccount(accountId)
 
     $.ajax({
-        url: account.controller+"/createDir",
+        url: account.controller+"/drive/createDir",
         method: 'POST',
         data: {
             path: account.pathActual,
@@ -197,7 +199,7 @@ function createFile(name,accountId)
     let account = getAccount(accountId)
 
     $.ajax({
-        url: account.controller+"/createFile",
+        url: account.controller+"/drive/createFile",
         method: 'POST',
         data: {
             path: account.pathActual,
@@ -219,7 +221,7 @@ function dlt(data,accountId)
     let account = getAccount(accountId)
 
     $.ajax({
-        url: account.controller+"/delete",
+        url: account.controller+"/drive/delete",
         method: 'POST',
         data: {
             path: data.path,
@@ -246,7 +248,7 @@ function upload(accountId)
 
     let fileupload = $('#fileupload');
     fileupload.fileupload({
-        url: account.controller+'/upload',
+        url: account.controller+'/drive/upload',
         dataType: 'json',
         formData: { path: account.pathActual,
                     id: accountId
@@ -276,7 +278,7 @@ function download(path,name,accountId)
     let account = getAccount(accountId)
 
     $.ajax({
-        url: account.controller+"/download",
+        url: account.controller+"/drive/download",
         method: 'POST',
         data: {
             path: path,

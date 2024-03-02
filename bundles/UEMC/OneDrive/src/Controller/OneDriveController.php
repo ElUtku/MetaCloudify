@@ -72,7 +72,7 @@ class OneDriveController extends AbstractController
      */
     public function download(Request $request): Response
     {
-        return $this->json($this->oneDriveCore->download($request->get('path'),$request->get('name')));
+        return $this->oneDriveCore->download($request->get('path'),$request->get('name'));
     }
 
     /**
