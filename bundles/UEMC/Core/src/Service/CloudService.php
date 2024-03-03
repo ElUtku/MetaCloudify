@@ -41,7 +41,6 @@ abstract class CloudService extends UemcLogger
      */
     public function listDirectory(String $path)
     {
-        $this->loggerUEMC->debug("Listing directory " . $path);
 
         $filesystem=$this->getFilesystem();
 

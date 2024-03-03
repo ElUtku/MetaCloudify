@@ -9,14 +9,14 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use UEMC\Core\Entity\Account;
 use UEMC\OwnCloud\Service\CloudService as OwncloudCore;
-use UEMC\OwnCloud\Entity\OwnCloudAccount;
 
 
 class OwnCloudController extends AbstractController
 {
     private OwncloudCore $owncloudCore;
-    private OwnCloudAccount $ownCloudAccount;
+    private Account $account;
 
     public function __construct(RequestStack $requestStack)
     {
@@ -29,17 +29,47 @@ class OwnCloudController extends AbstractController
 
         //$session->remove('owncloudAccounts');
         $this->owncloudCore=new OwncloudCore();
-        $this->ownCloudAccount=new OwncloudAccount();
+        $this->account=new Account();
 
         $this->owncloudCore->loggerUEMC->debug($ruta.$accountId);
 
         if($session->has('owncloudAccounts') and
             ($ruta !== 'owncloud_login' and $ruta !== 'owncloud_loginPOST'))
         {
-            $this->ownCloudAccount=$this->ownCloudAccount->arrayToObject($session->get('owncloudAccounts')[$accountId]);
-            $filesystem=$this->owncloudCore->constructFilesystem($this->ownCloudAccount);
+            $this->account=$this->owncloudCore->arrayToObject($session->get('owncloudAccounts')[$accountId]);
+            $filesystem=$this->owncloudCore->constructFilesystem($this->account);
             $this->owncloudCore->setFilesystem($filesystem);
         }
+    }
+
+    /**
+     * @Route("/owncloud/login", name="owncloud_login", methods={"GET"})
+     */
+    public function loginGET(): Response
+    {
+        return $this->render('@UEMCOwnCloudBundle/login.html.twig', [
+            'test' => 'OK'
+        ]);
+    }
+
+    /**
+     * @Route("/owncloud/login", name="owncloud_loginPOST", methods={"POST"})
+     */
+    public function loginPOST(SessionInterface $session, Request $request): Response
+    {
+        if ($this->owncloudCore->login($session, $request)) {
+            return $this->redirectToRoute('_home_index');
+        } else {
+            return $this->render('@UEMCOwnCloudBundle/login.html.twig', ['test' => 'KO']);
+        }
+    }
+
+    /**
+     * @Route("/owncloud/logout", name="owncloud_logout")
+     */
+    public function logout(SessionInterface $session, Request $request): Response
+    {
+        return $this->redirectToRoute('_home_index',['status' => $this->account->logout($session,$request)]);
     }
 
     /**
@@ -88,35 +118,5 @@ class OwnCloudController extends AbstractController
     public function upload(SessionInterface $session, Request $request): Response
     {
         return $this->json($this->owncloudCore->upload($request->get('path'),$request->files->get('content')));
-    }
-
-    /**
-     * @Route("/owncloud/login", name="owncloud_login", methods={"GET"})
-     */
-    public function loginGET(): Response
-    {
-        return $this->render('@UEMCOwnCloudBundle/login.html.twig', [
-            'test' => 'OK'
-        ]);
-    }
-
-    /**
-     * @Route("/owncloud/login", name="owncloud_loginPOST", methods={"POST"})
-     */
-    public function loginPOST(SessionInterface $session, Request $request): Response
-    {
-        if ($this->ownCloudAccount->login($session, $request)) {
-            return $this->redirectToRoute('_home_index');
-        } else {
-            return $this->render('@UEMCOwnCloudBundle/login.html.twig', ['test' => 'KO']);
-        }
-    }
-
-    /**
-     * @Route("/owncloud/logout", name="owncloud_logout")
-     */
-    public function logout(SessionInterface $session, Request $request): Response
-    {
-        return $this->redirectToRoute('_home_index',['status' => $this->ownCloudAccount->logout($session,$request)]);
     }
 }

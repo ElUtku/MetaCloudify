@@ -9,14 +9,14 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
-use UEMC\Ftp\Entity\FtpAccount;
+use UEMC\Core\Entity\Account;
 use UEMC\Ftp\Service\CloudService as FtpCore;
 
 class FtpController extends AbstractController
 {
 
     private FtpCore $ftpCore;
-    private FtpAccount $ftpAccount;
+    private Account $account;
 
     public function __construct(RequestStack $requestStack)
     {
@@ -28,17 +28,49 @@ class FtpController extends AbstractController
         $accountId = $request->query->get('accountId') ?? $request->request->get('accountId');
 
         $this->ftpCore=new FtpCore();
-        $this->ftpAccount=new FtpAccount();
+        $this->account=new Account();
 
         $this->ftpCore->loggerUEMC->debug($ruta.$accountId);
 
         if($session->has('ftpAccounts') and
             ($ruta !== 'ftp_login' and $ruta !== 'ftp_loginPOST'))
         {
-            $this->ftpAccount=$this->ftpAccount->arrayToObject($session->get('ftpAccounts')[$accountId]);
-            $filesystem=$this->ftpCore->constructFilesystem($this->ftpAccount);
+            $this->account=$this->account->arrayToObject($session->get('ftpAccounts')[$accountId]);
+            $filesystem=$this->ftpCore->constructFilesystem($this->account);
             $this->ftpCore->setFilesystem($filesystem);
         }
+    }
+
+    /**
+     * @Route("/ftp/login", name="ftp_login", methods={"GET"})
+     */
+    public function loginGET(): Response
+    {
+        return $this->render('@UEMCFtpBundle/login.html.twig', [
+            'test' => 'OK'
+        ]);
+    }
+
+    /**
+     * @Route("/ftp/login", name="ftp_loginPOST", methods={"POST"})
+     */
+    public function loginPOST(SessionInterface $session, Request $request): Response
+    {
+        if($this->ftpCore->login($session,$request))
+        {
+            return $this->redirectToRoute('_home_index');
+        } else
+        {
+            return $this->render('@UEMCFtpBundle/login.html.twig',['test' => 'KO']);
+        }
+    }
+
+    /**
+     * @Route("/ftp/logout", name="ftp_logout")
+     */
+    public function logout(SessionInterface $session, Request $request): Response
+    {
+        return $this->redirectToRoute('_home_index',['status' => $this->account->ftpCore($session,$request)]);
     }
 
     /**
@@ -90,35 +122,5 @@ class FtpController extends AbstractController
     }
 
 
-    /**
-     * @Route("/ftp/login", name="ftp_login", methods={"GET"})
-     */
-    public function loginGET(): Response
-    {
-        return $this->render('@UEMCFtpBundle/login.html.twig', [
-            'test' => 'OK'
-        ]);
-    }
 
-    /**
-     * @Route("/ftp/login", name="ftp_loginPOST", methods={"POST"})
-     */
-    public function loginPOST(SessionInterface $session, Request $request): Response
-    {
-        if($this->ftpAccount->login($session,$request))
-        {
-            return $this->redirectToRoute('_home_index');
-        } else
-        {
-            return $this->render('@UEMCFtpBundle/login.html.twig',['test' => 'KO']);
-        }
-    }
-
-    /**
-     * @Route("/ftp/logout", name="ftp_logout")
-     */
-    public function logout(SessionInterface $session, Request $request): Response
-    {
-        return $this->redirectToRoute('_home_index',['status' => $this->ftpAccount->logout($session,$request)]);
-    }
 }

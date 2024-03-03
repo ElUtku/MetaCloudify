@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use UEMC\OneDrive\Entity\OneDriveAccount;
+use UEMC\Core\Entity\Account;
 use UEMC\OneDrive\Service\CloudService as OneDriveCore;
 
 
@@ -17,7 +17,7 @@ use UEMC\OneDrive\Service\CloudService as OneDriveCore;
 class OneDriveController extends AbstractController
 {
 
-    private OneDriveAccount $oneDriveAccount;
+    private Account $account;
     private OneDriveCore $oneDriveCore;
 
     public function __construct(RequestStack $requestStack)
@@ -25,10 +25,9 @@ class OneDriveController extends AbstractController
         $request=$requestStack->getCurrentRequest();
 
         $session=$request->getSession();
-
-        //$session->remove('owncloudAccounts');
+        
         $this->oneDriveCore=new OneDriveCore();
-        $this->oneDriveAccount=new OneDriveAccount();
+        $this->account=new Account();
 
         $ruta=$request->attributes->get('_route');
         $accountId = $request->query->get('accountId') ?? $request->request->get('accountId') ?? null;
@@ -36,8 +35,8 @@ class OneDriveController extends AbstractController
         $this->oneDriveCore->loggerUEMC->debug('Controller: '.$ruta. ' y el accountId : '.$accountId);
         if($session->has('onedriveAccounts') and $ruta !== 'onedrive_login' )
         {
-            $this->oneDriveAccount=$this->oneDriveAccount->arrayToObject($session->get('onedriveAccounts')[$accountId]);
-            $filesystem=$this->oneDriveCore->constructFilesystem($this->oneDriveAccount);
+            $this->account=$this->oneDriveCore->arrayToObject($session->get('onedriveAccounts')[$accountId]);
+            $filesystem=$this->oneDriveCore->constructFilesystem($this->account);
             $this->oneDriveCore->setFilesystem($filesystem);
         }
     }
@@ -47,7 +46,7 @@ class OneDriveController extends AbstractController
      */
     public function login(SessionInterface $session, Request $request): Response
     {
-        $this->oneDriveAccount->login($session,$request);
+        $this->oneDriveCore->login($session,$request);
         return $this->redirectToRoute('_home_index');
     }
 
@@ -56,7 +55,7 @@ class OneDriveController extends AbstractController
      */
     public function logout(SessionInterface $session, Request $request): Response
     {
-        return $this->redirectToRoute('_home_index',['status' => $this->oneDriveAccount->logout($session,$request)]);
+        return $this->redirectToRoute('_home_index',['status' => $this->oneDriveCore->logout($session,$request)]);
     }
 
     /**

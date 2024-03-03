@@ -3,10 +3,8 @@
 namespace UEMC\Core\Entity;
 
 use DateTime;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use UEMC\Core\Repository\AccountRepository;
-use UEMC\Core\Service\UemcLogger;
 
 #[ORM\Entity(repositoryClass: AccountRepository::class)]
 class Account
@@ -30,6 +28,18 @@ class Account
 
     #[ORM\Column(type: 'datetime', nullable: false)]
     public ?Datetime $last_session = null;
+
+    #[ORM\Column(length: 1000)]
+    public ?string $token = null;
+
+    #[ORM\Column(length: 1000)]
+    public ?string $URL = null;
+
+    #[ORM\Column(type: 'smallint')]
+    public ?int $port = null;
+
+    #[ORM\Column(length: 1000)]
+    public ?string $password = null;
 
     public function getId(): ?int
     {
@@ -104,5 +114,63 @@ class Account
         $this->last_session = $last_session;
     }
 
+    /**
+     * @return string|null
+     */
+    public function getToken(): ?string
+    {
+        return $this->token;
+    }
 
+    /**
+     * @param string|null $token
+     */
+    public function setToken(?string $token): void
+    {
+        $this->token = $token;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getURL(): ?string
+    {
+        return $this->URL;
+    }
+
+    /**
+     * @param string|null $URL
+     */
+    public function setURL(?string $URL): void
+    {
+        $this->URL = $URL;
+    }
+
+    public function getPort(): ?int
+    {
+        return $this->port;
+    }
+
+    public function setPort(int $port): static
+    {
+        $this->port = $port;
+
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getPassword(): ?string
+    {
+        return $this->password;
+    }
+
+    /**
+     * @param string|null $password
+     */
+    public function setPassword(?string $password): void
+    {
+        $this->password = $password;
+    }
 }

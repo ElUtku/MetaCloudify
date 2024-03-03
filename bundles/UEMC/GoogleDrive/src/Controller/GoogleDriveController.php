@@ -7,6 +7,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use UEMC\Core\Entity\Account;
 use UEMC\GoogleDrive\Entity\GoogleDriveAccount;
 use UEMC\GoogleDrive\Service\CloudService as GoogleDriveCore;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -16,7 +17,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 class GoogleDriveController extends AbstractController
 {
 
-    private GoogleDriveAccount $googleDriveAccount;
+    private Account $account;
     private GoogleDriveCore $googleDriveCore;
 
     public function __construct(RequestStack $requestStack)
@@ -27,7 +28,7 @@ class GoogleDriveController extends AbstractController
 
         //$session->remove('googledriveAccounts');
         $this->googleDriveCore=new GoogleDriveCore();
-        $this->googleDriveAccount=new GoogleDriveAccount();
+        $this->account=new Account();
 
         $ruta=$request->attributes->get('_route');
         $accountId = $request->query->get('accountId') ?? $request->request->get('accountId') ?? null;
@@ -35,8 +36,8 @@ class GoogleDriveController extends AbstractController
         $this->googleDriveCore->loggerUEMC->debug('Controller: '.$ruta. ' y el id : '.$accountId);
         if($session->has('googledriveAccounts') and $ruta !== 'googledrive_login' )
         {
-            $this->googleDriveAccount=$this->googleDriveAccount->arrayToObject($session->get('googledriveAccounts')[$accountId]);
-            $filesystem=$this->googleDriveCore->constructFilesystem($this->googleDriveAccount);
+            $this->account=$this->googleDriveCore->arrayToObject($session->get('googledriveAccounts')[$accountId]);
+            $filesystem=$this->googleDriveCore->constructFilesystem($this->account);
             $this->googleDriveCore->setFilesystem($filesystem);
         }
     }
@@ -46,9 +47,18 @@ class GoogleDriveController extends AbstractController
      */
     public function login(SessionInterface $session, Request $request): Response
     {
-        $this->googleDriveAccount->login($session,$request);
+        $this->googleDriveCore->login($session,$request);
         $this->googleDriveCore->loggerUEMC->debug('5');
         return $this->redirectToRoute('_home_index');
+    }
+
+    /**
+     * @Route("/googledrive/logout", name="googledrive_logout")
+     */
+    public function logout(SessionInterface $session, Request $request): Response
+    {
+        return $this->redirectToRoute('_home_index',['status' => $this->googleDriveCore->logout($session,$request)]);
+
     }
 
     /**
@@ -97,14 +107,5 @@ class GoogleDriveController extends AbstractController
     public function upload(Request $request): Response
     {
         return $this->json($this->googleDriveCore->upload($request->get('path'),$request->files->get('content')));
-    }
-
-    /**
-     * @Route("/googledrive/logout", name="googledrive_logout")
-     */
-    public function logout(SessionInterface $session, Request $request): Response
-    {
-        return $this->redirectToRoute('_home_index',['status' => $this->googleDriveAccount->logout($session,$request)]);
-
     }
 }
