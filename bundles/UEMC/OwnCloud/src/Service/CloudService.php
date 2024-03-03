@@ -21,7 +21,7 @@ use UEMC\Core\Service\CloudService as Core;
 class CloudService extends Core
 {
 
-    public function login(SessionInterface $session, Request $request): Account|\Exception
+    public function login(SessionInterface $session, Request $request): Account|\Exception|String
     {
         $account = new Account();
         $account->setPassword($request->get('password'));

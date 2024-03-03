@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use UEMC\Core\Entity\Account;
 
 abstract class CloudService extends UemcLogger
 {
@@ -233,4 +234,8 @@ abstract class CloudService extends UemcLogger
         }
         return "Sesion limpia";
     }
+
+    public abstract function login(SessionInterface $session, Request $request): Account|\Exception|String;
+    public abstract function constructFilesystem(Account $account): Filesystem;
+
 }
