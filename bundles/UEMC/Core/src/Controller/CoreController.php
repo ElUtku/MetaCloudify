@@ -17,7 +17,7 @@ use UEMC\GoogleDrive\Service\CloudService as GoogleDriveCore;
 use UEMC\OneDrive\Service\CloudService as OneDriveCore;
 
 
-class AbstractCoreController extends AbstractController
+class CoreController extends AbstractController
 {
 
     private Account $account;

@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use UEMC\Core\Entity\Account;
+use function PHPUnit\Framework\isEmpty;
 
 abstract class CloudService extends UemcLogger
 {
@@ -240,14 +241,17 @@ abstract class CloudService extends UemcLogger
         $accounts=$session->get('accounts');
 
         $encontrado=false;
-        foreach ($accounts as $acc)
-        {
-            if($acc['openid']==$account->getOpenid() or
-              ($acc['URL']==$account->getURL() and $acc['user']==$account->getUser()))
-                {
-                    $encontrado=true;
-                    break;
-                }
+
+        if(!isEmpty($accounts)){ //Si el array no esta vacio se comprueba
+            foreach ($accounts as $acc)
+            {
+                if($acc['openid']==$account->getOpenid() or
+                  ($acc['URL']==$account->getURL() and $acc['user']==$account->getUser()))
+                    {
+                        $encontrado=true;
+                        break;
+                    }
+            }
         }
 
         if(!$encontrado)
