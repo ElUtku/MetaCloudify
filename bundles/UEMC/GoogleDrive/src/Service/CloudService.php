@@ -15,11 +15,12 @@ use Masbug\Flysystem\GoogleDriveAdapter;
 use Symfony\Component\Yaml\Yaml;
 
 use UEMC\Core\Entity\Account;
+use UEMC\Core\Resources\CloudTypes;
 use UEMC\Core\Service\CloudService as Core;
 
 class CloudService extends Core
 {
-    public function login($session, $request)
+    public function login($session, $request): Account|Exception|string
     {
         $config = Yaml::parseFile(__DIR__.'\..\Resources\config\googledrive.yaml');
 
@@ -60,35 +61,18 @@ class CloudService extends Core
                 $account=$this->arrayToObject($user);
 
                 $account->setLastIp($request->getClientIp());
-
+                $account->setLastSession(new \DateTime);
                 $account->setToken($token);
+                $account->setCloud(CloudTypes::GoogleDrive->value);
 
-                $googledriveAccounts=$session->get('googledriveAccounts');
-                $googledriveAccounts[uniqid()]=get_object_vars($account);
-                $session->set('googledriveAccounts',$googledriveAccounts);
+                $accounts=$session->get('accounts');
+                $accounts[uniqid()]=get_object_vars($account);
+                $session->set('accounts',$accounts);
             } catch (Exception $e) {
                 return($e);
             }
             return $token->getToken();
         }
-    }
-
-    public function logout($session, $request): string
-    {
-        $googleDriveAccounts = $session->get('googledriveAccounts');
-
-        $id = $request->get('accountId');
-        if (array_key_exists($id, $googleDriveAccounts)) {
-            // Eliminar el elemento del array
-            unset($googleDriveAccounts[$id]);
-            if (empty($googleDriveAccounts) || !is_array($googleDriveAccounts)) {
-                // Si está vacío o no es un array, eliminarlo de la sesión
-                $session->remove('googledriveAccounts');
-            }else{
-                $session->set('googledriveAccounts', $googleDriveAccounts);
-            }
-        }
-        return "Sesion limpia";
     }
 
     /**

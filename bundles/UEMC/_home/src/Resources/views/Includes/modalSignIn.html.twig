@@ -7,19 +7,19 @@
             </div>
             <div class="modal-body">
                 <!-- Contenido del modal -->
-                <a class="w-100 py-2 mb-2 btn btn-outline-secondary rounded-3" href="{{ path('ftp_login') }}">
+                <a class="w-100 py-2 mb-2 btn btn-outline-secondary rounded-3" href="{{ path('login', {cloud: 'ftp'}) }}">
                     <i class="bi bi-hdd-rack"></i>
                     FTP
                 </a>
-                <a class="w-100 py-2 mb-2 btn btn-outline-secondary rounded-3" href="{{ path('owncloud_login') }}">
+                <a class="w-100 py-2 mb-2 btn btn-outline-secondary rounded-3" href="{{ path('login', {cloud: 'owncloud'}) }}">
                     <i class="bi bi-clouds"></i>
                     OwnCloud
                 </a>
-                <a class="w-100 py-2 mb-2 btn btn-outline-secondary rounded-3" href="{{ path('googledrive_login') }}">
+                <a class="w-100 py-2 mb-2 btn btn-outline-secondary rounded-3" href="{{ path('login', {cloud: 'googledrive'}) }}">
                     <i class="bi bi-google"></i>
                     Google
                 </a>
-                <a class="w-100 py-2 mb-2 btn btn-outline-secondary rounded-3" href="{{ path('onedrive_login') }}">
+                <a class="w-100 py-2 mb-2 btn btn-outline-secondary rounded-3" href="{{ path('login', {cloud: 'onedrive'}) }}">
                     <i class="bi bi-microsoft"></i>
                     OneDrive
                 </a>

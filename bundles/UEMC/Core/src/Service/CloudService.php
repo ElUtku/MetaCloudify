@@ -6,11 +6,12 @@ use League\Flysystem\FilesystemException;
 use League\Flysystem\Filesystem;
 use League\Flysystem\UnableToCreateDirectory;
 use League\Flysystem\UnableToWriteFile;
-use Sabre\DAV\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
-abstract class CloudService extends UemcLogger
+abstract class CloudService extends UemcLogger implements CloudServiceInterface
 {
     public Filesystem $filesystem;
 
@@ -213,5 +214,23 @@ abstract class CloudService extends UemcLogger
         } catch (FilesystemException $e) {
             return new Response($e->getMessage());
         }
+    }
+
+    public function logout(SessionInterface $session,Request $request): string
+    {
+        $accounts = $session->get('accounts');
+
+        $id = $request->get('accountId');
+        if (array_key_exists($id, $accounts)) {
+            // Eliminar el elemento del array
+            unset($accounts[$id]);
+            if (empty($accounts) || !is_array($accounts)) {
+                // Si está vacío o no es un array, eliminarlo de la sesión
+                $session->remove('accounts');
+            }else{
+                $session->set('accounts', $accounts);
+            }
+        }
+        return "Sesion limpia";
     }
 }

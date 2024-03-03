@@ -6,9 +6,10 @@
     <ul class="list-unstyled ps-0">
 
 
-        {% if app.session.has('googledriveAccounts') %}
-            {% for accountId, account in app.session.get('googledriveAccounts') %}
+        {% if app.session.has('accounts') %}
+            {% for accountId, account in app.session.get('accounts') %}
 
+                {% if account.cloud == 'googledrive' %}
                 <script>
                     storeAccount('{{ accountId }}','{{ account.user }}','googledrive','');
                     $("script:last").remove();
@@ -25,12 +26,8 @@
                         </ul>
                     </div>
                 </li>
-            {% endfor %}
-        {% endif %}
 
-        {% if app.session.has('onedriveAccounts') %}
-            {% for accountId, account in app.session.get('onedriveAccounts') %}
-
+                {% elseif account.cloud=='onedrive' %}
                 <script>
                     storeAccount('{{ accountId }}','{{ account.user }}','onedrive','');
                     $("script:last").remove();
@@ -47,12 +44,8 @@
                         </ul>
                     </div>
                 </li>
-            {% endfor %}
-        {% endif %}
 
-        {% if app.session.has('owncloudAccounts') %}
-            {% for accountId, account in app.session.get('owncloudAccounts') %}
-
+                {% elseif account.cloud=='owncloud' %}
                 <script>
                     storeAccount('{{ accountId }}','{{ account.user }}','owncloud','');
                     $("script:last").remove();
@@ -64,17 +57,13 @@
                     </button>
                     <div class="collapse" id="owncloud{{ accountId }}-collapse">
                         <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-                            <li><a onclick="event.preventDefault();controller='{{ path('owncloud_drive') }}' ;loadData('','{{ accountId }}');" class="btn d-inline-flex align-items-center rounded border-0">Drive</a></li>
+                            <li><a onclick="event.preventDefault();loadData('{{ accountId }}');" class="btn d-inline-flex align-items-center rounded border-0">Drive</a></li>
                             <li><a onclick="logout('{{ accountId }}');" class="btn link-body-emphasis d-inline-flex text-decoration-none rounded">LogOut</a></li>
                         </ul>
                     </div>
                 </li>
-            {% endfor %}
-        {% endif %}
 
-        {% if app.session.has('ftpAccounts') %}
-            {% for accountId, account in app.session.get('ftpAccounts') %}
-
+                {% elseif account.cloud=='ftp' %}
                 <script>
                     storeAccount('{{ accountId }}','{{ account.user }}','ftp','');
                     $("script:last").remove();
@@ -91,16 +80,14 @@
                         </ul>
                     </div>
                 </li>
+                {% endif %}
+
             {% endfor %}
         {% endif %}
 
         <li class="border-top my-3"></li>
         <li class="mb-1">
-            {% if not ( app.session.has('googledriveAccounts') or
-                app.session.has('onedriveAccounts') or
-                app.session.has('owncloudAccounts') or
-                app.session.has('ftpAccounts')   )
-            %}
+            {% if not ( app.session.has('accounts')) %}
                 <p>Por favor, inicia sesión en algún servicio para poder continuar.</p>
             {% endif %}
             <button id="btLogin" class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#modalSignin">Login</button>

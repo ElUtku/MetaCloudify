@@ -10,6 +10,7 @@ use League\Flysystem\Ftp\FtpAdapter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use UEMC\Core\Entity\Account;
+use UEMC\Core\Resources\CloudTypes;
 use UEMC\Core\Service\CloudService as Core;
 
 class CloudService extends Core
@@ -23,29 +24,13 @@ class CloudService extends Core
         $account->setURL($request->get('URL'));
         $account->setPort($request->get('port') ?? 21);
         $account->setLastIp($request->getClientIp());
+        $account->setLastSession(new \DateTime);
+        $account->setCloud(CloudTypes::FTP->value);
 
-        $ftpAccounts = $session->get('ftpAccounts');
-        $ftpAccounts[uniqid()]=get_object_vars($account);
-        $session->set('ftpAccounts',$ftpAccounts);
+        $accounts=$session->get('accounts');
+        $accounts[uniqid()]=get_object_vars($account);
+        $session->set('accounts',$accounts);
         return $account;
-    }
-
-    public function logout(SessionInterface $session, Request $request)
-    {
-        $ftpAccounts = $session->get('ftpAccounts');
-
-        $id = $request->get('accountId');
-        if (array_key_exists($id, $ftpAccounts)) {
-            // Eliminar el elemento del array
-            unset($ftpAccounts[$id]);
-            if (empty($ftpAccounts) || !is_array($ftpAccounts)) {
-                // Si está vacío o no es un array, eliminarlo de la sesión
-                $session->remove('ftpAccounts');
-            }else{
-                $session->set('ftpAccounts', $ftpAccounts);
-            }
-        }
-        return "Sesion limpia";
     }
 
     function arrayToObject($array): Account

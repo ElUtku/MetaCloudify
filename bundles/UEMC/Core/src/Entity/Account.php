@@ -14,6 +14,9 @@ class Account
     #[ORM\Column]
     public ?int $id = null;
 
+    #[ORM\Column(length: 255, nullable: false)]
+    public ?string $cloud = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     public ?string $user = null;
 
@@ -29,22 +32,39 @@ class Account
     #[ORM\Column(type: 'datetime', nullable: false)]
     public ?Datetime $last_session = null;
 
-    #[ORM\Column(length: 1000)]
+    #[ORM\Column(length: 1000, nullable: true)]
     public ?string $token = null;
 
-    #[ORM\Column(length: 1000)]
+    #[ORM\Column(length: 1000, nullable: true)]
     public ?string $URL = null;
 
-    #[ORM\Column(type: 'smallint')]
+    #[ORM\Column(type: 'smallint', nullable: true)]
     public ?int $port = null;
 
-    #[ORM\Column(length: 1000)]
+    #[ORM\Column(length: 1000, nullable: true)]
     public ?string $password = null;
 
     public function getId(): ?int
     {
         return $this->id;
     }
+
+    /**
+     * @return string|null
+     */
+    public function getCloud(): ?string
+    {
+        return $this->cloud;
+    }
+
+    /**
+     * @param string|null $cloud
+     */
+    public function setCloud(?string $cloud): void
+    {
+        $this->cloud = $cloud;
+    }
+
 
     public function getUser(): ?string
     {

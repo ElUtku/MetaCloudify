@@ -12,6 +12,7 @@ use Sabre\DAV\Client;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use UEMC\Core\Entity\Account;
+use UEMC\Core\Resources\CloudTypes;
 use UEMC\Core\Service\CloudService as Core;
 
 
@@ -28,32 +29,17 @@ class CloudService extends Core
         $account->setURL($request->get('URL'));
         $account->setPort($request->get('port') ?? '');
         $account->setLastIp($request->getClientIp());
+        $account->setLastSession(new \DateTime);
+        $account->setCloud(CloudTypes::OwnCloud->value);
 
         try {
-            $owncloudAccounts = $session->get('owncloudAccounts');
-            $owncloudAccounts[uniqid()]=get_object_vars($this);
-            $session->set('owncloudAccounts',$owncloudAccounts);
+            $accounts=$session->get('accounts');
+            $accounts[uniqid()]=get_object_vars($account);
+            $session->set('accounts',$accounts);
             return $account;
         } catch (\Exception $e) {
             return $e;
         }
-    }
-    public function logout(SessionInterface $session, Request $request): string
-    {
-        $owncloudAccounts = $session->get('owncloudAccounts');
-
-        $id = $request->get('accountId');
-        if (array_key_exists($id, $owncloudAccounts)) {
-            // Eliminar el elemento del array
-            unset($owncloudAccounts[$id]);
-            if (empty($owncloudAccounts) || !is_array($owncloudAccounts)) {
-                // Si está vacío o no es un array, eliminarlo de la sesión
-                $session->remove('owncloudAccounts');
-            }else{
-                $session->set('owncloudAccounts', $owncloudAccounts);
-            }
-        }
-        return "Sesion limpia";
     }
 
     function arrayToObject($array): Account
@@ -101,7 +87,7 @@ class CloudService extends Core
         return 'KO';
     }
 
-    public function constructFilesystem(OwnCloudAccount $account): Filesystem
+    public function constructFilesystem(Account $account): Filesystem
     {
         $options = [
             'baseUri' => $account->getURL(),

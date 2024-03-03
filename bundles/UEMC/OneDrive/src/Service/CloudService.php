@@ -14,11 +14,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Yaml\Yaml;
 use UEMC\Core\Entity\Account;
+use UEMC\Core\Resources\CloudTypes;
 use UEMC\Core\Service\CloudService as Core;
 class CloudService extends Core
 {
 
-    public function login(SessionInterface $session,Request $request)
+    public function login(SessionInterface $session,Request $request): Account|Exception|String
     {
         $config = Yaml::parseFile(__DIR__.'\..\Resources\config\onedrive.yaml'); //Configuraicon de la nube
 
@@ -54,11 +55,13 @@ class CloudService extends Core
                 $account=$this->arrayToObject($user);
 
                 $account->setLastIp($request->getClientIp());
+                $account->setLastSession(new \DateTime);
                 $account->setToken($token);
+                $account->setCloud(CloudTypes::OneDrive->value);
 
-                $onedriveAccounts=$session->get('onedriveAccounts');
-                $onedriveAccounts[uniqid()]=get_object_vars($account);
-                $session->set('onedriveAccounts',$onedriveAccounts);
+                $accounts=$session->get('accounts');
+                $accounts[uniqid()]=get_object_vars($account);
+                $session->set('accounts',$accounts);
             } catch (Exception $e) {
                 return($e);
             }
@@ -113,23 +116,7 @@ class CloudService extends Core
         $object->setToken($array['token'] ?? '');
         return $object;
     }
-    public function logout(SessionInterface $session,Request $request): string
-    {
-        $onedriveAccounts = $session->get('onedriveAccounts');
 
-        $id = $request->get('accountId');
-        if (array_key_exists($id, $onedriveAccounts)) {
-            // Eliminar el elemento del array
-            unset($onedriveAccounts[$id]);
-            if (empty($onedriveAccounts) || !is_array($onedriveAccounts)) {
-                // Si está vacío o no es un array, eliminarlo de la sesión
-                $session->remove('onedriveAccounts');
-            }else{
-                $session->set('onedriveAccounts', $onedriveAccounts);
-            }
-        }
-        return "Sesion limpia";
-    }
 
     public function constructFilesystem(Account $account): Filesystem
     {
