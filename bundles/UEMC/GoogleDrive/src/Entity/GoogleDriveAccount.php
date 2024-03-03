@@ -84,7 +84,7 @@ class GoogleDriveAccount extends Account
     {
         $googleDriveAccounts = $session->get('googledriveAccounts');
 
-        $id = $request->get('id');
+        $id = $request->get('accountId');
         if (array_key_exists($id, $googleDriveAccounts)) {
             // Eliminar el elemento del array
             unset($googleDriveAccounts[$id]);

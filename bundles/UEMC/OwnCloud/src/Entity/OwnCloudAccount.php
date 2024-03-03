@@ -16,7 +16,7 @@ class OwnCloudAccount extends Account
     #[ORM\Column(length: 1000)]
     public ?string $URL = null;
 
-    #[ORM\Column(type: Types::SMALLINT)]
+    #[ORM\Column(type: 'smallint')]
     public ?int $port = null;
 
     #[ORM\Column(length: 1000)]
@@ -85,7 +85,7 @@ class OwnCloudAccount extends Account
     {
         $owncloudAccounts = $session->get('owncloudAccounts');
 
-        $id = $request->get('id');
+        $id = $request->get('accountId');
         if (array_key_exists($id, $owncloudAccounts)) {
             // Eliminar el elemento del array
             unset($owncloudAccounts[$id]);

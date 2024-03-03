@@ -2,6 +2,8 @@
 
 namespace UEMC\Core\Entity;
 
+use DateTime;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use UEMC\Core\Repository\AccountRepository;
 use UEMC\Core\Service\UemcLogger;
@@ -26,6 +28,8 @@ class Account
     #[ORM\Column(length: 16, nullable: false)]
     public ?string $last_ip = null;
 
+    #[ORM\Column(type: 'datetime', nullable: false)]
+    public ?Datetime $last_session = null;
 
     public function getId(): ?int
     {
@@ -82,6 +86,22 @@ class Account
     public function setLastIp(?string $last_ip): void
     {
         $this->last_ip = $last_ip;
+    }
+
+    /**
+     * @return DateTime|null
+     */
+    public function getLastSession(): ?DateTime
+    {
+        return $this->last_session;
+    }
+
+    /**
+     * @param DateTime|null $last_session
+     */
+    public function setLastSession(?DateTime $last_session): void
+    {
+        $this->last_session = $last_session;
     }
 
 

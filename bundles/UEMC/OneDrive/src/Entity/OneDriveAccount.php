@@ -132,7 +132,7 @@ class OneDriveAccount extends Account
     {
         $onedriveAccounts = $session->get('onedriveAccounts');
 
-        $id = $request->get('id');
+        $id = $request->get('accountId');
         if (array_key_exists($id, $onedriveAccounts)) {
             // Eliminar el elemento del array
             unset($onedriveAccounts[$id]);

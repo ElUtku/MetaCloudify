@@ -20,7 +20,7 @@ class FtpAccount extends Account
     #[ORM\Column(length: 1000)]
     public ?string $url = null;
 
-    #[ORM\Column(type: Types::SMALLINT, nullable: true)]
+    #[ORM\Column(type:'smallint', nullable: true)]
     private ?int $port = null;
 
     #[ORM\Column(length: 1000, nullable: true)]
@@ -86,7 +86,7 @@ class FtpAccount extends Account
     {
         $ftpAccounts = $session->get('ftpAccounts');
 
-        $id = $request->get('id');
+        $id = $request->get('accountId');
         if (array_key_exists($id, $ftpAccounts)) {
             // Eliminar el elemento del array
             unset($ftpAccounts[$id]);
