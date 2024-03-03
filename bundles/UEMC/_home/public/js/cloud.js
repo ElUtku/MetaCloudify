@@ -321,7 +321,7 @@ function logout(accountId)
             accountId: accountId
         },
         success: function () {
-            // Actualiza dinámicamente el contenido en la página
+            sessionStorage.removeItem('storedAccounts');
             location.reload();
         },
         error: function (xhr, status, error) {
