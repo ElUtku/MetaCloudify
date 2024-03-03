@@ -65,9 +65,8 @@ class CloudService extends Core
                 $account->setToken($token);
                 $account->setCloud(CloudTypes::GoogleDrive->value);
 
-                $accounts=$session->get('accounts');
-                $accounts[uniqid()]=get_object_vars($account);
-                $session->set('accounts',$accounts);
+                $this->setSession($session, $account);
+
             } catch (Exception $e) {
                 return($e);
             }

@@ -24,6 +24,7 @@ class CloudService extends Core
     public function login(SessionInterface $session, Request $request): Account|\Exception|String
     {
         $account = new Account();
+
         $account->setPassword($request->get('password'));
         $account->setUser($request->get('userName'));
         $account->setURL($request->get('URL'));
@@ -33,10 +34,11 @@ class CloudService extends Core
         $account->setCloud(CloudTypes::OwnCloud->value);
 
         try {
-            $accounts=$session->get('accounts');
-            $accounts[uniqid()]=get_object_vars($account);
-            $session->set('accounts',$accounts);
+
+            $this->setSession($session, $account);
+
             return $account;
+
         } catch (\Exception $e) {
             return $e;
         }

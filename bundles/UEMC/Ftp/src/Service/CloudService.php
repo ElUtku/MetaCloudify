@@ -27,9 +27,8 @@ class CloudService extends Core
         $account->setLastSession(new \DateTime);
         $account->setCloud(CloudTypes::FTP->value);
 
-        $accounts=$session->get('accounts');
-        $accounts[uniqid()]=get_object_vars($account);
-        $session->set('accounts',$accounts);
+        $this->setSession($session, $account);
+
         return $account;
     }
 

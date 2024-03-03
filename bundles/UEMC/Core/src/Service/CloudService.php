@@ -235,6 +235,28 @@ abstract class CloudService extends UemcLogger
         return "Sesion limpia";
     }
 
+    public function setSession(SessionInterface $session, Account $account): void
+    {
+        $accounts=$session->get('accounts');
+
+        $encontrado=false;
+        foreach ($accounts as $acc)
+        {
+            if($acc['openid']==$account->getOpenid() or
+              ($acc['URL']==$account->getURL() and $acc['user']==$account->getUser()))
+                {
+                    $encontrado=true;
+                    break;
+                }
+        }
+
+        if(!$encontrado)
+        {
+            $accounts[uniqid()]=get_object_vars($account);
+            $session->set('accounts',$accounts);
+        }
+    }
+
     public abstract function login(SessionInterface $session, Request $request): Account|\Exception|String;
     public abstract function constructFilesystem(Account $account): Filesystem;
 
