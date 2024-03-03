@@ -5,13 +5,12 @@ namespace UEMC\Core\Controller;
 use PHPUnit\Util\Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 use UEMC\Core\Entity\Account;
-use UEMC\Core\Service\CloudServiceInterface;
+use UEMC\Core\Service\CloudService as Core;
 use UEMC\OwnCloud\Service\CloudService as OwnCloudCore;
 use UEMC\Ftp\Service\CloudService as FtpCore;
 use UEMC\GoogleDrive\Service\CloudService as GoogleDriveCore;
@@ -22,46 +21,7 @@ class AbstractCoreController extends AbstractController
 {
 
     private Account $account;
-    private CloudServiceInterface $core;
-
-    /*public function __construct(RequestStack $requestStack)
-    {
-        $request=$requestStack->getCurrentRequest();
-
-        $session=$request->getSession();
-
-
-        $ruta=$request->attributes->get('_route');
-        $accountId = $request->query->get('accountId') ?? $request->request->get('accountId') ?? null;
-        $controller=$session->get('accounts')[$accountId]['controller'] ?? $request->request->get('controller');
-
-        switch ($controller) {
-            case 'onedrive':
-                $this->core=new OneDriveCore();
-                break;
-            case 'googledrive':
-                $this->core=new GoogleDriveCore();
-                break;
-            case 'owncloud':
-                $this->core=new OwnCloudCore();
-                break;
-            case 'ftp':
-                $this->core=new FtpCore();
-                break;
-            default:
-                throw new Exception('Error de controlador');
-        }
-
-        $this->core->loggerUEMC->debug('Controller: '.$ruta. ' y el accountId : '.$accountId);
-
-        $this->account=new Account();
-        if($session->has('accounts') and $ruta !== '{cloud}_login' )
-        {
-            $this->account=$this->core->arrayToObject($session->get('accounts')[$accountId]);
-            $filesystem=$this->core->constructFilesystem($this->account);
-            $this->core->setFilesystem($filesystem);
-        }
-    }*/
+    private Core $core;
 
     private function createContext(string $cloud): void
     {

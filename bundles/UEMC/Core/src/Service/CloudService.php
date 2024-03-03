@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
-abstract class CloudService extends UemcLogger implements CloudServiceInterface
+abstract class CloudService extends UemcLogger
 {
     public Filesystem $filesystem;
 
