@@ -65,7 +65,11 @@ class GoogleDriveAccount extends Account
                 ]);
                 $user=$provider->getResourceOwner($token)->toArray();
                 $account=$this->arrayToObject($user);
+
+                $account->setLastIp($request->getClientIp());
+
                 $account->setToken($token);
+
                 $googledriveAccounts=$session->get('googledriveAccounts');
                 $googledriveAccounts[uniqid()]=get_object_vars($account);
                 $session->set('googledriveAccounts',$googledriveAccounts);

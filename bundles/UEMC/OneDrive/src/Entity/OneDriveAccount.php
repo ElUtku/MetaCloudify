@@ -66,7 +66,11 @@ class OneDriveAccount extends Account
                 ]);
                 $user=$this->getUserInfo($token);
                 $account=$this->arrayToObject($user);
+
+                $account->setLastIp($request->getClientIp());
+
                 $account->setToken($token);
+
                 $onedriveAccounts=$session->get('onedriveAccounts');
                 $onedriveAccounts[uniqid()]=get_object_vars($account);
                 $session->set('onedriveAccounts',$onedriveAccounts);

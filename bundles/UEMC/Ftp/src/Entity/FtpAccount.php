@@ -74,6 +74,7 @@ class FtpAccount extends Account
         $this->setUser($request->get('userName'));
         $this->setURL($request->get('URL'));
         $this->setPort($request->get('port') ?? 21);
+        $this->setLastIp($request->getClientIp());
 
         $ftpAccounts = $session->get('ftpAccounts');
         $ftpAccounts[uniqid()]=get_object_vars($this);

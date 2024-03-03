@@ -23,6 +23,10 @@ class Account
     #[ORM\Column(length: 255, nullable: true)]
     public ?string $openid = null;
 
+    #[ORM\Column(length: 16, nullable: false)]
+    public ?string $last_ip = null;
+
+
     public function getId(): ?int
     {
         return $this->id;
@@ -63,4 +67,22 @@ class Account
 
         return $this;
     }
+
+    /**
+     * @return string|null
+     */
+    public function getLastIp(): ?string
+    {
+        return $this->last_ip;
+    }
+
+    /**
+     * @param string|null $last_ip
+     */
+    public function setLastIp(?string $last_ip): void
+    {
+        $this->last_ip = $last_ip;
+    }
+
+
 }
