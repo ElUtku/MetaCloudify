@@ -10,8 +10,10 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use UEMC\Core\Entity\Account;
 use function PHPUnit\Framework\isEmpty;
+
+use UEMC\Core\Resources\ErrorTypes;
+use UEMC\Core\Entity\Account;
 
 abstract class CloudService extends UemcLogger
 {
@@ -33,16 +35,15 @@ abstract class CloudService extends UemcLogger
         $this->filesystem = $filesystem;
     }
 
+
     /**
+     *  Devuelve todos los elementos que se encuentren en la ruta seleccionada.
      *
-     * Devuelve todos los elementos que se encuentren en la ruta seleccionada.
-     *
-     * @param Filesystem $filesystem
-     * @param $path
-     *
-     * @return array|string
+     * @param String $path
+     * @return array
+     * @throws CloudException
      */
-    public function listDirectory(String $path)
+    public function listDirectory(String $path): array
     {
 
         $filesystem=$this->getFilesystem();
@@ -56,58 +57,52 @@ abstract class CloudService extends UemcLogger
             return $contenido;
 
         } catch (FilesystemException $e) {
-            return $e->getMessage();
+            throw new CloudException(ErrorTypes::ERROR_LIST_CONTENT->getErrorMessage().' - '.$e->getMessage(),
+                                    ErrorTypes::ERROR_LIST_CONTENT->getErrorCode());
         }
     }
 
+
     /**
+     *  Crea un directorio.
      *
-     * Crea un directorio.
-     *
-     * @param Filesystem $filesystem
-     * @param $path
-     * @param $name
-     *
-     * @return \Exception|FilesystemException|UnableToCreateDirectory|string
+     * @param String $path
+     * @param String $name
+     * @return void
+     * @throws CloudException
      */
-    public function createDir(String $path, String $name)
+    public function createDir(String $path, String $name): void
     {
         $newPath = $path. '/'. $name;
-
-        $this->loggerUEMC->info("Creating Directory " . $newPath);
 
         $filesystem=$this->getFilesystem();
 
         try {
             if($filesystem->directoryExists($newPath))
             {
-                $message ='El directorio ya existe y por tanto NO ';
+                throw new CloudException(ErrorTypes::DIRECTORY_YA_EXISTE->getErrorMessage(),
+                    ErrorTypes::DIRECTORY_YA_EXISTE->getErrorCode());
             }else{
-                $message ='El directorio no existe y ';
                 $filesystem->createDirectory($newPath);
             }
-        } catch (FilesystemException | UnableToCreateDirectory $exception) {
-            return $exception;
+        } catch (FilesystemException | UnableToCreateDirectory $e) {
+            throw new CloudException(ErrorTypes::ERROR_CREAR_DIRECTORIO->getErrorMessage().' - '.$e->getMessage(),
+                ErrorTypes::ERROR_CREAR_DIRECTORIO->getErrorCode());
         }
-        return $message.'Directorio creado';
     }
 
+
     /**
+     *  Crea un fichero de cualquier tipo.
      *
-     * Crea un fichero de cualquier tipo.
-     * NOTE: Webdav requiere de extension.
-     *
-     * @param Filesystem $filesystem
-     * @param $path
-     * @param $name
-     *
-     * @return \Exception|FilesystemException|UnableToCreateDirectory|string
+     * @param String $path
+     * @param String $name
+     * @return void
+     * @throws CloudException
      */
-    public function createFile(String $path, String $name)
+    public function createFile(String $path, String $name): void
     {
         $newPath = '/'.$path. '/'. $name;
-
-        $this->loggerUEMC->info("Creating File ".$newPath);
 
         $filesystem=$this->getFilesystem();
 
@@ -116,30 +111,30 @@ abstract class CloudService extends UemcLogger
             {
                 if($filesystem->directoryExists($newPath))
                 {
-                    return  "El fichero ya existe";
+                    throw new CloudException(ErrorTypes::FICHERO_YA_EXISTE->getErrorMessage(),
+                        ErrorTypes::FICHERO_YA_EXISTE->getErrorCode());
                 } else{
                     $filesystem->write($newPath,"");
-                    return  "Fichero creado";
                 }
             }else{
-                $message ='El directorio no existe ';
-                return $message.' | Fichero NO creado';
+                throw new CloudException(ErrorTypes::DIRECTORIO_NO_EXISTE->getErrorMessage(),
+                    ErrorTypes::DIRECTORIO_NO_EXISTE->getErrorCode());
             }
-        } catch (FilesystemException | UnableToCreateDirectory $exception) {
-            return $exception;
+        } catch (FilesystemException | UnableToCreateDirectory $e) {
+            throw new CloudException(ErrorTypes::ERROR_CREAR_FICHERO->getErrorMessage().' - '.$e->getMessage(),
+                ErrorTypes::ERROR_CREAR_FICHERO->getErrorCode());
         }
     }
 
+
     /**
+     *  Elimina ficheros y directorios.
      *
-     * Elimina ficheros y directorios.
-     *
-     * @param Filesystem $filesystem
-     * @param $path
-     *
-     * @return \Exception|FilesystemException|UnableToWriteFile|string
+     * @param String $path
+     * @return void
+     * @throws CloudException
      */
-    public function delete(String $path)
+    public function delete(String $path): void
     {
         $this->loggerUEMC->info("Deleting " . $path);
 
@@ -147,23 +142,22 @@ abstract class CloudService extends UemcLogger
 
         try {
             $filesystem->delete($path);
-        } catch (FilesystemException | UnableToWriteFile $exception) {
-            return $exception;
+        } catch (FilesystemException | UnableToWriteFile $e) {
+            throw new CloudException(ErrorTypes::ERROR_BORRAR->getErrorMessage().' - '.$e->getMessage(),
+                ErrorTypes::ERROR_BORRAR->getErrorCode());
         }
-        return 'Fichero eliminado';
     }
 
+
     /**
+     *  Permite subir archivos de uno en uno.
      *
-     * Permite subir archivos de uno en uno.
-     *
-     * @param Filesystem $filesystem
-     * @param $path
+     * @param String $path
      * @param UploadedFile $content
-     *
-     * @return string
+     * @return void
+     * @throws CloudException
      */
-    public function upload(String $path, UploadedFile $content)
+    public function upload(String $path, UploadedFile $content): void
     {
         $this->loggerUEMC->info("Uploading ".$content->getPathname());
 
@@ -174,27 +168,26 @@ abstract class CloudService extends UemcLogger
         if ($stream) {
             try {
                 $filesystem->writeStream($path . "\\" . $content->getClientOriginalName(), $stream);
-                return 'OK';
-            } catch (FilesystemException | UnableToWriteFile $exception) {
+            } catch (FilesystemException | UnableToWriteFile $e) {
                 fclose($stream); // Asegurarse de cerrar el recurso en caso de excepción
-                return $exception->getMessage();
+                throw new CloudException(ErrorTypes::ERROR_UPLOAD->getErrorMessage().' - '.$e->getMessage(),
+                    ErrorTypes::ERROR_UPLOAD->getErrorCode());
             }
         } else {
-            return 'Error al abrir el recurso de transmisión.';
+            throw new CloudException(ErrorTypes::BAD_CONTENT->getErrorMessage(),
+                ErrorTypes::BAD_CONTENT->getErrorCode());
         }
     }
 
     /**
+     *  Descarga culaquier tipo de archivos.
      *
-     * Descarga culaquier tipo de archivos.
-     *
-     * @param Filesystem $filesystem
-     * @param $path
-     * @param $name
-     *
-     * @return string|Response
+     * @param String $path
+     * @param String $name
+     * @return Response
+     * @throws CloudException
      */
-    public function download(String $path, String $name): string|Response
+    public function download(String $path, String $name): Response
     {
 
         $filesystem=$this->getFilesystem();
@@ -213,55 +206,88 @@ abstract class CloudService extends UemcLogger
             $response->headers->set('Content-Disposition', 'attachment; filename="' . $name .'"');
 
             return $response;
-        } catch (FilesystemException $e) {
-            return new Response($e->getMessage());
+        } catch (FilesystemException | \Exception $e) {
+            throw new CloudException(ErrorTypes::ERROR_DESCARGA->getErrorMessage().' - '.$e->getMessage(),
+                ErrorTypes::ERROR_DESCARGA->getErrorCode());
         }
     }
 
-    public function logout(SessionInterface $session,Request $request): string
+    /**
+     * @param SessionInterface $session
+     * @param Request $request
+     * @return void
+     * @throws CloudException
+     */
+    public function logout(SessionInterface $session, Request $request): void
     {
-        $accounts = $session->get('accounts');
+        try {
+            $accounts = $session->get('accounts');
 
-        $id = $request->get('accountId');
-        if (array_key_exists($id, $accounts)) {
-            // Eliminar el elemento del array
-            unset($accounts[$id]);
-            if (empty($accounts) || !is_array($accounts)) {
-                // Si está vacío o no es un array, eliminarlo de la sesión
-                $session->remove('accounts');
-            }else{
-                $session->set('accounts', $accounts);
+            $id = $request->get('accountId');
+            if (array_key_exists($id, $accounts)) {
+                // Eliminar el elemento del array
+                unset($accounts[$id]);
+                if (empty($accounts) || !is_array($accounts)) {
+                    // Si está vacío o no es un array, eliminarlo de la sesión
+                    $session->remove('accounts');
+                }else{
+                    $session->set('accounts', $accounts);
+                }
             }
+        }catch (\Exception $e){
+            throw new CloudException(ErrorTypes::ERROR_LOGOUT->getErrorMessage().' - '.$e->getMessage(),
+                ErrorTypes::ERROR_LOGOUT->getErrorCode());
         }
-        return "Sesion limpia";
     }
 
+    /**
+     * @param SessionInterface $session
+     * @param Account $account
+     * @return void
+     * @throws CloudException
+     */
     public function setSession(SessionInterface $session, Account $account): void
     {
         $accounts=$session->get('accounts');
 
-        $encontrado=false;
-
-        if(!isEmpty($accounts)){ //Si el array no esta vacio se comprueba
-            foreach ($accounts as $acc)
-            {
-                if($acc['openid']==$account->getOpenid() or
-                  ($acc['URL']==$account->getURL() and $acc['user']==$account->getUser()))
+        try{
+            $encontrado=false;
+            if(!isEmpty($accounts)){ //Si el array no esta vacio se comprueba
+                foreach ($accounts as $acc)
+                {
+                    if($acc['openid']==$account->getOpenid() or
+                        ($acc['URL']==$account->getURL() and $acc['user']==$account->getUser()))
                     {
                         $encontrado=true;
                         break;
                     }
+                }
             }
-        }
 
-        if(!$encontrado)
-        {
-            $accounts[uniqid()]=get_object_vars($account);
-            $session->set('accounts',$accounts);
+            if(!$encontrado)
+            {
+                $accounts[uniqid()]=get_object_vars($account);
+                $session->set('accounts',$accounts);
+            }
+        }catch (\Exception $e){
+            throw new CloudException(ErrorTypes::ERROR_SAVE_SESSION->getErrorMessage().' - '.$e->getMessage(),
+                ErrorTypes::ERROR_SAVE_SESSION->getErrorCode());
         }
     }
 
-    public abstract function login(SessionInterface $session, Request $request): Account|\Exception|String;
+    /**
+     * @param SessionInterface $session
+     * @param Request $request
+     * @return Account
+     * @throws CloudException
+     */
+    public abstract function login(SessionInterface $session, Request $request): Account;
+
+    /**
+     * @param Account $account
+     * @return Filesystem
+     * @throws CloudException
+     */
     public abstract function constructFilesystem(Account $account): Filesystem;
 
 }

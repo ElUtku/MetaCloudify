@@ -12,15 +12,26 @@ use League\Flysystem\Filesystem;
 use League\Flysystem\Visibility;
 use League\OAuth2\Client\Provider\Google;
 use Masbug\Flysystem\GoogleDriveAdapter;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Yaml\Yaml;
 
 use UEMC\Core\Entity\Account;
 use UEMC\Core\Resources\CloudTypes;
+use UEMC\Core\Resources\ErrorTypes;
 use UEMC\Core\Service\CloudService as Core;
+use UEMC\Core\Service\CloudException;
 
 class CloudService extends Core
 {
-    public function login($session, $request): Account|Exception|string
+
+    /**
+     * @param SessionInterface $session
+     * @param Request $request
+     * @return Account
+     * @throws CloudException
+     */
+    public function login(SessionInterface $session, Request $request): Account
     {
         $config = Yaml::parseFile(__DIR__.'\..\Resources\config\googledrive.yaml');
 
@@ -29,35 +40,36 @@ class CloudService extends Core
             'clientSecret' => $config['clientSecret'],
             'redirectUri'  => $config['redirectUri']
         ]);
+        $options = [ 'scope' => $config['scopes'] ];
 
-        if (!empty($request->get('error'))) {
+        $code=$request->get('code');
+        $state=$request->get('state');
+        $oauth2state=$session->get('oauth2state');
 
-            exit('Got error: ' . htmlspecialchars($request->get('error'), ENT_QUOTES, 'UTF-8'));
+        if (empty($code)) { // Se obtiene el codigo de autorizacion si no lo tenemos.
 
-        } elseif (empty($request->get('code'))) {
-
-            $authUrl = $provider->getAuthorizationUrl([
-                'scope' => $config['scopes'],
-            ]);
-            $googleSesion['oauth2state']=$provider->getState();
-            $session->set('googleSession',$googleSesion);
-            header('Location: ' . $authUrl);
+            $authUrl = $provider->getAuthorizationUrl($options);
+            $oauth2state=$provider->getState();
+            $session->set('oauth2state',$oauth2state);
+            header('Location: '.$authUrl);
             exit();
 
-        } elseif (empty($request->get('state')) || ($request->get('state') !== $session->get('googleSession')['oauth2state'])) {
-            // Situacion de ataque CSRF
-            $session->remove('googleSession');
-            return ('Invalid state');
+        } elseif (empty($state) || ($state !== $oauth2state)) { // Si el codigo de estado esta vacio o coincide es
+                                                                // porque ha sido modificado.
+                                                                // Por seguridad borramos la sesion.
+            $session->remove('oauth2state');
+            throw new CloudException(ErrorTypes::ERROR_STATE_OAUTH2->getErrorMessage(), ErrorTypes::ERROR_STATE_OAUTH2->getErrorCode());
 
-        } else {
+        } else { //Si el codigo es correcto solicitamos un token de acceso y gurdamos la cuenta en la sesion
             try {
 
-                $session->remove('googleSession');
+                $session->remove('oauth2state');
 
                 $token = $provider->getAccessToken('authorization_code', [
                     'code' => $request->get('code')
                 ]);
-                $user=$provider->getResourceOwner($token)->toArray();
+
+                $user=$provider->getResourceOwner($token)->toArray(); //Se obtiene el usuario y se transforma en objeto
                 $account=$this->arrayToObject($user);
 
                 $account->setLastIp($request->getClientIp());
@@ -68,9 +80,10 @@ class CloudService extends Core
                 $this->setSession($session, $account);
 
             } catch (Exception $e) {
-                return($e);
+                throw new CloudException(ErrorTypes::ERROR_INICIO_SESION->getErrorMessage().' - '.$e->getMessage(),
+                                        ErrorTypes::ERROR_INICIO_SESION->getErrorCode());
             }
-            return $token->getToken();
+            return $account;
         }
     }
 
@@ -80,33 +93,51 @@ class CloudService extends Core
      * @param $array | Array con los parametros de la cuenta (Existen dos verisones, si se invoca desde getUserInfo los
      *                 parametros tienen un nombre y si se invoca desde sesion, tienen otro.)
      * @return Account
+     * @throws CloudException
      */
     function arrayToObject($array): Account
     {
-        $account = new Account();
-        $account->setUser($array['name'] ?? $array['user']);
-        $account->setEmail($array['email']);
-        $account->setOpenid($array['sub'] ?? $array['openid']);
-        $account->setToken($array['token'] ?? '');
-        return $account;
+        try {
+            $account = new Account();
+            $account->setUser($array['name'] ?? $array['user']);
+            $account->setEmail($array['email']);
+            $account->setOpenid($array['sub'] ?? $array['openid']);
+            $account->setToken($array['token'] ?? '');
+            return $account;
+        } catch (Exception $e)
+        {
+            throw new CloudException(ErrorTypes::ERROR_CONSTRUIR_OBJETO->getErrorMessage().' - '.$e->getMessage(),
+                                    ErrorTypes::ERROR_CONSTRUIR_OBJETO->getErrorCode());
+        }
+
     }
+
+    /**
+     * @param Account $account
+     * @return Filesystem
+     * @throws CloudException
+     **/
     public function constructFilesystem(Account $account): Filesystem
     {
-        $config = Yaml::parseFile(__DIR__.'\..\Resources\config\googledrive.yaml');
+        try {
+            $config = Yaml::parseFile(__DIR__.'\..\Resources\config\googledrive.yaml');
 
-        $client = new Google_Client();
-        $client->setClientId($config['clientId']);
-        $client->setClientSecret($config['clientSecret']);
-        $client->setAccessToken($account->getToken());
+            $client = new Google_Client();
+            $client->setClientId($config['clientId']);
+            $client->setClientSecret($config['clientSecret']);
+            $client->setAccessToken($account->getToken());
 
-        $service = new Drive($client);
+            $service = new Drive($client);
 
-        $adapter = new GoogleDriveAdapter($service,  '');
+            $adapter = new GoogleDriveAdapter($service,  '');
 
-        $filesystem = new Filesystem($adapter, [
-            new Config([Config::OPTION_VISIBILITY => Visibility::PRIVATE])
-        ]);
-
-        return $filesystem;
+            return new Filesystem($adapter, [
+                new Config([Config::OPTION_VISIBILITY => Visibility::PRIVATE])
+            ]);
+        }
+        catch (Exception)
+        {
+            throw new CloudException(ErrorTypes::ERROR_CONSTRUIR_FILESYSTEM->getErrorMessage(), ErrorTypes::ERROR_CONSTRUIR_FILESYSTEM->getErrorCode());
+        }
     }
 }

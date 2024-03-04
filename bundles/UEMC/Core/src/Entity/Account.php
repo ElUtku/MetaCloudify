@@ -44,6 +44,9 @@ class Account
     #[ORM\Column(length: 1000, nullable: true)]
     public ?string $password = null;
 
+    /**
+     * @return int|null
+     */
     public function getId(): ?int
     {
         return $this->id;
@@ -66,11 +69,18 @@ class Account
     }
 
 
+    /**
+     * @return string|null
+     */
     public function getUser(): ?string
     {
         return $this->user;
     }
 
+    /**
+     * @param string|null $user
+     * @return $this
+     */
     public function setUser(?string $user): static
     {
         $this->user = $user;
@@ -78,11 +88,18 @@ class Account
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
     public function getEmail(): ?string
     {
         return $this->email;
     }
 
+    /**
+     * @param string|null $email
+     * @return $this
+     */
     public function setEmail(?string $email): static
     {
         $this->email = $email;
@@ -90,11 +107,18 @@ class Account
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
     public function getOpenid(): ?string
     {
         return $this->openid;
     }
 
+    /**
+     * @param string|null $openid
+     * @return $this
+     */
     public function setOpenid(?string $openid): static
     {
         $this->openid = $openid;
@@ -166,11 +190,18 @@ class Account
         $this->URL = $URL;
     }
 
+    /**
+     * @return int|null
+     */
     public function getPort(): ?int
     {
         return $this->port;
     }
 
+    /**
+     * @param int $port
+     * @return $this
+     */
     public function setPort(int $port): static
     {
         $this->port = $port;

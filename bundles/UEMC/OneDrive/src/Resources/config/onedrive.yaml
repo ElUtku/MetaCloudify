@@ -4,7 +4,7 @@ redirectUri: 'http://localhost/cloudBundles5.4/public/index.php/onedrive/login'
 urlAuthorize: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize'
 urlAccessToken: 'https://login.microsoftonline.com/common/oauth2/v2.0/token'
 urlResourceOwnerDetails: 'https://outlook.office.com/api/v2.0/me'
-scope:
+scopes:
   - 'User.Read'
   - 'openid'
   - 'Files.ReadWrite.All'

@@ -8,8 +8,14 @@ use Psr\Log\LoggerInterface;
 
 class UemcLogger
 {
+    /**
+     * @var LoggerInterface
+     */
     public LoggerInterface $loggerUEMC;
 
+    /**
+     *
+     */
     public function __construct()
     {
         $this->loggerUEMC = new Logger("uemc");

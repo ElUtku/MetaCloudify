@@ -2,14 +2,16 @@
 
 namespace UEMC\Core\Controller;
 
-use PHPUnit\Util\Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 use UEMC\Core\Entity\Account;
+use UEMC\Core\Resources\ErrorTypes;
+use UEMC\Core\Service\CloudException;
 use UEMC\Core\Service\CloudService as Core;
 use UEMC\OwnCloud\Service\CloudService as OwnCloudCore;
 use UEMC\Ftp\Service\CloudService as FtpCore;
@@ -23,27 +25,36 @@ class CoreController extends AbstractController
     private Account $account;
     private Core $core;
 
+    /**
+     *
+     * Se escoge un tipo de core.
+     *
+     * @param string $cloud
+     * @return void
+     * @throws CloudException
+     */
     private function createContext(string $cloud): void
     {
-        switch ($cloud) {
-            case 'onedrive':
-                $this->core=new OneDriveCore();
-                break;
-            case 'googledrive':
-                $this->core=new GoogleDriveCore();
-                break;
-            case 'owncloud':
-                $this->core=new OwnCloudCore();
-                break;
-            case 'ftp':
-                $this->core=new FtpCore();
-                break;
-            default:
-                throw new Exception('Error de controlador');
-        }
+        $this->core = match ($cloud) {
+            'onedrive' => new OneDriveCore(),
+            'googledrive' => new GoogleDriveCore(),
+            'owncloud' => new OwnCloudCore(),
+            'ftp' => new FtpCore(),
+            default => throw new CloudException(ErrorTypes::ERROR_CONTROLLER->getErrorMessage(),
+                                                ErrorTypes::ERROR_CONTROLLER->getErrorCode()),
+        };
         $this->account=new Account();
     }
 
+    /**
+     *
+     * Se recupera el filesystem si ya existe en sesión
+     *
+     * @param SessionInterface $session
+     * @param Request $request
+     * @return void
+     * @throws CloudException
+     */
     private function retriveCore(SessionInterface $session, Request $request): void
     {
         $ruta=$request->attributes->get('_route');
@@ -62,12 +73,16 @@ class CoreController extends AbstractController
      */
     public function login(SessionInterface $session, Request $request, string $cloud): Response
     {
+        try {
+            $this->createContext($cloud);
+            $this->retriveCore($session,$request);
 
-        $this->createContext($cloud);
-        $this->retriveCore($session,$request);
-
-        $this->core->login($session,$request);
-        return $this->redirectToRoute('_home_index');
+            $this->core->login($session,$request);
+            return $this->redirectToRoute('_home_index');
+        }catch (CloudException $e)
+        {
+            return new JsonResponse($e->getCode(), $e->getMessage());
+        }
     }
 
     /**
@@ -75,10 +90,15 @@ class CoreController extends AbstractController
      */
     public function logout(SessionInterface $session, Request $request, string $cloud): Response
     {
-        $this->createContext($cloud);
-        $this->retriveCore($session,$request);
-
-        return $this->redirectToRoute('_home_index',['status' => $this->core->logout($session,$request)]);
+        try {
+            $this->createContext($cloud);
+            $this->retriveCore($session,$request);
+            $this->core->logout($session,$request);
+            return new JsonResponse();
+        }catch (CloudException $e)
+        {
+            return new JsonResponse($e->getCode(), $e->getMessage());
+        }
     }
 
     /**
@@ -86,10 +106,16 @@ class CoreController extends AbstractController
      */
     public function drive(SessionInterface $session, Request $request, string $cloud): Response
     {
-        $this->createContext($cloud);
-        $this->retriveCore($session,$request);
+        try {
+            $this->createContext($cloud);
+            $this->retriveCore($session,$request);
 
-        return $this->json($this->core->listDirectory($request->get('path')));
+            return new JsonResponse($this->core->listDirectory($request->get('path')));
+        }catch (CloudException $e)
+        {
+            return new JsonResponse($e->getCode(), $e->getMessage());
+        }
+
     }
 
     /**
@@ -97,10 +123,15 @@ class CoreController extends AbstractController
      */
     public function download(SessionInterface $session, Request $request, string $cloud): Response
     {
-        $this->createContext($cloud);
-        $this->retriveCore($session,$request);
+        try {
+            $this->createContext($cloud);
+            $this->retriveCore($session,$request);
 
-        return $this->core->download($request->get('path'),$request->get('name'));
+            return $this->core->download($request->get('path'),$request->get('name'));
+        }catch (CloudException $e)
+        {
+            return new JsonResponse($e->getCode(), $e->getMessage());
+        }
     }
 
     /**
@@ -108,10 +139,15 @@ class CoreController extends AbstractController
      */
     public function createDir(SessionInterface $session, Request $request, string $cloud): Response
     {
-        $this->createContext($cloud);
-        $this->retriveCore($session,$request);
-
-        return $this->json($this->core->createDir($request->get('path'),$request->get('name')));
+        try {
+            $this->createContext($cloud);
+            $this->retriveCore($session,$request);
+            $this->core->createDir($request->get('path'),$request->get('name'));
+            return new JsonResponse();
+        }catch (CloudException $e)
+        {
+            return new JsonResponse($e->getCode(), $e->getMessage());
+        }
     }
 
     /**
@@ -119,10 +155,15 @@ class CoreController extends AbstractController
      */
     public function createFile(SessionInterface $session, Request $request, string $cloud): Response
     {
-        $this->createContext($cloud);
-        $this->retriveCore($session,$request);
-
-        return $this->json($this->core->createFile($request->get('path'),$request->get('name')));
+        try{
+            $this->createContext($cloud);
+            $this->retriveCore($session,$request);
+            $this->core->createFile($request->get('path'),$request->get('name'));
+            return new JsonResponse();
+        }catch (CloudException $e)
+        {
+        return new JsonResponse($e->getCode(), $e->getMessage());
+        }
     }
 
     /**
@@ -130,10 +171,15 @@ class CoreController extends AbstractController
      */
     public function delete(SessionInterface $session, Request $request, string $cloud): Response
     {
-        $this->createContext($cloud);
-        $this->retriveCore($session,$request);
-
-        return $this->json($this->core->delete($request->get('path')));
+        try {
+            $this->createContext($cloud);
+            $this->retriveCore($session,$request);
+            $this->core->delete($request->get('path'));
+            return new JsonResponse();
+        }catch (CloudException $e)
+        {
+            return new JsonResponse($e->getCode(), $e->getMessage());
+        }
     }
 
     /**
@@ -141,9 +187,14 @@ class CoreController extends AbstractController
      */
     public function upload(SessionInterface $session, Request $request, string $cloud): Response
     {
-        $this->createContext($cloud);
-        $this->retriveCore($session,$request);
-
-        return $this->json($this->core->upload($request->get('path'),$request->files->get('content')));
+        try {
+            $this->createContext($cloud);
+            $this->retriveCore($session,$request);
+            $this->core->upload($request->get('path'),$request->files->get('content'));
+            return new JsonResponse();
+        }catch (CloudException $e)
+        {
+            return new JsonResponse($e->getCode(), $e->getMessage());
+        }
     }
 }
