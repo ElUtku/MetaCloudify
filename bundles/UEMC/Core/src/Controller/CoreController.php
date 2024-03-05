@@ -17,6 +17,7 @@ use UEMC\OwnCloud\Service\CloudService as OwnCloudCore;
 use UEMC\Ftp\Service\CloudService as FtpCore;
 use UEMC\GoogleDrive\Service\CloudService as GoogleDriveCore;
 use UEMC\OneDrive\Service\CloudService as OneDriveCore;
+use function PHPUnit\Framework\isEmpty;
 
 
 class CoreController extends AbstractController
@@ -60,7 +61,7 @@ class CoreController extends AbstractController
         $ruta=$request->attributes->get('_route');
         $accountId = $request->query->get('accountId') ?? $request->request->get('accountId') ?? null;
 
-        if($session->has('accounts') and $ruta !== 'login' )
+        if($session->has('accounts') and $ruta !== 'login' and $ruta !== 'login_token' and $ruta !== 'loginWeb' )
         {
             $this->account = $this->core->arrayToObject($session->get('accounts')[$accountId]);
             $filesystem = $this->core->constructFilesystem($this->account);
@@ -76,9 +77,42 @@ class CoreController extends AbstractController
         try {
             $this->createContext($cloud);
             $this->retriveCore($session,$request);
-
             $this->core->login($session,$request);
+
             return $this->redirectToRoute('_home_index');
+        }catch (CloudException $e)
+        {
+            return new JsonResponse($e->getCode(), $e->getMessage());
+        }
+    }
+
+    /**
+     * @Route("/{cloud}/login/web", name="login_web")
+     * @param SessionInterface $session
+     * @param Request $request
+     * @param string $cloud
+     * @return Response
+     */
+    public function loginWeb(SessionInterface $session, Request $request, string $cloud) : Response
+    {
+        return match ($cloud) {
+            'owncloud' => $this->render('@UEMCOwnCloudBundle/login.html.twig'),
+            'ftp' => $this->render('@UEMCFtpBundle/login.html.twig'),
+            default => new JsonResponse(ErrorTypes::ERROR_INDETERMINADO->getErrorMessage(),
+                ErrorTypes::ERROR_INDETERMINADO->getErrorCode()),
+        };
+    }
+
+    /**
+     * @Route("/{cloud}/login/token", name="login_token", methods={"POST"})
+     */
+    public function loginPost(SessionInterface $session, Request $request, string $cloud): Response
+    {
+        try {
+            $this->createContext($cloud);
+            $this->retriveCore($session,$request);
+            $accountId=$this->core->loginPost($session,$request);
+            return new JsonResponse('El identificador es ' .$accountId);
         }catch (CloudException $e)
         {
             return new JsonResponse($e->getCode(), $e->getMessage());

@@ -24,10 +24,10 @@ class CloudService extends Core
     /**
      * @param SessionInterface $session
      * @param Request $request
-     * @return Account
+     * @return string
      * @throws CloudException
      */
-    public function login(SessionInterface $session,Request $request): Account
+    public function login(SessionInterface $session,Request $request): string
     {
         $config = Yaml::parseFile(__DIR__.'\..\Resources\config\onedrive.yaml'); //Configuraicon de la nube
 
@@ -75,17 +75,41 @@ class CloudService extends Core
                 $account->setLastSession(new \DateTime);
                 $account->setToken($token);
                 $account->setCloud(CloudTypes::OneDrive->value);
-
-                $this->setSession($session, $account);
+                return $this->setSession($session, $account);
 
             } catch (Exception $e) {
-                throw new CloudException(ErrorTypes::ERROR_INICIO_SESION->getErrorMessage(), ErrorTypes::ERROR_INICIO_SESION->getErrorCode());
+                throw new CloudException(ErrorTypes::ERROR_INICIO_SESION->getErrorMessage().' - '.$e->getMessage(), ErrorTypes::ERROR_INICIO_SESION->getErrorCode());
             }
-            return $account;
         }
     }
 
+    /**
+     * @param SessionInterface $session
+     * @param Request $request
+     * @return string
+     * @throws CloudException
+     */
+    public function loginPost(SessionInterface $session, Request $request): string
+    {
+        try {
+            $token=$request->get('token');
 
+            $user=$this->getUserInfo($token);
+            $account=$this->arrayToObject($user);
+
+            $account->setLastIp($request->getClientIp());
+            $account->setLastSession(new \DateTime);
+            $account->setToken($token);
+            $account->setCloud(CloudTypes::OneDrive->value);
+
+            return $this->setSession($session, $account);
+
+        } catch (Exception $e)
+        {
+            throw new CloudException(ErrorTypes::ERROR_INICIO_SESION->getErrorMessage().' - '.$e->getMessage(),
+                ErrorTypes::ERROR_INICIO_SESION->getErrorCode());
+        }
+    }
     /**
      * Proporciona información básica del usuario gracias a la API de Microsoft /me.
      *
@@ -108,7 +132,8 @@ class CloudService extends Core
             }
             else
             {
-                return "KO";
+                throw new CloudException(ErrorTypes::ERROR_OBTENER_USUARIO->getErrorMessage(),
+                    ErrorTypes::ERROR_OBTENER_USUARIO->getErrorCode());
             }
         } catch (GuzzleException $e) {
             throw new CloudException(ErrorTypes::ERROR_OBTENER_USUARIO->getErrorMessage().' - '.$e->getMessage(),

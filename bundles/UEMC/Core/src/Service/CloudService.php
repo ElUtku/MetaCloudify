@@ -243,45 +243,57 @@ abstract class CloudService extends UemcLogger
     /**
      * @param SessionInterface $session
      * @param Account $account
-     * @return void
+     * @return string
      * @throws CloudException
      */
-    public function setSession(SessionInterface $session, Account $account): void
+    public function setSession(SessionInterface $session, Account $account): string
     {
         $accounts=$session->get('accounts');
 
         try{
-            $encontrado=false;
+
             if(!isEmpty($accounts)){ //Si el array no esta vacio se comprueba
-                foreach ($accounts as $acc)
+                foreach ($accounts as $accountId => $acc)
                 {
                     if($acc['openid']==$account->getOpenid() or
                         ($acc['URL']==$account->getURL() and $acc['user']==$account->getUser()))
                     {
-                        $encontrado=true;
-                        break;
+                        return $accountId;
                     }
                 }
             }
 
-            if(!$encontrado)
-            {
-                $accounts[uniqid()]=get_object_vars($account);
-                $session->set('accounts',$accounts);
-            }
+            //Si no se encuetra la cuenta se agrega
+            $accountId=uniqid();
+            $accounts[$accountId]=get_object_vars($account);
+            $session->set('accounts',$accounts);
+            return $accountId;
+
         }catch (\Exception $e){
             throw new CloudException(ErrorTypes::ERROR_SAVE_SESSION->getErrorMessage().' - '.$e->getMessage(),
                 ErrorTypes::ERROR_SAVE_SESSION->getErrorCode());
         }
     }
 
+
     /**
      * @param SessionInterface $session
      * @param Request $request
-     * @return Account
+     * @return string
      * @throws CloudException
      */
-    public abstract function login(SessionInterface $session, Request $request): Account;
+    public function loginPost(SessionInterface $session, Request $request): string
+    {
+        return $this->login($session, $request);
+    }
+
+    /**
+     * @param SessionInterface $session
+     * @param Request $request
+     * @return string
+     * @throws CloudException
+     */
+    public abstract function login(SessionInterface $session, Request $request): string;
 
     /**
      * @param Account $account

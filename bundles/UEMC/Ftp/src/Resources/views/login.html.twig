@@ -73,7 +73,7 @@
 
 
     <main class="form-signin w-100 m-auto">
-        <form action="{{ path('ftp_loginPOST') }}" method="post">
+        <form action="{{ path('login', {cloud: 'ftp'}) }}" method="post">
             <img class="mb-4 rounded" src="https://cdn.shopify.com/s/files/1/1198/9148/t/2/assets/ftp-promo-card.png?v=113387828774375845881579566606" alt="FTP imagen" height="57">
             <h1 class="h3 mb-3 fw-normal">Sign in</h1>
 
@@ -104,5 +104,4 @@
         </form>
     </main>
     </body>
-    {{ dump(test) }}
 {% endblock %}

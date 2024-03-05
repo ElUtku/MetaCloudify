@@ -5,7 +5,6 @@ namespace UEMC\OwnCloud\Service;
 use Exception;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemException;
-use phpDocumentor\Reflection\Types\Boolean;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use League\Flysystem\UnableToWriteFile;
 use League\Flysystem\WebDAV\WebDAVAdapter;
@@ -28,25 +27,24 @@ class CloudService extends Core
     /**
      * @param SessionInterface $session
      * @param Request $request
-     * @return Account
+     * @return string
      * @throws CloudException
      */
-    public function login(SessionInterface $session, Request $request): Account
+    public function login(SessionInterface $session, Request $request): string
     {
         try {
+
             $account = new Account();
 
             $account->setPassword($request->get('password'));
             $account->setUser($request->get('userName'));
             $account->setURL($request->get('URL'));
-            $account->setPort($request->get('port') ?? '');
+            $account->setPort($request->get('port') ?? 443);
             $account->setLastIp($request->getClientIp());
             $account->setLastSession(new \DateTime);
             $account->setCloud(CloudTypes::OwnCloud->value);
 
-            $this->setSession($session, $account);
-
-            return $account;
+            return $this->setSession($session, $account);
 
         } catch (Exception $e) {
             throw new CloudException(ErrorTypes::ERROR_INICIO_SESION->getErrorMessage().' - '.$e->getMessage(),

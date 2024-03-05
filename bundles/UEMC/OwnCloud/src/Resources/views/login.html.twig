@@ -73,7 +73,7 @@
 
 
     <main class="form-signin w-100 m-auto">
-        <form action="{{ path('owncloud_loginPOST') }}" method="post">
+        <form action="{{ path('login', {cloud: 'owncloud'}) }}" method="post">
             <img class="mb-4 rounded" src="https://th.bing.com/th/id/OIP.re2FC5NKN8McvtAmvYCXSgHaD3?rs=1&pid=ImgDetMain" alt="Owncloud imagen" height="57">
             <h1 class="h3 mb-3 fw-normal">Sign in</h1>
 
@@ -104,5 +104,4 @@
         </form>
     </main>
     </body>
-    {{ dump(test) }}
 {% endblock %}

@@ -28,10 +28,10 @@ class CloudService extends Core
     /**
      * @param SessionInterface $session
      * @param Request $request
-     * @return Account
+     * @return string
      * @throws CloudException
      */
-    public function login(SessionInterface $session, Request $request): Account
+    public function login(SessionInterface $session, Request $request): string
     {
         $config = Yaml::parseFile(__DIR__.'\..\Resources\config\googledrive.yaml');
 
@@ -77,13 +77,49 @@ class CloudService extends Core
                 $account->setToken($token);
                 $account->setCloud(CloudTypes::GoogleDrive->value);
 
-                $this->setSession($session, $account);
+                return $this->setSession($session, $account);
 
             } catch (Exception $e) {
                 throw new CloudException(ErrorTypes::ERROR_INICIO_SESION->getErrorMessage().' - '.$e->getMessage(),
                                         ErrorTypes::ERROR_INICIO_SESION->getErrorCode());
             }
-            return $account;
+
+        }
+    }
+
+    /**
+     * @param SessionInterface $session
+     * @param Request $request
+     * @return string
+     * @throws CloudException
+     */
+    public function loginPost(SessionInterface $session, Request $request): string
+    {
+        try {
+
+            $config = Yaml::parseFile(__DIR__.'\..\Resources\config\googledrive.yaml');
+
+            $provider = new Google([
+                'clientId'     => $config['clientId'],
+                'clientSecret' => $config['clientSecret'],
+                'redirectUri'  => $config['redirectUri']
+            ]);
+
+            $token=$request->get('token');
+
+            $user=$provider->getResourceOwner($token)->toArray(); //Se obtiene el usuario y se transforma en objeto
+            $account=$this->arrayToObject($user);
+
+            $account->setLastIp($request->getClientIp());
+            $account->setLastSession(new \DateTime);
+            $account->setToken($token);
+            $account->setCloud(CloudTypes::OneDrive->value);
+
+            return $this->setSession($session, $account);
+        } catch (Exception $e)
+        {
+            throw new CloudException(ErrorTypes::ERROR_INICIO_SESION->getErrorMessage().' - '.$e->getMessage(),
+                ErrorTypes::ERROR_INICIO_SESION->getErrorCode());
         }
     }
 
