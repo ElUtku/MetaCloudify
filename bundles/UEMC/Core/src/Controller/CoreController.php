@@ -70,6 +70,9 @@ class CoreController extends AbstractController
     }
 
     /**
+     *
+     *  Login generico para autenticarse via web.
+      *
      * @Route("/{cloud}/login", name="login")
      */
     public function login(SessionInterface $session, Request $request, string $cloud): Response
@@ -87,6 +90,9 @@ class CoreController extends AbstractController
     }
 
     /**
+     *
+     * Este login proporciona una interfaz web para aquiellas nubes que necesiten autentitcacion básica
+     *
      * @Route("/{cloud}/login/web", name="login_web")
      * @param SessionInterface $session
      * @param Request $request
@@ -104,6 +110,9 @@ class CoreController extends AbstractController
     }
 
     /**
+     *
+     *  Este login debe ser usado como endpoint para obtener el identificador de la cuenta en la sesion.
+     *
      * @Route("/{cloud}/login/token", name="login_token", methods={"POST"})
      */
     public function loginPost(SessionInterface $session, Request $request, string $cloud): Response
