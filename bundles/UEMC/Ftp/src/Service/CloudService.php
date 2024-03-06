@@ -22,10 +22,10 @@ class CloudService extends Core
     /**
      * @param SessionInterface $session
      * @param Request $request
-     * @return string
+     * @return Account
      * @throws CloudException
      */
-    public function login(SessionInterface $session, Request $request): string
+    public function login(SessionInterface $session, Request $request): Account
     {
         try {
             $account = new Account();
@@ -37,7 +37,7 @@ class CloudService extends Core
             $account->setLastSession(new \DateTime);
             $account->setCloud(CloudTypes::FTP->value);
 
-            return $this->setSession($session, $account);
+            return $account;
         }catch (Exception $e)
         {
             throw new CloudException(ErrorTypes::ERROR_INICIO_SESION->getErrorMessage().' - '.$e->getMessage(),

@@ -4,6 +4,7 @@ namespace UEMC\Core\Entity;
 
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
+
 use UEMC\Core\Repository\AccountRepository;
 
 #[ORM\Entity(repositoryClass: AccountRepository::class)]

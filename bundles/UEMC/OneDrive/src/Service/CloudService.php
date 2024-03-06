@@ -24,10 +24,10 @@ class CloudService extends Core
     /**
      * @param SessionInterface $session
      * @param Request $request
-     * @return string
+     * @return Account
      * @throws CloudException
      */
-    public function login(SessionInterface $session,Request $request): string
+    public function login(SessionInterface $session,Request $request): Account
     {
         $config = Yaml::parseFile(__DIR__.'\..\Resources\config\onedrive.yaml'); //Configuraicon de la nube
 
@@ -75,7 +75,7 @@ class CloudService extends Core
                 $account->setLastSession(new \DateTime);
                 $account->setToken($token);
                 $account->setCloud(CloudTypes::OneDrive->value);
-                return $this->setSession($session, $account);
+                return $account;
 
             } catch (Exception $e) {
                 throw new CloudException(ErrorTypes::ERROR_INICIO_SESION->getErrorMessage().' - '.$e->getMessage(), ErrorTypes::ERROR_INICIO_SESION->getErrorCode());
@@ -86,10 +86,10 @@ class CloudService extends Core
     /**
      * @param SessionInterface $session
      * @param Request $request
-     * @return string
+     * @return Account
      * @throws CloudException
      */
-    public function loginPost(SessionInterface $session, Request $request): string
+    public function loginPost(SessionInterface $session, Request $request): Account
     {
         try {
             $token=$request->get('token');
@@ -102,7 +102,7 @@ class CloudService extends Core
             $account->setToken($token);
             $account->setCloud(CloudTypes::OneDrive->value);
 
-            return $this->setSession($session, $account);
+            return $account;
 
         } catch (Exception $e)
         {

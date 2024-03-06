@@ -2,6 +2,8 @@
 
 namespace UEMC\Core\Controller;
 
+use Doctrine\DBAL\Driver\PDO\PDOException;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,11 +15,11 @@ use UEMC\Core\Entity\Account;
 use UEMC\Core\Resources\ErrorTypes;
 use UEMC\Core\Service\CloudException;
 use UEMC\Core\Service\CloudService as Core;
+use UEMC\Core\Service\UemcLogger;
 use UEMC\OwnCloud\Service\CloudService as OwnCloudCore;
 use UEMC\Ftp\Service\CloudService as FtpCore;
 use UEMC\GoogleDrive\Service\CloudService as GoogleDriveCore;
 use UEMC\OneDrive\Service\CloudService as OneDriveCore;
-use function PHPUnit\Framework\isEmpty;
 
 
 class CoreController extends AbstractController
@@ -75,17 +77,48 @@ class CoreController extends AbstractController
       *
      * @Route("/{cloud}/login", name="login")
      */
-    public function login(SessionInterface $session, Request $request, string $cloud): Response
+    public function login(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
     {
         try {
             $this->createContext($cloud);
             $this->retriveCore($session,$request);
-            $this->core->login($session,$request);
+
+            $account=$this->core->login($session,$request);
+            $accountId=$this->core->setSession($session,$account);
+
+            $entityManager = $doctrine->getManager();
+            $entityManager->getRepository(Account::class)->addAcount($account);
 
             return $this->redirectToRoute('_home_index');
-        }catch (CloudException $e)
+        }catch (CloudException | \Exception $e)
         {
-            return new JsonResponse($e->getCode(), $e->getMessage());
+            return new JsonResponse($e->getMessage());
+        }
+    }
+
+    /**
+     *
+     *  Este login debe ser usado como endpoint para obtener el identificador de la cuenta en la sesion.
+     *
+     * @Route("/{cloud}/login/token", name="login_token", methods={"POST"})
+     */
+    public function loginPost(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
+    {
+        try {
+            $entityManager = $doctrine->getManager();
+            $this->createContext($cloud);
+            $this->retriveCore($session,$request);
+
+            $account=$this->core->loginPost($session,$request);
+            $accountId=$this->core->setSession($session,$account);
+
+            $entityManager = $doctrine->getManager();
+            $entityManager->getRepository(Account::class)->addAcount($account);
+
+            return new JsonResponse('El identificador es ' .$accountId);
+        }catch (CloudException | \Exception $e)
+        {
+            return new JsonResponse($e->getMessage());
         }
     }
 
@@ -110,25 +143,6 @@ class CoreController extends AbstractController
     }
 
     /**
-     *
-     *  Este login debe ser usado como endpoint para obtener el identificador de la cuenta en la sesion.
-     *
-     * @Route("/{cloud}/login/token", name="login_token", methods={"POST"})
-     */
-    public function loginPost(SessionInterface $session, Request $request, string $cloud): Response
-    {
-        try {
-            $this->createContext($cloud);
-            $this->retriveCore($session,$request);
-            $accountId=$this->core->loginPost($session,$request);
-            return new JsonResponse('El identificador es ' .$accountId);
-        }catch (CloudException $e)
-        {
-            return new JsonResponse($e->getCode(), $e->getMessage());
-        }
-    }
-
-    /**
      * @Route("/{cloud}/logout", name="logout", methods={"POST"})
      */
     public function logout(SessionInterface $session, Request $request, string $cloud): Response
@@ -138,9 +152,9 @@ class CoreController extends AbstractController
             $this->retriveCore($session,$request);
             $this->core->logout($session,$request);
             return new JsonResponse();
-        }catch (CloudException $e)
+        }catch (CloudException | \Exception $e)
         {
-            return new JsonResponse($e->getCode(), $e->getMessage());
+            return new JsonResponse($e->getMessage());
         }
     }
 
@@ -154,9 +168,9 @@ class CoreController extends AbstractController
             $this->retriveCore($session,$request);
 
             return new JsonResponse($this->core->listDirectory($request->get('path')));
-        }catch (CloudException $e)
+        }catch (CloudException | \Exception $e)
         {
-            return new JsonResponse($e->getCode(), $e->getMessage());
+            return new JsonResponse($e->getMessage());
         }
 
     }
@@ -171,9 +185,9 @@ class CoreController extends AbstractController
             $this->retriveCore($session,$request);
 
             return $this->core->download($request->get('path'),$request->get('name'));
-        }catch (CloudException $e)
+        }catch (CloudException | \Exception $e)
         {
-            return new JsonResponse($e->getCode(), $e->getMessage());
+            return new JsonResponse($e->getMessage());
         }
     }
 
@@ -187,9 +201,9 @@ class CoreController extends AbstractController
             $this->retriveCore($session,$request);
             $this->core->createDir($request->get('path'),$request->get('name'));
             return new JsonResponse();
-        }catch (CloudException $e)
+        }catch (CloudException | \Exception $e)
         {
-            return new JsonResponse($e->getCode(), $e->getMessage());
+            return new JsonResponse($e->getMessage());
         }
     }
 
@@ -203,9 +217,9 @@ class CoreController extends AbstractController
             $this->retriveCore($session,$request);
             $this->core->createFile($request->get('path'),$request->get('name'));
             return new JsonResponse();
-        }catch (CloudException $e)
+        }catch (CloudException | \Exception $e)
         {
-        return new JsonResponse($e->getCode(), $e->getMessage());
+        return new JsonResponse($e->getMessage());
         }
     }
 
@@ -219,9 +233,9 @@ class CoreController extends AbstractController
             $this->retriveCore($session,$request);
             $this->core->delete($request->get('path'));
             return new JsonResponse();
-        }catch (CloudException $e)
+        }catch (CloudException | \Exception $e)
         {
-            return new JsonResponse($e->getCode(), $e->getMessage());
+            return new JsonResponse($e->getMessage());
         }
     }
 
@@ -235,9 +249,9 @@ class CoreController extends AbstractController
             $this->retriveCore($session,$request);
             $this->core->upload($request->get('path'),$request->files->get('content'));
             return new JsonResponse();
-        }catch (CloudException $e)
+        }catch (CloudException | \Exception $e)
         {
-            return new JsonResponse($e->getCode(), $e->getMessage());
+            return new JsonResponse($e->getMessage());
         }
     }
 }

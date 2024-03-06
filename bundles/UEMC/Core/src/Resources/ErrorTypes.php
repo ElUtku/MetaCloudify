@@ -23,6 +23,7 @@ enum ErrorTypes: string
     case ERROR_LOGOUT='Error al cerrar la sesión.';
     case ERROR_SAVE_SESSION='Error al guardar la sesión.';
     case ERROR_CONTROLLER='Error al detectar el controlador.';
+    case ERROR_ADD_ACCOUNT ='Error al guardar la cuenta en la base de datos.';
     /**
      * @return int
      */
@@ -48,6 +49,7 @@ enum ErrorTypes: string
             ErrorTypes::ERROR_LOGOUT => 616,
             ErrorTypes::ERROR_SAVE_SESSION => 617,
             ErrorTypes::ERROR_CONTROLLER => 618,
+            ErrorTypes::ERROR_ADD_ACCOUNT => 630,
         };
     }
 
@@ -76,7 +78,7 @@ enum ErrorTypes: string
             ErrorTypes::ERROR_LOGOUT => 'Error al cerrar la sesion',
             ErrorTypes::ERROR_SAVE_SESSION => 'Error al guardar la sesion',
             ErrorTypes::ERROR_CONTROLLER => 'Error al detectar el controlador',
-
+            ErrorTypes::ERROR_ADD_ACCOUNT => 'Error al guardar la cuenta en base de datos',
         };
     }
 }

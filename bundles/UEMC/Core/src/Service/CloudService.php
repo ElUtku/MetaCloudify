@@ -10,13 +10,13 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use function PHPUnit\Framework\isEmpty;
 
 use UEMC\Core\Resources\ErrorTypes;
 use UEMC\Core\Entity\Account;
 
 abstract class CloudService extends UemcLogger
 {
+
     public Filesystem $filesystem;
 
     /**
@@ -251,8 +251,7 @@ abstract class CloudService extends UemcLogger
         $accounts=$session->get('accounts');
 
         try{
-
-            if(!isEmpty($accounts)){ //Si el array no esta vacio se comprueba
+            if(!empty($accounts)){ //Si el array no esta vacio se comprueba
                 foreach ($accounts as $accountId => $acc)
                 {
                     if($acc['openid']==$account->getOpenid() or
@@ -279,21 +278,22 @@ abstract class CloudService extends UemcLogger
     /**
      * @param SessionInterface $session
      * @param Request $request
-     * @return string
+     * @return Account
      * @throws CloudException
      */
-    public function loginPost(SessionInterface $session, Request $request): string
+    public function loginPost(SessionInterface $session, Request $request): Account
     {
-        return $this->login($session, $request);
+        $account=$this->login($session, $request);
+        return $account;
     }
 
     /**
      * @param SessionInterface $session
      * @param Request $request
-     * @return string
+     * @return Account
      * @throws CloudException
      */
-    public abstract function login(SessionInterface $session, Request $request): string;
+    public abstract function login(SessionInterface $session, Request $request): Account;
 
     /**
      * @param Account $account
