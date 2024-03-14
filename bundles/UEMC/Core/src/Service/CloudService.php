@@ -14,10 +14,11 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use UEMC\Core\Resources\ErrorTypes;
 use UEMC\Core\Entity\Account;
 
-abstract class CloudService extends UemcLogger
+abstract class CloudService
 {
 
     public Filesystem $filesystem;
+    public UemcLogger $logger;
 
     /**
      * @return Filesystem
@@ -34,6 +35,23 @@ abstract class CloudService extends UemcLogger
     {
         $this->filesystem = $filesystem;
     }
+
+    /**
+     * @return UemcLogger
+     */
+    public function getLogger(): UemcLogger
+    {
+        return $this->logger;
+    }
+
+    /**
+     * @param UemcLogger $logger
+     */
+    public function setLogger(UemcLogger $logger): void
+    {
+        $this->logger = $logger;
+    }
+
 
 
     /**
@@ -136,7 +154,7 @@ abstract class CloudService extends UemcLogger
      */
     public function delete(String $path): void
     {
-        $this->loggerUEMC->info("Deleting " . $path);
+        $this->logger->info("Deleting " . $path);
 
         $filesystem=$this->getFilesystem();
 
@@ -159,7 +177,7 @@ abstract class CloudService extends UemcLogger
      */
     public function upload(String $path, UploadedFile $content): void
     {
-        $this->loggerUEMC->info("Uploading ".$content->getPathname());
+        $this->logger->info("Uploading ".$content->getPathname());
 
         $filesystem=$this->getFilesystem();
 
@@ -192,7 +210,7 @@ abstract class CloudService extends UemcLogger
 
         $filesystem=$this->getFilesystem();
 
-        $this->loggerUEMC->info("Downloading ".$path);
+        $this->logger->info("Downloading ".$path);
 
         try {
             $contents = $filesystem->read($path);

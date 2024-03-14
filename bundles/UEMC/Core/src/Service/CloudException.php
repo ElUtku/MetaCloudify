@@ -11,6 +11,7 @@ class CloudException extends Exception
      * @var int
      */
     protected int $statusCode = 500;
+    private UemcLogger $logger;
 
     /**
      * @param $message
@@ -20,6 +21,8 @@ class CloudException extends Exception
     public function __construct($message = null, $code = 0, Exception $previous = null)
     {
         parent::__construct($message, $code, $previous);
+        $this->logger=new UemcLogger();
+        $this->logger->ERROR('Code: '.$code. ' - Message: '.$message);
     }
 
     /**

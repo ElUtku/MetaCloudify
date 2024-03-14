@@ -20,6 +20,7 @@ use UEMC\OwnCloud\Service\CloudService as OwnCloudCore;
 use UEMC\Ftp\Service\CloudService as FtpCore;
 use UEMC\GoogleDrive\Service\CloudService as GoogleDriveCore;
 use UEMC\OneDrive\Service\CloudService as OneDriveCore;
+use function PHPUnit\Framework\isInstanceOf;
 
 
 class CoreController extends AbstractController
@@ -46,6 +47,7 @@ class CoreController extends AbstractController
             default => throw new CloudException(ErrorTypes::ERROR_CONTROLLER->getErrorMessage(),
                                                 ErrorTypes::ERROR_CONTROLLER->getErrorCode()),
         };
+        $this->core->setLogger(new UemcLogger());
         $this->account=new Account();
     }
 
@@ -68,6 +70,7 @@ class CoreController extends AbstractController
             $this->account = $this->core->arrayToObject($session->get('accounts')[$accountId]);
             $filesystem = $this->core->constructFilesystem($this->account);
             $this->core->setFilesystem($filesystem);
+
         }
     }
 
@@ -79,6 +82,7 @@ class CoreController extends AbstractController
      */
     public function login(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
     {
+
         try {
             $this->createContext($cloud);
             $this->retriveCore($session,$request);
