@@ -11,7 +11,7 @@
 
                 {% if account.cloud == 'googledrive' %}
                 <script>
-                    storeAccount('{{ accountId }}','{{ account.user }}','googledrive','');
+                    storeNewAccount('{{ accountId }}','{{ account.user }}','googledrive','');
                     $("script:last").remove();
                 </script>
 
@@ -29,7 +29,7 @@
 
                 {% elseif account.cloud=='onedrive' %}
                 <script>
-                    storeAccount('{{ accountId }}','{{ account.user }}','onedrive','');
+                    storeNewAccount('{{ accountId }}','{{ account.user }}','onedrive','');
                     $("script:last").remove();
                 </script>
 
@@ -47,7 +47,7 @@
 
                 {% elseif account.cloud=='owncloud' %}
                 <script>
-                    storeAccount('{{ accountId }}','{{ account.user }}','owncloud','');
+                    storeNewAccount('{{ accountId }}','{{ account.user }}','owncloud','');
                     $("script:last").remove();
                 </script>
 
@@ -65,7 +65,7 @@
 
                 {% elseif account.cloud=='ftp' %}
                 <script>
-                    storeAccount('{{ accountId }}','{{ account.user }}','ftp','');
+                    storeNewAccount('{{ accountId }}','{{ account.user }}','ftp','');
                     $("script:last").remove();
                 </script>
 

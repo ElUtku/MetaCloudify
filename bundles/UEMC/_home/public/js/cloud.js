@@ -19,7 +19,7 @@ function loadData(accountId,path) {
     path = (typeof path !== 'undefined') ? path : '';
 
     let account = getAccount(accountId);
-    accountE1=account;
+
     try {
         //test/a/b/c -> [test],[a],[b],[c] -> [test],[a],[b] -> test/a/b
         account.parent=path.split('\\');
@@ -49,6 +49,8 @@ function loadData(accountId,path) {
                 data=cleanOwncloudData(data);
             }
             account.pathActual=ruta;
+            accountE1=account;
+            setAccount(account);
             updatePageContent(data,accountId,account);
 
             $('#divUpload').removeClass('d-none').addClass('d-block');
@@ -278,7 +280,7 @@ function upload(accountId)
 
 function download(path,name,accountId)
 {
-    let account = getAccount(accountId)
+    let account = getAccount(accountId);
 
     $.ajax({
         url: account.controller+"/drive/download",

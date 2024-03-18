@@ -2,6 +2,7 @@
 
 namespace UEMC\OneDrive\Service;
 
+use DateTime;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
@@ -69,10 +70,11 @@ class CloudService extends Core
                 ]);
 
                 $user=$this->getUserInfo($token);
+
                 $account=$this->arrayToObject($user);
 
                 $account->setLastIp($request->getClientIp());
-                $account->setLastSession(new \DateTime);
+                $account->setLastSession(new DateTime());
                 $account->setToken($token);
                 $account->setCloud(CloudTypes::OneDrive->value);
                 return $account;
@@ -153,12 +155,16 @@ class CloudService extends Core
     function arrayToObject($array): Account
     {
         try {
-            $object = new Account();
-            $object->setUser($array['displayName'] ?? $array['user']);
-            $object->setEmail($array['mail'] ?? $array['email']);
-            $object->setOpenid($array['id'] ?? $array['openid']);
-            $object->setToken($array['token'] ?? '');
-            return $object;
+            $account = new Account();
+            $account->setId(is_int($array['id']) ? $array['id'] : -1);
+            $account->setCloud(CloudTypes::OneDrive->value);
+            $account->setUser($array['displayName'] ?? $array['user']);
+            $account->setEmail($array['mail'] ?? $array['email']);
+            $account->setOpenid($array['openid'] ?? $array['id']);
+            $account->setLastIp($array['last_ip'] ?? '');
+            $account->setLastSession($array['last_session'] ?? new DateTime());
+            $account->setToken($array['token'] ?? '');
+            return $account;
         } catch (Exception $e){
             throw new CloudException(ErrorTypes::ERROR_CONSTRUIR_OBJETO->getErrorMessage().' - '.$e->getMessage(),
                                      ErrorTypes::ERROR_CONSTRUIR_OBJETO->getErrorCode());

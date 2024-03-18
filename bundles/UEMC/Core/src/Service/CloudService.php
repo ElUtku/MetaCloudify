@@ -6,11 +6,14 @@ use League\Flysystem\FilesystemException;
 use League\Flysystem\Filesystem;
 use League\Flysystem\UnableToCreateDirectory;
 use League\Flysystem\UnableToWriteFile;
+use League\Flysystem\FileAttributes;
+use League\Flysystem\DirectoryAttributes;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
+use UEMC\Core\Entity\Metadata;
 use UEMC\Core\Resources\ErrorTypes;
 use UEMC\Core\Entity\Account;
 
@@ -197,6 +200,11 @@ abstract class CloudService
         }
     }
 
+    public function getUploadedFile(UploadedFile $content): UploadedFile
+    {
+        return $content;
+    }
+
     /**
      *  Descarga culaquier tipo de archivos.
      *
@@ -272,11 +280,16 @@ abstract class CloudService
             if(!empty($accounts)){ //Si el array no esta vacio se comprueba
                 foreach ($accounts as $accountId => $acc)
                 {
-                    if($acc['openid']==$account->getOpenid() or
-                        ($acc['URL']==$account->getURL() and $acc['user']==$account->getUser()))
-                    {
+                    if (
+                        (!empty($acc['openid']) and $acc['openid'] == $account->getOpenid()) or
+                        (
+                            !empty($acc['URL']) and !empty($acc['user']) and
+                            $acc['URL'] == $account->getURL() and $acc['user'] == $account->getUser()
+                        )
+                    ) {
                         return $accountId;
                     }
+
                 }
             }
 
@@ -319,5 +332,59 @@ abstract class CloudService
      * @throws CloudException
      */
     public abstract function constructFilesystem(Account $account): Filesystem;
+
+    /**
+     * @param String $path
+     * @return Metadata
+     * @throws CloudException
+     */
+    public function getNativeMetadata(String $path):Metadata
+    {
+        try {
+
+            $attributes = match ($this->distinguirTipoRuta($path)) {
+                'file' => new FileAttributes($path),
+                'dir' => new DirectoryAttributes($path),
+                default => throw new CloudException(ErrorTypes::NO_SUCH_FILE_OR_DIRECTORY->getErrorMessage(),
+                    ErrorTypes::NO_SUCH_FILE_OR_DIRECTORY->getErrorCode()),
+            };
+
+            $this->logger->debug("path->: ".$path);
+            $this->logger->debug("isFile()->: ".$attributes->isFile());
+            $this->logger->debug("isFile()->: ".$attributes->type());
+
+            $extraMetadata= $attributes->extraMetadata();
+            $this->logger->debug("extraMetadata: ".json_encode($extraMetadata));
+            return new Metadata(null,$extraMetadata['id']??null,$path,$extraMetadata['virtual_path']??null,$attributes->type(),$attributes->lastModified()??new \DateTime(),null,$attributes->visibility(),null,null);
+
+        } catch (FilesystemException | \Exception $e) {
+            throw new CloudException(ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorMessage().' - '.$e->getMessage(),
+                ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorCode());
+        }
+
+    }
+
+    /**
+     * @param string $ruta
+     * @return string
+     * @throws CloudException
+     */
+    public function distinguirTipoRuta(string $ruta): string
+    {
+        try {
+            if ($this->getFilesystem()->has($ruta)) {
+                if ($this->getFilesystem()->fileExists($ruta)) {
+                    return 'file';
+                } else {
+                    return 'dir';
+                }
+            } else {
+                return 'KO';
+            }
+        } catch (FilesystemException | \Exception $e) {
+            throw new CloudException(ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorMessage().' - '.$e->getMessage(),
+                ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorCode());
+        }
+    }
 
 }

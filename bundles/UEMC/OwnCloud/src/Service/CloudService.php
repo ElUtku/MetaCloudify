@@ -138,5 +138,4 @@ class CloudService extends Core
                                     ErrorTypes::ERROR_CONSTRUIR_FILESYSTEM->getErrorCode());
         }
     }
-
 }

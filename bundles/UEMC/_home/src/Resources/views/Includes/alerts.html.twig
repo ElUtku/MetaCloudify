@@ -22,26 +22,30 @@
 {% endif %}
 
 {% if app.flashes('error')  %}
-<!-- Alert Error -->
-<div class="modal fade" id="errorModal">
-    <div class="modal-dialog">
+    <div class="modal fade" id="errorModal">
+        <div class="modal-dialog">
             <div class="modal-body alert alert-danger d-flex align-items-center" role="alert">
                 <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
-                <div>
-                    {% for message in app.flashes('error') %}
-                        {{ message }}
-                    {% endfor %}
-                </div>
+                {% if app.flashes('error') is not empty %}
+                    <div>
+                        {% for message in app.flashes('error') %}
+                            {{ message }}
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>Ha ocurrido un error.</p>
+                {% endif %}
                 <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
             </div>
+        </div>
     </div>
-</div>
-<script>
-    $(document).ready(function() {
-        $('#errorModal').modal('show');
-    });
-</script>
+    <script>
+        $(document).ready(function() {
+            $('#errorModal').modal('show');
+        });
+    </script>
 {% endif %}
+
 
 <!-- SVG -->
 <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">

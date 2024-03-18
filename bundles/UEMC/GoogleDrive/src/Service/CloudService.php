@@ -4,11 +4,15 @@ namespace UEMC\GoogleDrive\Service;
 
 // include 'vendor/autoload.php';
 
+use DateTime;
 use Exception;
 use Google_Client;
 use Google\Service\Drive;
 use League\Flysystem\Config;
+use League\Flysystem\DirectoryAttributes;
+use League\Flysystem\FileAttributes;
 use League\Flysystem\Filesystem;
+use League\Flysystem\FilesystemException;
 use League\Flysystem\Visibility;
 use League\OAuth2\Client\Provider\Google;
 use Masbug\Flysystem\GoogleDriveAdapter;
@@ -17,6 +21,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Yaml\Yaml;
 
 use UEMC\Core\Entity\Account;
+use UEMC\Core\Entity\Metadata;
 use UEMC\Core\Resources\CloudTypes;
 use UEMC\Core\Resources\ErrorTypes;
 use UEMC\Core\Service\CloudService as Core;
@@ -24,6 +29,27 @@ use UEMC\Core\Service\CloudException;
 
 class CloudService extends Core
 {
+
+    private GoogleDriveAdapter $adapter;
+
+    /**
+     * @return GoogleDriveAdapter
+     */
+    public function getAdapter(): GoogleDriveAdapter
+    {
+        return $this->adapter;
+    }
+
+    /**
+     * @param GoogleDriveAdapter $adapter
+     */
+    public function setAdapter(GoogleDriveAdapter $adapter): void
+    {
+        $this->adapter = $adapter;
+    }
+
+
+
 
     /**
      * @param SessionInterface $session
@@ -73,7 +99,7 @@ class CloudService extends Core
                 $account=$this->arrayToObject($user);
 
                 $account->setLastIp($request->getClientIp());
-                $account->setLastSession(new \DateTime);
+                $account->setLastSession(new DateTime());
                 $account->setToken($token);
                 $account->setCloud(CloudTypes::GoogleDrive->value);
 
@@ -111,9 +137,9 @@ class CloudService extends Core
             $account=$this->arrayToObject($user);
 
             $account->setLastIp($request->getClientIp());
-            $account->setLastSession(new \DateTime);
+            $account->setLastSession(new DateTime);
             $account->setToken($token);
-            $account->setCloud(CloudTypes::OneDrive->value);
+            $account->setCloud(CloudTypes::GoogleDrive->value);
 
             return $account;
         } catch (Exception $e)
@@ -135,10 +161,13 @@ class CloudService extends Core
     {
         try {
             $account = new Account();
-            $account->setUser($array['name'] ?? $array['user']);
-            $account->setEmail($array['email']);
-            $account->setOpenid($array['sub'] ?? $array['openid']);
-            $account->setToken($array['token'] ?? '');
+            $account->setCloud(CloudTypes::GoogleDrive->value);
+            $account->setUser($array['name'] ?? $array['user']?? '');
+            $account->setEmail($array['email'] ?? '');
+            $account->setOpenid($array['sub'] ?? $array['openid']?? '');
+            $account->setLastIp($array['last_ip']?? '');
+            $account->setLastSession($array['last_session']?? new DateTime());
+            $account->setToken($array['token']?? '');
             return $account;
         } catch (Exception $e)
         {
@@ -147,6 +176,7 @@ class CloudService extends Core
         }
 
     }
+
 
     /**
      * @param Account $account
@@ -166,6 +196,7 @@ class CloudService extends Core
             $service = new Drive($client);
 
             $adapter = new GoogleDriveAdapter($service,  '');
+            $this->setAdapter($adapter);
 
             return new Filesystem($adapter, [
                 new Config([Config::OPTION_VISIBILITY => Visibility::PRIVATE])
@@ -175,5 +206,32 @@ class CloudService extends Core
         {
             throw new CloudException(ErrorTypes::ERROR_CONSTRUIR_FILESYSTEM->getErrorMessage(), ErrorTypes::ERROR_CONSTRUIR_FILESYSTEM->getErrorCode());
         }
+    }
+
+    public function getNativeMetadata(String $path):Metadata
+    {
+        try {
+
+            $attributes = match ($this->distinguirTipoRuta($path)) {
+                'file' => new FileAttributes($path),
+                'dir' => new DirectoryAttributes($path),
+                default => throw new CloudException(ErrorTypes::NO_SUCH_FILE_OR_DIRECTORY->getErrorMessage(),
+                    ErrorTypes::NO_SUCH_FILE_OR_DIRECTORY->getErrorCode()),
+            };
+
+            $this->logger->debug("path->: ".$path);
+            $this->logger->debug("isFile()->: ".$attributes->isFile());
+            $this->logger->debug("type()->: ".$attributes->type());
+
+            $extraMetadata= $this->getAdapter()->getMetadata($path);
+
+            $this->logger->debug("extraMetadata: ".json_encode($extraMetadata));
+            return new Metadata(null,$extraMetadata['extraMetadata']['id']??null,$path,$extraMetadata['extraMetadata']['virtual_path']??null,$attributes->type(),$attributes->lastModified()??new \DateTime(),null,$attributes->visibility(),null,null);
+
+        } catch (FilesystemException | \Exception $e) {
+            throw new CloudException(ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorMessage().' - '.$e->getMessage(),
+                ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorCode());
+        }
+
     }
 }

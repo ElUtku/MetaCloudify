@@ -1,4 +1,4 @@
-function storeAccount(accountId,accountUser,controller,root)
+function storeNewAccount(accountId,accountUser,controller,root)
 {
     let storedAccounts = JSON.parse(sessionStorage.getItem('storedAccounts')) || {};
     if (!storedAccounts[accountId]) {
@@ -18,4 +18,17 @@ function storeAccount(accountId,accountUser,controller,root)
 function getAccount(accountId)
 {
     return JSON.parse(sessionStorage.getItem('storedAccounts'))[accountId];
+}
+
+function setAccount(account)
+{
+    try {
+        let storedAccounts = JSON.parse(sessionStorage.getItem('storedAccounts')) ;
+        storedAccounts[account.accountId]=account;
+        sessionStorage.setItem('storedAccounts', JSON.stringify(storedAccounts));
+    }catch (e)
+    {
+        console.log(e);
+    }
+
 }

@@ -2,9 +2,10 @@
 
 namespace UEMC\Core\Repository;
 
-use DateTime;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
+use Exception;
+
 use UEMC\Core\Entity\Account;
 use UEMC\Core\Resources\ErrorTypes;
 use UEMC\Core\Service\CloudException;
@@ -25,40 +26,59 @@ class AccountRepository extends EntityRepository
      * @return void
      * @throws CloudException
      */
-    public function addAcount(Account $account): void
+    public function newAcount(Account $account): void
     {
         try {
             $em=$this->getEntityManager();
-            $accountStored=$this->existAccount($account);
-            if($accountStored==null)
-            {
-                $em->persist($account);
-            }else{
-                $accountStored->setLastIp($account->getLastIp());
-                $accountStored->setLastSession($account->getLastSession());
-            }
+            $em->persist($account);
             $em->flush();
-        }catch (NonUniqueResultException $e)
+        }catch (Exception | NonUniqueResultException $e)
         {
-            throw new CloudException(ErrorTypes::ERROR_ADD_ACCOUNT->getErrorMessage().' - '.$e->getMessage(),
-                                    ErrorTypes::ERROR_ADD_ACCOUNT->getErrorCode());
+            throw new CloudException(ErrorTypes::ERROR_LOG_ACCOUNT->getErrorMessage().' - '.$e->getMessage(),
+                                    ErrorTypes::ERROR_LOG_ACCOUNT->getErrorCode());
         }
-
     }
 
+    /**
+     * @param Account $account
+     * @return void
+     * @throws CloudException
+     */
+    public function updateAcount(Account $account): void
+    {
+        try {
+            $em=$this->getEntityManager();
+            $account->setLastIp($account->getLastIp());
+            $account->setLastSession($account->getLastSession());
+            $em->flush();
+        }catch (Exception $e)
+        {
+            throw new CloudException(ErrorTypes::ERROR_LOG_ACCOUNT->getErrorMessage().' - '.$e->getMessage(),
+                ErrorTypes::ERROR_LOG_ACCOUNT->getErrorCode());
+        }
+    }
 
     /**
      * @param Account $account
      * @return Account|null
      * @throws NonUniqueResultException
      */
-    private function existAccount(Account $account): Account|null
+    public function getAccount(Account $account): Account|null
     {
-        return $this->createQueryBuilder('a')
-              ->andWhere('a.openid = :val')
-              ->setParameter('val', $account->getOpenid())
-              ->getQuery()
-              ->getOneOrNullResult();
+        $qb = $this->createQueryBuilder('a');
+
+        $qb->where('a.openid = :openid')
+            ->setParameter('openid', $account->getOpenid());
+
+        if (!$account->getOpenid()) {
+            $qb->orWhere('a.URL = :url')
+                ->andWhere('a.user = :user')
+                ->setParameter('url', $account->getURL())
+                ->setParameter('user', $account->getUser());
+        }
+
+        return $qb->getQuery()->getOneOrNullResult();
+
     }
 //    /**
 //     * @return Account[] Returns an array of Account objects

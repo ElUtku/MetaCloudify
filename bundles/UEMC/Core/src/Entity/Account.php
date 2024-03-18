@@ -3,6 +3,8 @@
 namespace UEMC\Core\Entity;
 
 use DateTime;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 use UEMC\Core\Repository\AccountRepository;
@@ -34,16 +36,21 @@ class Account
     public ?Datetime $last_session = null;
 
     #[ORM\Column(length: 1000, nullable: true)]
-    public ?string $token = null;
-
-    #[ORM\Column(length: 1000, nullable: true)]
     public ?string $URL = null;
 
     #[ORM\Column(type: 'smallint', nullable: true)]
     public ?int $port = null;
 
-    #[ORM\Column(length: 1000, nullable: true)]
+    public ?string $token = null;
     public ?string $password = null;
+
+    #[ORM\OneToMany(mappedBy: 'account', targetEntity: Metadata::class)]
+    private Collection $metadata;
+
+    public function __construct()
+    {
+        $this->metadata = new ArrayCollection();
+    }
 
     /**
      * @return int|null
@@ -51,6 +58,14 @@ class Account
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    /**
+     * @param int $id
+     */
+    public function setId(int $id): void
+    {
+        $this->id=$id;
     }
 
     /**
@@ -224,5 +239,35 @@ class Account
     public function setPassword(?string $password): void
     {
         $this->password = $password;
+    }
+
+    /**
+     * @return Collection<int, Metadata>
+     */
+    public function getMetadata(): Collection
+    {
+        return $this->metadata;
+    }
+
+    public function addMetadata(Metadata $metadata): static
+    {
+        if (!$this->metadata->contains($metadata)) {
+            $this->metadata->add($metadata);
+            $metadata->setAccount($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMetadata(Metadata $metadata): static
+    {
+        if ($this->metadata->removeElement($metadata)) {
+            // set the owning side to null (unless already changed)
+            if ($metadata->getAccount() === $this) {
+                $metadata->setAccount(null);
+            }
+        }
+
+        return $this;
     }
 }
