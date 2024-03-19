@@ -212,14 +212,15 @@ class CloudService extends Core
     {
         try {
 
-            $attributes = match ($this->distinguirTipoRuta($path)) {
+            $extraMetadata= $this->getAdapter()->getMetadata($path);
+
+            $attributes = match ($extraMetadata['type']) {
                 'file' => new FileAttributes($path),
                 'dir' => new DirectoryAttributes($path),
                 default => throw new CloudException(ErrorTypes::NO_SUCH_FILE_OR_DIRECTORY->getErrorMessage(),
                     ErrorTypes::NO_SUCH_FILE_OR_DIRECTORY->getErrorCode()),
             };
 
-            $extraMetadata= $this->getAdapter()->getMetadata($path);
 
             $this->logger->debug("extraMetadata: ".json_encode($extraMetadata));
             return new Metadata(null,$extraMetadata['extraMetadata']['id']??null,$path,$extraMetadata['extraMetadata']['virtual_path']??null,$attributes->type(),$attributes->lastModified()??new \DateTime(),null,$attributes->visibility(),null,null);

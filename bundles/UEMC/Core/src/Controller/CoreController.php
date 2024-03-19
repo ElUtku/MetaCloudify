@@ -243,6 +243,7 @@ class CoreController extends AbstractController
     public function delete(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
     {
         try {
+
             $entityManager = $doctrine->getManager();
 
             $this->createContext($cloud);
@@ -301,7 +302,11 @@ class CoreController extends AbstractController
         }
     }
 
-    private function getBasename(String $path)
+    /**
+     * @param String $path
+     * @return false|string
+     */
+    private function getBasename(String $path): false|string
     {
         $parts = explode(DIRECTORY_SEPARATOR, $path);
         $lastValue = end($parts);

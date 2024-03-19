@@ -317,20 +317,6 @@ abstract class CloudService
         return $account;
     }
 
-    /**
-     * @param SessionInterface $session
-     * @param Request $request
-     * @return Account
-     * @throws CloudException
-     */
-    public abstract function login(SessionInterface $session, Request $request): Account;
-
-    /**
-     * @param Account $account
-     * @return Filesystem
-     * @throws CloudException
-     */
-    public abstract function constructFilesystem(Account $account): Filesystem;
 
     /**
      * @param String $path
@@ -365,24 +351,41 @@ abstract class CloudService
      */
     public function distinguirTipoRuta(string $ruta): string
     {
-        $this->logger->debug("ruta->: ".$ruta);
         try {
-            if ($this->getFilesystem()->has($ruta)) {
-                if ($this->getFilesystem()->directoryExists($ruta)) {
-                    $this->logger->debug("Dir");
-                    return 'dir';
-                } else {
-                    $this->logger->debug("File");
-                    return 'file';
+            $filesystem=$this->getFilesystem();
+            $contents=$filesystem->listContents(dirname($ruta));
+            foreach ($contents as $item) {
+                $this->logger->debug($item['type']);
+                $this->logger->debug(str_replace('\\', '/',$item['path']).'---'.$ruta);
+                if (str_replace('\\', '/',$item['path']) == $ruta) { ////LAS BARRAS DE LA RUTA SON DISITNATXS POR ESO NO DETECTA
+                    if ($item['type'] == 'file') {
+                        return 'file';
+                    } elseif ($item['type'] == 'dir') {
+                        return 'dir';
+                    }
                 }
-            } else {
-                $this->logger->debug("KO");
-                return 'KO';
             }
+            return 'KO';
         } catch (FilesystemException | \Exception $e) {
             throw new CloudException(ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorMessage().' - '.$e->getMessage(),
                 ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorCode());
         }
     }
+
+    /**
+     * @param SessionInterface $session
+     * @param Request $request
+     * @return Account
+     * @throws CloudException
+     */
+    public abstract function login(SessionInterface $session, Request $request): Account;
+
+    /**
+     * @param Account $account
+     * @return Filesystem
+     * @throws CloudException
+     */
+    public abstract function constructFilesystem(Account $account): Filesystem;
+
 
 }
