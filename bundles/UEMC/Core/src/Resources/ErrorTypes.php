@@ -26,8 +26,8 @@ enum ErrorTypes: string
     case ERROR_LOG_ACCOUNT ='Error al guardar la cuenta en la base de datos.';
     case ERROR_GET_NATIVE_METADATA = 'Error al cargar los metadatos nativos.';
     case ERROR_LOG_METADATA = 'Error al guardar los metadatos en la base de datos';
-    case NO_SUCH_FILE_OR_DIRECTORY ='La ruta es un directorio ni un archivo.';
-
+    case NO_SUCH_FILE_OR_DIRECTORY ='La ruta no es un directorio ni un archivo.';
+    case ERROR_DELETE_MULTIPLE_FILES = 'Imposible maborrar todos los ficheros que contien la carpeta en la BD.';
     /**
      * @return int
      */
@@ -57,6 +57,7 @@ enum ErrorTypes: string
             ErrorTypes::ERROR_LOG_ACCOUNT => 630,
             ErrorTypes::ERROR_GET_NATIVE_METADATA => 640,
             ErrorTypes::ERROR_LOG_METADATA => 645,
+            ErrorTypes::ERROR_DELETE_MULTIPLE_FILES =>646,
         };
     }
 
@@ -88,7 +89,8 @@ enum ErrorTypes: string
             ErrorTypes::ERROR_LOG_ACCOUNT => 'Error al guardar la cuenta en base de datos',
             ErrorTypes::ERROR_GET_NATIVE_METADATA => 'Error al cargar los metadatos nativos',
             ErrorTypes::ERROR_LOG_METADATA => 'Error al guardar los metadatos en la base de datos',
-            ErrorTypes::NO_SUCH_FILE_OR_DIRECTORY => 'La ruta es un directorio ni un archivo',
+            ErrorTypes::NO_SUCH_FILE_OR_DIRECTORY => 'La ruta no es un directorio ni un archivo',
+            ErrorTypes::ERROR_DELETE_MULTIPLE_FILES => 'Imposible maborrar todos los ficheros que contien la carpeta en la BD',
         };
     }
 }

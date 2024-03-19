@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 
+use UEMC\Core\Entity\Account;
 use UEMC\Core\Entity\Metadata;
 use UEMC\Core\Resources\ErrorTypes;
 use UEMC\Core\Service\CloudException;
@@ -26,7 +27,7 @@ class MetadataRepository extends EntityRepository
      * @return void
      * @throws CloudException
      */
-    public function upload(Metadata $fileMetadata): void
+    public function store(Metadata $fileMetadata): void
     {
         try {
             $em=$this->getEntityManager();
@@ -42,6 +43,7 @@ class MetadataRepository extends EntityRepository
                 $fileStored->setAuthor($fileMetadata->getAuthor()??null);
                 $fileStored->setLastModified($fileMetadata->getLastModified());
                 $fileStored->setVisibility($fileMetadata->getVisibility());
+                $fileStored->setStatus($fileMetadata->getStatus());
             }
             $em->flush();
         }catch (Exception | NonUniqueResultException $e)
@@ -49,7 +51,28 @@ class MetadataRepository extends EntityRepository
             throw new CloudException(ErrorTypes::ERROR_LOG_METADATA->getErrorMessage().' - '.$e->getMessage(),
                 ErrorTypes::ERROR_LOG_METADATA->getErrorCode());
         }
+    }
 
+
+    /**
+     * @param Metadata $fileMetadata
+     * @return void
+     * @throws CloudException
+     */
+    public function deleteDirectory(Metadata $fileMetadata): void
+    {
+        try {
+            $dataUnderDirectory=$this->findByPathAndAccount($fileMetadata->getAccount(), $fileMetadata->getPath());
+            foreach ($dataUnderDirectory as $file) {
+                $file->setLastModified($fileMetadata->getLastModified());
+                $file->setStatus($fileMetadata->getStatus());
+                $this->store($file);
+            }
+        }catch (Exception $e)
+        {
+            throw new CloudException(ErrorTypes::ERROR_DELETE_MULTIPLE_FILES->getErrorMessage().' - '.$e->getMessage(),
+                ErrorTypes::ERROR_DELETE_MULTIPLE_FILES->getErrorCode());
+        }
     }
 
     /**
@@ -61,18 +84,32 @@ class MetadataRepository extends EntityRepository
     {
         $qb = $this->createQueryBuilder('m');
 
-        $qb->where('m.virtualName = :virtual_name')
-            ->setParameter('virtual_name', $file->getVirtualName());
-
-        if (!$file->getVirtualName()) {
-            $qb->orWhere('m.path = :path')
-                ->andWhere('m.name = :name')
-                ->setParameter('path', $file->getPath())
-                ->setParameter('name', $file->getName());
-        }
+        $qb->where('m.path = :path')
+            ->andWhere('m.name = :name')
+            ->andWhere('m.account = :account')
+            ->setParameter('path', $file->getPath())
+            ->setParameter('name', $file->getName())
+            ->setParameter('account', $file->getAccount());
 
         return $qb->getQuery()->getOneOrNullResult();
 
+    }
+
+    /**
+     * @param Account $account
+     * @param String $path
+     * @return float|int|mixed|string
+     */
+    private function findByPathAndAccount(Account $account, String $path): mixed
+    {
+        $qb = $this->createQueryBuilder('m');
+
+        $qb->where('m.path LIKE :path')
+            ->andWhere('m.account = :account')
+            ->setParameter('path', $path . '%')
+            ->setParameter('account', $account);
+
+        return $qb->getQuery()->getResult();
     }
 
 //    /**

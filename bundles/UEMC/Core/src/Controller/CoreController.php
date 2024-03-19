@@ -103,7 +103,7 @@ class CoreController extends AbstractController
             $account->setId($accountExists->getId());
             $accountId=$this->core->setSession($session,$account);
 
-        }catch (CloudException | Exception $e)
+        }catch (CloudException $e)
         {
             $this->addFlash('error','CODE: '.$e->getStatusCode(). ' - MESSAGE: '.$e->getMessage());
         }
@@ -130,7 +130,7 @@ class CoreController extends AbstractController
             $entityManager->getRepository(Account::class)->logAcount($account);
 
             return new JsonResponse('El identificador es ' .$accountId);
-        }catch (CloudException |Exception $e)
+        }catch (CloudException $e)
         {
             return new JsonResponse($e->getMessage(),$e->getStatusCode());
         }
@@ -166,7 +166,7 @@ class CoreController extends AbstractController
             $this->retriveCore($session,$request);
             $this->core->logout($session,$request);
             return new JsonResponse();
-        }catch (CloudException |Exception $e)
+        }catch (CloudException $e)
         {
             return new JsonResponse($e->getMessage(),$e->getStatusCode());
         }
@@ -182,7 +182,7 @@ class CoreController extends AbstractController
             $this->retriveCore($session,$request);
 
             return new JsonResponse($this->core->listDirectory($request->get('path')));
-        }catch (CloudException |Exception $e)
+        }catch (CloudException $e)
         {
             return new JsonResponse($e->getMessage(),$e->getStatusCode());
         }
@@ -199,7 +199,7 @@ class CoreController extends AbstractController
             $this->retriveCore($session,$request);
 
             return $this->core->download($request->get('path'),$request->get('name'));
-        }catch (CloudException |Exception $e)
+        }catch (CloudException $e)
         {
             return new JsonResponse($e->getMessage(),$e->getStatusCode());
         }
@@ -215,7 +215,7 @@ class CoreController extends AbstractController
             $this->retriveCore($session,$request);
             $this->core->createDir($request->get('path'),$request->get('name'));
             return new JsonResponse();
-        }catch (CloudException |Exception $e)
+        }catch (CloudException $e)
         {
             return new JsonResponse($e->getMessage(),$e->getStatusCode());
         }
@@ -231,7 +231,7 @@ class CoreController extends AbstractController
             $this->retriveCore($session,$request);
             $this->core->createFile($request->get('path'),$request->get('name'));
             return new JsonResponse();
-        }catch (CloudException |Exception $e)
+        }catch (CloudException $e)
         {
             return new JsonResponse($e->getMessage(),$e->getStatusCode());
         }
@@ -240,14 +240,29 @@ class CoreController extends AbstractController
     /**
      * @Route("/{cloud}/drive/delete", name="delete")
      */
-    public function delete(SessionInterface $session, Request $request, string $cloud): Response
+    public function delete(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
     {
         try {
+            $entityManager = $doctrine->getManager();
+
             $this->createContext($cloud);
             $this->retriveCore($session,$request);
-            $this->core->delete($request->get('path'));
+
+            $path=$request->get('path');
+            $name=$this->getBasename($path);
+            $nativeMetadata=$this->core->getNativeMetadata(str_replace('\\', '/', ($path)));
+            $nativeMetadata->setAccount($entityManager->getRepository(Account::class)->getAccount($this->account));
+            $nativeMetadata->setName($name);
+            $nativeMetadata->setPath($path);
+            $nativeMetadata->setStatus(FileStatus::DELETED->value);
+
+            $entityManager->getRepository(Metadata::class)->store($nativeMetadata);
+            $entityManager->getRepository(Metadata::class)->deleteDirectory($nativeMetadata);
+
+            $this->core->delete($path);
+
             return new JsonResponse();
-        }catch (CloudException |Exception $e)
+        }catch (CloudException $e)
         {
             return new JsonResponse($e->getMessage(),$e->getStatusCode());
         }
@@ -274,10 +289,10 @@ class CoreController extends AbstractController
             $nativeMetadata=$this->core->getNativeMetadata(str_replace('\\', '/', ($destinationPath.'\\'.$content->getClientOriginalName())));
             $nativeMetadata->setAccount($entityManager->getRepository(Account::class)->getAccount($this->account));
             $nativeMetadata->setName($content->getClientOriginalName());
-            $nativeMetadata->setPath($destinationPath);
+            $nativeMetadata->setPath($destinationPath.'\\'.$content->getClientOriginalName());
             $nativeMetadata->setStatus(FileStatus::NEW->value);
 
-            $entityManager->getRepository(Metadata::class)->upload($nativeMetadata);
+            $entityManager->getRepository(Metadata::class)->store($nativeMetadata);
 
             return new JsonResponse(null,Response::HTTP_OK);
         }catch (CloudException $e)
@@ -285,4 +300,12 @@ class CoreController extends AbstractController
             return new JsonResponse($e->getMessage(),$e->getStatusCode());
         }
     }
+
+    private function getBasename(String $path)
+    {
+        $parts = explode(DIRECTORY_SEPARATOR, $path);
+        $lastValue = end($parts);
+        return $lastValue;
+    }
+
 }

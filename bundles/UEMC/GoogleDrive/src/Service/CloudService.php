@@ -219,16 +219,12 @@ class CloudService extends Core
                     ErrorTypes::NO_SUCH_FILE_OR_DIRECTORY->getErrorCode()),
             };
 
-            $this->logger->debug("path->: ".$path);
-            $this->logger->debug("isFile()->: ".$attributes->isFile());
-            $this->logger->debug("type()->: ".$attributes->type());
-
             $extraMetadata= $this->getAdapter()->getMetadata($path);
 
             $this->logger->debug("extraMetadata: ".json_encode($extraMetadata));
             return new Metadata(null,$extraMetadata['extraMetadata']['id']??null,$path,$extraMetadata['extraMetadata']['virtual_path']??null,$attributes->type(),$attributes->lastModified()??new \DateTime(),null,$attributes->visibility(),null,null);
 
-        } catch (FilesystemException | \Exception $e) {
+        } catch (\Exception $e) {
             throw new CloudException(ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorMessage().' - '.$e->getMessage(),
                 ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorCode());
         }

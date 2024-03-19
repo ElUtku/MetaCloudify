@@ -349,12 +349,7 @@ abstract class CloudService
                     ErrorTypes::NO_SUCH_FILE_OR_DIRECTORY->getErrorCode()),
             };
 
-            $this->logger->debug("path->: ".$path);
-            $this->logger->debug("isFile()->: ".$attributes->isFile());
-            $this->logger->debug("isFile()->: ".$attributes->type());
-
             $extraMetadata= $attributes->extraMetadata();
-            $this->logger->debug("extraMetadata: ".json_encode($extraMetadata));
             return new Metadata(null,$extraMetadata['id']??null,$path,$extraMetadata['virtual_path']??null,$attributes->type(),$attributes->lastModified()??new \DateTime(),null,$attributes->visibility(),null,null);
 
         } catch (FilesystemException | \Exception $e) {
@@ -371,14 +366,18 @@ abstract class CloudService
      */
     public function distinguirTipoRuta(string $ruta): string
     {
+        $this->logger->debug("ruta->: ".$ruta);
         try {
             if ($this->getFilesystem()->has($ruta)) {
-                if ($this->getFilesystem()->fileExists($ruta)) {
-                    return 'file';
-                } else {
+                if ($this->getFilesystem()->directoryExists($ruta)) {
+                    $this->logger->debug("Dir");
                     return 'dir';
+                } else {
+                    $this->logger->debug("File");
+                    return 'file';
                 }
             } else {
+                $this->logger->debug("KO");
                 return 'KO';
             }
         } catch (FilesystemException | \Exception $e) {
