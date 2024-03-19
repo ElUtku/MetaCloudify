@@ -123,19 +123,18 @@ abstract class CloudService
      */
     public function createFile(String $path, String $name): void
     {
-        $newPath = '/'.$path. '/'. $name;
 
         $filesystem=$this->getFilesystem();
 
         try {
             if($filesystem->directoryExists($path)) //Comprobamos si existe el directorio
             {
-                if($filesystem->directoryExists($newPath))
+                if($filesystem->fileExists($path . '/' . $name))
                 {
                     throw new CloudException(ErrorTypes::FICHERO_YA_EXISTE->getErrorMessage(),
                         ErrorTypes::FICHERO_YA_EXISTE->getErrorCode());
                 } else{
-                    $filesystem->write($newPath,"");
+                    $filesystem->write($path . '/' . $name,'');
                 }
             }else{
                 throw new CloudException(ErrorTypes::DIRECTORIO_NO_EXISTE->getErrorMessage(),
