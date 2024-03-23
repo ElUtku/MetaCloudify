@@ -94,6 +94,7 @@ class CoreController extends AbstractController
             if($accountExists==null)
             {
                 $entityManager->getRepository(Account::class)->newAcount($account);
+                $accountExists=$entityManager->getRepository(Account::class)->getAccount($account); //Una vez guardada la nuva cuenta se recupera
             } else
             {
                 $accountExists->setLastSession($account->getLastSession());
