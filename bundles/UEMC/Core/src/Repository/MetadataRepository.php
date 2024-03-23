@@ -40,6 +40,8 @@ class MetadataRepository extends EntityRepository
                 $fileStored->setPath($fileMetadata->getPath());
                 $fileStored->setVirtualName($fileMetadata->getVirtualName()??null);
                 $fileStored->setVirtualPath($fileMetadata->getVirtualPath()??null);
+                $fileStored->setSize($fileMetadata->getSize()??null);
+                $fileStored->setMimeType($fileMetadata->getMimeType()??null);
                 $fileStored->setAuthor($fileMetadata->getAuthor()??null);
                 $fileStored->setLastModified($fileMetadata->getLastModified());
                 $fileStored->setVisibility($fileMetadata->getVisibility());
@@ -75,22 +77,32 @@ class MetadataRepository extends EntityRepository
         }
     }
 
-    public function fillMetadata(Metadata $file): Metadata
+    /**
+     * @param Metadata $file
+     * @return Metadata
+     * @throws CloudException
+     */
+    public function getCloudMetadata(Metadata $file): Metadata
     {
         try {
-            $em=$this->getEntityManager();
             $fileStored=$this->existFile($file);
-            if($fileStored==null)
+
+            if($fileStored!=null)
             {
-                $this->store($file);
+                $fileStored->setVisibility($fileStored->getVisibility() ?? $file->getVisibility());
+                $fileStored->setVirtualName($fileStored->getVirtualName() ?? $file->getVirtualName());
+                $fileStored->setVirtualPath($fileStored->getVirtualPath() ?? $file->getVirtualPath());
+                $fileStored->setSize($fileStored->getSize()??$file->getSize());
+                $fileStored->setMimeType($fileStored->getMimeType()??$file->getMimeType());
+                $fileStored->setAuthor($fileStored->getAuthor() ?? $file->getAuthor());
+                $fileStored->setStatus($fileStored->getStatus() ?? $file->getStatus());
             }
-            $em->flush();
 
             return $fileStored??$file;
         }catch (Exception | NonUniqueResultException $e)
         {
-            throw new CloudException(ErrorTypes::ERROR_LOG_METADATA->getErrorMessage().' - '.$e->getMessage(),
-                ErrorTypes::ERROR_LOG_METADATA->getErrorCode());
+            throw new CloudException(ErrorTypes::ERROR_GET_METADATA->getErrorMessage().' - '.$e->getMessage(),
+                ErrorTypes::ERROR_GET_METADATA->getErrorCode());
         }
     }
 
@@ -99,7 +111,7 @@ class MetadataRepository extends EntityRepository
      * @return Metadata|null
      * @throws NonUniqueResultException
      */
-    private function existFile(Metadata $file): Metadata|null
+    public function existFile(Metadata $file): Metadata|null
     {
         $qb = $this->createQueryBuilder('m');
 
@@ -121,7 +133,7 @@ class MetadataRepository extends EntityRepository
      * @param String $path
      * @return float|int|mixed|string
      */
-    private function findByPathAndAccount(Account $account, String $path): mixed
+    public function findByPathAndAccount(Account $account, String $path): mixed
     {
         $qb = $this->createQueryBuilder('m');
 
@@ -133,28 +145,25 @@ class MetadataRepository extends EntityRepository
         return $qb->getQuery()->getResult();
     }
 
-//    /**
-//     * @return Metadata[] Returns an array of Metadata objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('m')
-//            ->andWhere('m.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('m.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
 
-//    public function findOneBySomeField($value): ?Metadata
-//    {
-//        return $this->createQueryBuilder('m')
-//            ->andWhere('m.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    /**
+     * @param Account $account
+     * @param String $path
+     * @param String $name
+     * @return mixed
+     * @throws NonUniqueResultException
+     */
+    public function findByExactPathAndAccountNull(Account $account, String $path, String $name): mixed
+    {
+        $qb = $this->createQueryBuilder('m');
+
+        $qb->where('m.path = :path')
+            ->andWhere('m.name = :name')
+            ->andWhere('m.account = :account')
+            ->setParameter('path', $path)
+            ->setParameter('name', $name)
+            ->setParameter('account', $account);
+
+        return $qb->getQuery()->getOneOrNullResult();
+    }
 }

@@ -3,8 +3,11 @@
 namespace UEMC\Core\Service;
 
 use DateTime;
+use League\Flysystem\DirectoryAttributes;
+use League\Flysystem\FileAttributes;
 use League\Flysystem\FilesystemException;
 use League\Flysystem\Filesystem;
+use League\Flysystem\StorageAttributes;
 use League\Flysystem\UnableToCreateDirectory;
 use League\Flysystem\UnableToWriteFile;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -199,6 +202,10 @@ abstract class CloudService
         }
     }
 
+    /**
+     * @param UploadedFile $content
+     * @return UploadedFile
+     */
     public function getUploadedFile(UploadedFile $content): UploadedFile
     {
         return $content;
@@ -318,69 +325,89 @@ abstract class CloudService
     }
 
 
-    /**
-     * @param String $path
-     * @return Metadata
-     * @throws CloudException
-     */
-    public function getNativeMetadata(String $path):Metadata
-    {
-        $arhive=$this->getAnArchive($path);
 
-        $lastModifiedTimestamp = $arhive['last_modified'];
+    public function getMetadata(StorageAttributes $file, Account $account):Metadata
+    {
+
+        if ($file instanceof FileAttributes)
+        {
+            $fileSize = $file->fileSize();
+            $mimeType = $file->MimeType();
+        }
+
+        $visibility = $file->Visibility();
+        $lastModified = $file->lastModified();
+
+        $lastModifiedTimestamp = $lastModified;
         $dateTime = new DateTime();
         $dateTime->setTimestamp($lastModifiedTimestamp);
 
         return new Metadata(
-            basename($path),
-            $arhive['extra_metadata']['id']??null,
-            dirname($path),
-            $arhive['extra_metadata']['virtual_path']??null,
-            $arhive['type'],
+            basename($file->path()),
+            $file->extraMetadata()['id']??null,
+            dirname($file->path()),
+            $file->extraMetadata()['virtual_path']??null,
+            $file->type(),
+            $fileSize??null,
+            $mimeType??null,
             $dateTime,
             null,
-            $arhive['visibility'],
+            $visibility,
             FileStatus::EXISTENT->value,
-            null
+            $account
         );
     }
 
     /**
      * @param string $ruta
-     * @return string
+     * @return StorageAttributes|null
      * @throws CloudException
      */
-    public function distinguirTipoRuta(string $ruta): string // ruta=a/b/c.txt
+    public function getArchivo(string $ruta): StorageAttributes|null
     {
         try {
             $filesystem=$this->getFilesystem();
-            $contents=$filesystem->listContents(dirname($ruta));
-            foreach ($contents as $item) {
-                if ($item['path']==$ruta ||
-                    str_replace('\\', '/',$item['path']) == $ruta) {  // /a/b/c.txt == /a/b/c.txt
-                    if ($item['type'] == 'file') {
-                        return 'file';
-                    } elseif ($item['type'] == 'dir') {
-                        return 'dir';
-                    }
+
+            $contents = $filesystem->listContents(dirname($ruta))->toArray();
+
+            $filteredItems = array_filter($contents, function ($item) use ($ruta) {
+                return $item['path'] === $ruta || str_replace('\\', '/', $item['path']) === $ruta;
+            });
+
+            if (!empty($filteredItems)) {
+                // El primer elemento encontrado (puede haber más si hay duplicados)
+                $item = reset($filteredItems);
+
+                if ($item instanceof FileAttributes) {
+                    return new FileAttributes($ruta, $item->fileSize(), $item->visibility(), $item->lastModified(), $item->mimeType(), $item->extraMetadata());
+                } elseif ($item instanceof \League\Flysystem\DirectoryAttributes) {
+                    return new DirectoryAttributes($ruta, $item->visibility(), $item->lastModified(), $item->extraMetadata());
                 }
             }
-            return 'KO';
         } catch (FilesystemException | \Exception $e) {
             throw new CloudException(ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorMessage().' - '.$e->getMessage(),
                 ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorCode());
         }
+        return null;
     }
 
+    /**
+     * @param string $ruta
+     * @return array
+     * @throws CloudException
+     */
     public function getAnArchive(string $ruta): array // ruta=a/b/c.txt
     {
+
         try {
             $filesystem=$this->getFilesystem();
-            $contents=$filesystem->listContents(dirname($ruta))->toArray();
+
+            $contents=$filesystem->listContents(dirname($ruta),false)->toArray();
             foreach ($contents as $item) {
                 if ($item['path']==$ruta ||
                     str_replace('\\', '/',$item['path']) == $ruta) {  // /a/b/c.txt == /a/b/c.txt
-                    return json_decode(json_encode($item),true); //El objeto se ocnvierte a un array
+
+                    return json_decode(json_encode($item),true); //El objeto se convierte a un array
                 }
             }
             return array();

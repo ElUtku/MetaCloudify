@@ -29,7 +29,10 @@ class Metadata
 
     #[ORM\Column(length: 50)]
     private ?string $type = null;
-
+    #[ORM\Column(type:Types::FLOAT, nullable:true)]
+    private ?float $size;
+    #[ORM\Column(length: 50)]
+    private ?string $mime_type;
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?DateTimeInterface $lastModified = null;
 
@@ -47,24 +50,29 @@ class Metadata
     private ?Account $account = null;
 
     /**
+     * @param int|null $id
      * @param string|null $name
      * @param string|null $virtualName
      * @param string|null $path
      * @param string|null $virtualPath
      * @param string|null $type
+     * @param float|null $size
+     * @param string|null $mime_type
      * @param DateTimeInterface|null $lastModified
      * @param string|null $author
      * @param string|null $visibility
      * @param string|null $status
      * @param Account|null $account
      */
-    public function __construct(?string $name, ?string $virtualName, ?string $path, ?string $virtualPath, ?string $type, ?DateTimeInterface $lastModified, ?string $author, ?string $visibility, ?string $status, ?Account $account)
+    public function __construct(?string $name, ?string $virtualName, ?string $path, ?string $virtualPath, ?string $type, ?float $size, ?string $mime_type, ?DateTimeInterface $lastModified, ?string $author, ?string $visibility, ?string $status, ?Account $account)
     {
         $this->name = $name;
         $this->virtualName = $virtualName;
         $this->path = $path;
         $this->virtualPath = $virtualPath;
         $this->type = $type;
+        $this->size = $size;
+        $this->mime_type = $mime_type;
         $this->lastModified = $lastModified;
         $this->author = $author;
         $this->visibility = $visibility;
@@ -136,6 +144,38 @@ class Metadata
         $this->type = $type;
 
         return $this;
+    }
+
+    /**
+     * @return float|null
+     */
+    public function getSize(): ?float
+    {
+        return $this->size;
+    }
+
+    /**
+     * @param float|null $size
+     */
+    public function setSize(?float $size): void
+    {
+        $this->size = $size;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getMimeType(): ?string
+    {
+        return $this->mime_type;
+    }
+
+    /**
+     * @param string|null $mime_type
+     */
+    public function setMimeType(?string $mime_type): void
+    {
+        $this->mime_type = $mime_type;
     }
 
     public function getLastModified(): ?DateTimeInterface

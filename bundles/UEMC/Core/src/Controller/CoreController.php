@@ -191,14 +191,27 @@ class CoreController extends AbstractController
             foreach ($archives as $archive)
             {
                 $path=$archive['path'];
-                $metadata=$this->core->getNativeMetadata($path);
-                    $metadata->setAccount($entityManager->getRepository(Account::class)->getAccount($this->account));
-                $extraMetadata=$entityManager->getRepository(Metadata::class)->fillMetadata($metadata);
+                $account = $entityManager->getRepository(Account::class)->getAccount($this->account);
 
-                $archive['extra_metadata']=$extraMetadata;
+                if ($entityManager->getRepository(Metadata::class)->findByExactPathAndAccountNull($account,dirname($path),basename($path)))
+                {
+                    $archivo=$this->core->getArchivo($path);
+
+                    $metadata = $this->core->getMetadata($archivo,$account);
+
+                    $extraMetadata=$entityManager->getRepository(Metadata::class)->getCloudMetadata($metadata);
+
+                    $archive['extra_metadata'] = [
+                        'virtual_name' => $extraMetadata->getVirtualName(),
+                        'virtual_path' => $extraMetadata->getVirtualPath(),
+                        'author' => $extraMetadata->getAuthor(),
+                        'visibility' => $extraMetadata->getVisibility(),
+                        'status' => $extraMetadata->getStatus()
+                    ];
+                }
+
                 $archivesWhitMetadata[]=$archive;
             }
-
             return new JsonResponse($archivesWhitMetadata??$archives);
 
         }catch (CloudException $e)
@@ -239,7 +252,7 @@ class CoreController extends AbstractController
             $this->retriveCore($session,$request);
             $this->core->createDir($path,$name);
 
-            $entityManager->getRepository(Metadata::class)->store(new Metadata($name,null,$path,null,'dir',new \DateTime(),null,null,FileStatus::NEW->value,$entityManager->getRepository(Account::class)->getAccount($this->account)));
+            $entityManager->getRepository(Metadata::class)->store(new Metadata($name,null,$path,null,'dir',null,null,new \DateTime(),null,null,FileStatus::NEW->value,$entityManager->getRepository(Account::class)->getAccount($this->account)));
             return new JsonResponse();
         }catch (CloudException $e)
         {
@@ -262,7 +275,7 @@ class CoreController extends AbstractController
             $this->retriveCore($session,$request);
             $this->core->createFile($path,$name);
 
-            $entityManager->getRepository(Metadata::class)->store(new Metadata($name,null,$path,null,'file',new \DateTime(),null,null,FileStatus::NEW->value,$entityManager->getRepository(Account::class)->getAccount($this->account)));
+            $entityManager->getRepository(Metadata::class)->store(new Metadata($name,null,$path,null,'file',0,pathinfo($name, PATHINFO_EXTENSION),new \DateTime(),null,null,FileStatus::NEW->value,$entityManager->getRepository(Account::class)->getAccount($this->account)));
 
             return new JsonResponse();
         }catch (CloudException $e)
@@ -285,14 +298,16 @@ class CoreController extends AbstractController
 
             $path=$request->get('path');
 
-            $nativeMetadata=$this->core->getNativeMetadata(str_replace('\\', '/', ($path)));
-            $nativeMetadata->setAccount($entityManager->getRepository(Account::class)->getAccount($this->account));
-            $nativeMetadata->setName(basename($path));
-            $nativeMetadata->setPath(dirname($path));
-            $nativeMetadata->setStatus(FileStatus::DELETED->value);
+            $archivo=$this->core->getArchivo(str_replace('\\', '/', ($path)));
 
-            $entityManager->getRepository(Metadata::class)->store($nativeMetadata);
-            $entityManager->getRepository(Metadata::class)->deleteDirectory($nativeMetadata);
+            $metadata = $this->core->getMetadata($archivo,$entityManager->getRepository(Account::class)->getAccount($this->account));
+
+            $metadata->setName(basename($path));
+            $metadata->setPath(dirname($path));
+            $metadata->setStatus(FileStatus::DELETED->value);
+
+            $entityManager->getRepository(Metadata::class)->store($metadata);
+            $entityManager->getRepository(Metadata::class)->deleteDirectory($metadata);
 
             $this->core->delete($path);
 
@@ -321,13 +336,15 @@ class CoreController extends AbstractController
 
             $this->core->upload($destinationPath,$content);
 
-            $nativeMetadata=$this->core->getNativeMetadata(str_replace('\\', '/', ($destinationPath.'\\'.$content->getClientOriginalName())));
-            $nativeMetadata->setAccount($entityManager->getRepository(Account::class)->getAccount($this->account));
-            $nativeMetadata->setName($content->getClientOriginalName());
-            $nativeMetadata->setPath($destinationPath);
-            $nativeMetadata->setStatus(FileStatus::NEW->value);
+            $archivo=$this->core->getArchivo(str_replace('\\', '/', ($destinationPath.'\\'.$content->getClientOriginalName())));
 
-            $entityManager->getRepository(Metadata::class)->store($nativeMetadata);
+            $metadata = $this->core->getMetadata($archivo,$entityManager->getRepository(Account::class)->getAccount($this->account));
+
+            $metadata->setName($content->getClientOriginalName());
+            $metadata->setPath($destinationPath);
+            $metadata->setStatus(FileStatus::NEW->value);
+
+            $entityManager->getRepository(Metadata::class)->store($metadata);
 
             return new JsonResponse(null,Response::HTTP_OK);
         }catch (CloudException $e)

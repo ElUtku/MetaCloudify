@@ -31,27 +31,6 @@ use UEMC\Core\Service\CloudException;
 class CloudService extends Core
 {
 
-    private GoogleDriveAdapter $adapter;
-
-    /**
-     * @return GoogleDriveAdapter
-     */
-    public function getAdapter(): GoogleDriveAdapter
-    {
-        return $this->adapter;
-    }
-
-    /**
-     * @param GoogleDriveAdapter $adapter
-     */
-    public function setAdapter(GoogleDriveAdapter $adapter): void
-    {
-        $this->adapter = $adapter;
-    }
-
-
-
-
     /**
      * @param SessionInterface $session
      * @param Request $request
@@ -178,7 +157,6 @@ class CloudService extends Core
 
     }
 
-
     /**
      * @param Account $account
      * @return Filesystem
@@ -197,7 +175,6 @@ class CloudService extends Core
             $service = new Drive($client);
 
             $adapter = new GoogleDriveAdapter($service,  '');
-            $this->setAdapter($adapter);
 
             return new Filesystem($adapter, [
                 new Config([Config::OPTION_VISIBILITY => Visibility::PRIVATE])
@@ -207,37 +184,5 @@ class CloudService extends Core
         {
             throw new CloudException(ErrorTypes::ERROR_CONSTRUIR_FILESYSTEM->getErrorMessage(), ErrorTypes::ERROR_CONSTRUIR_FILESYSTEM->getErrorCode());
         }
-    }
-
-    public function getNativeMetadata(String $path):Metadata
-    {
-        try {
-
-            $extraMetadata= $this->getAdapter()->getMetadata($path);
-
-            $arhive=$this->getAnArchive($path);
-
-            $lastModifiedTimestamp = $arhive['last_modified'];
-            $dateTime = new DateTime();
-            $dateTime->setTimestamp($lastModifiedTimestamp);
-
-            return new Metadata(
-                basename($path),
-                $extraMetadata['extra_metadata']['id']??null,
-                dirname($path),
-                $extraMetadata['extra_metadata']['virtual_path']??null,
-                $arhive['type'],
-                $dateTime,
-                null,
-                $arhive['visibility'],
-                FileStatus::EXISTENT->value,
-                null
-            );
-
-        } catch (\Exception $e) {
-            throw new CloudException(ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorMessage().' - '.$e->getMessage(),
-                ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorCode());
-        }
-
     }
 }
