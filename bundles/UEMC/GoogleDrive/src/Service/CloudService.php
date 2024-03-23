@@ -24,6 +24,7 @@ use UEMC\Core\Entity\Account;
 use UEMC\Core\Entity\Metadata;
 use UEMC\Core\Resources\CloudTypes;
 use UEMC\Core\Resources\ErrorTypes;
+use UEMC\Core\Resources\FileStatus;
 use UEMC\Core\Service\CloudService as Core;
 use UEMC\Core\Service\CloudException;
 
@@ -214,16 +215,24 @@ class CloudService extends Core
 
             $extraMetadata= $this->getAdapter()->getMetadata($path);
 
-            $attributes = match ($extraMetadata['type']) {
-                'file' => new FileAttributes($path),
-                'dir' => new DirectoryAttributes($path),
-                default => throw new CloudException(ErrorTypes::NO_SUCH_FILE_OR_DIRECTORY->getErrorMessage(),
-                    ErrorTypes::NO_SUCH_FILE_OR_DIRECTORY->getErrorCode()),
-            };
+            $arhive=$this->getAnArchive($path);
 
+            $lastModifiedTimestamp = $arhive['last_modified'];
+            $dateTime = new DateTime();
+            $dateTime->setTimestamp($lastModifiedTimestamp);
 
-            $this->logger->debug("extraMetadata: ".json_encode($extraMetadata));
-            return new Metadata(null,$extraMetadata['extraMetadata']['id']??null,$path,$extraMetadata['extraMetadata']['virtual_path']??null,$attributes->type(),$attributes->lastModified()??new \DateTime(),null,$attributes->visibility(),null,null);
+            return new Metadata(
+                basename($path),
+                $extraMetadata['extra_metadata']['id']??null,
+                dirname($path),
+                $extraMetadata['extra_metadata']['virtual_path']??null,
+                $arhive['type'],
+                $dateTime,
+                null,
+                $arhive['visibility'],
+                FileStatus::EXISTENT->value,
+                null
+            );
 
         } catch (\Exception $e) {
             throw new CloudException(ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorMessage().' - '.$e->getMessage(),

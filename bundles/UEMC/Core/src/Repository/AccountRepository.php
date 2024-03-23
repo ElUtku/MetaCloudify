@@ -40,16 +40,13 @@ class AccountRepository extends EntityRepository
     }
 
     /**
-     * @param Account $account
      * @return void
      * @throws CloudException
      */
-    public function updateAcount(Account $account): void
+    public function updateAcount(): void
     {
         try {
             $em=$this->getEntityManager();
-            $account->setLastIp($account->getLastIp());
-            $account->setLastSession($account->getLastSession());
             $em->flush();
         }catch (Exception $e)
         {
@@ -78,31 +75,5 @@ class AccountRepository extends EntityRepository
         }
 
         return $qb->getQuery()->getOneOrNullResult();
-
     }
-//    /**
-//     * @return Account[] Returns an array of Account objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('a')
-//            ->andWhere('a.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('a.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
-//    public function findOneBySomeField($value): ?Account
-//    {
-//        return $this->createQueryBuilder('a')
-//            ->andWhere('a.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
-
 }

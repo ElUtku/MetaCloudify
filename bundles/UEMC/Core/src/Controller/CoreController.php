@@ -94,10 +94,11 @@ class CoreController extends AbstractController
             if($accountExists==null)
             {
                 $entityManager->getRepository(Account::class)->newAcount($account);
-                $accountExists=$entityManager->getRepository(Account::class)->getAccount($account);
             } else
             {
-                $entityManager->getRepository(Account::class)->updateAcount($account);
+                $accountExists->setLastSession($account->getLastSession());
+                $accountExists->setLastIp($account->getLastIp());
+                $entityManager->getRepository(Account::class)->updateAcount();
             }
 
             $account->setId($accountExists->getId());
@@ -175,13 +176,30 @@ class CoreController extends AbstractController
     /**
      * @Route("/{cloud}/drive", name="drive")
      */
-    public function drive(SessionInterface $session, Request $request, string $cloud): Response
+    public function drive(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
     {
         try {
+            $entityManager = $doctrine->getManager();
+
             $this->createContext($cloud);
             $this->retriveCore($session,$request);
 
-            return new JsonResponse($this->core->listDirectory($request->get('path')));
+            $path=$request->get('path');
+
+            $archives=$this->core->listDirectory($path);
+            foreach ($archives as $archive)
+            {
+                $path=$archive['path'];
+                $metadata=$this->core->getNativeMetadata($path);
+                    $metadata->setAccount($entityManager->getRepository(Account::class)->getAccount($this->account));
+                $extraMetadata=$entityManager->getRepository(Metadata::class)->fillMetadata($metadata);
+
+                $archive['extra_metadata']=$extraMetadata;
+                $archivesWhitMetadata[]=$archive;
+            }
+
+            return new JsonResponse($archivesWhitMetadata??$archives);
+
         }catch (CloudException $e)
         {
             return new JsonResponse($e->getMessage(),$e->getStatusCode());
@@ -208,12 +226,19 @@ class CoreController extends AbstractController
     /**
      * @Route("/{cloud}/drive/createDir", name="createDir")
      */
-    public function createDir(SessionInterface $session, Request $request, string $cloud): Response
+    public function createDir(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
     {
         try {
+            $entityManager = $doctrine->getManager();
+
+            $name=$request->get('name');
+            $path=$request->get('path');
+
             $this->createContext($cloud);
             $this->retriveCore($session,$request);
-            $this->core->createDir($request->get('path'),$request->get('name'));
+            $this->core->createDir($path,$name);
+
+            $entityManager->getRepository(Metadata::class)->store(new Metadata($name,null,$path,null,'dir',new \DateTime(),null,null,FileStatus::NEW->value,$entityManager->getRepository(Account::class)->getAccount($this->account)));
             return new JsonResponse();
         }catch (CloudException $e)
         {
@@ -224,12 +249,20 @@ class CoreController extends AbstractController
     /**
      * @Route("/{cloud}/drive/createFile", name="createFile")
      */
-    public function createFile(SessionInterface $session, Request $request, string $cloud): Response
+    public function createFile(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
     {
         try{
+            $entityManager = $doctrine->getManager();
+
+            $name=$request->get('name');
+            $path=$request->get('path');
+
             $this->createContext($cloud);
             $this->retriveCore($session,$request);
-            $this->core->createFile($request->get('path'),$request->get('name'));
+            $this->core->createFile($path,$name);
+
+            $entityManager->getRepository(Metadata::class)->store(new Metadata($name,null,$path,null,'file',new \DateTime(),null,null,FileStatus::NEW->value,$entityManager->getRepository(Account::class)->getAccount($this->account)));
+
             return new JsonResponse();
         }catch (CloudException $e)
         {
@@ -250,11 +283,11 @@ class CoreController extends AbstractController
             $this->retriveCore($session,$request);
 
             $path=$request->get('path');
-            $name=$this->getBasename($path);
+
             $nativeMetadata=$this->core->getNativeMetadata(str_replace('\\', '/', ($path)));
             $nativeMetadata->setAccount($entityManager->getRepository(Account::class)->getAccount($this->account));
-            $nativeMetadata->setName($name);
-            $nativeMetadata->setPath($path);
+            $nativeMetadata->setName(basename($path));
+            $nativeMetadata->setPath(dirname($path));
             $nativeMetadata->setStatus(FileStatus::DELETED->value);
 
             $entityManager->getRepository(Metadata::class)->store($nativeMetadata);
@@ -290,7 +323,7 @@ class CoreController extends AbstractController
             $nativeMetadata=$this->core->getNativeMetadata(str_replace('\\', '/', ($destinationPath.'\\'.$content->getClientOriginalName())));
             $nativeMetadata->setAccount($entityManager->getRepository(Account::class)->getAccount($this->account));
             $nativeMetadata->setName($content->getClientOriginalName());
-            $nativeMetadata->setPath($destinationPath.'\\'.$content->getClientOriginalName());
+            $nativeMetadata->setPath($destinationPath);
             $nativeMetadata->setStatus(FileStatus::NEW->value);
 
             $entityManager->getRepository(Metadata::class)->store($nativeMetadata);
@@ -300,17 +333,6 @@ class CoreController extends AbstractController
         {
             return new JsonResponse($e->getMessage(),$e->getStatusCode());
         }
-    }
-
-    /**
-     * @param String $path
-     * @return false|string
-     */
-    private function getBasename(String $path): false|string
-    {
-        $parts = explode(DIRECTORY_SEPARATOR, $path);
-        $lastValue = end($parts);
-        return $lastValue;
     }
 
 }

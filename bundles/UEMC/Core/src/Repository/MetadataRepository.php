@@ -75,6 +75,25 @@ class MetadataRepository extends EntityRepository
         }
     }
 
+    public function fillMetadata(Metadata $file): Metadata
+    {
+        try {
+            $em=$this->getEntityManager();
+            $fileStored=$this->existFile($file);
+            if($fileStored==null)
+            {
+                $this->store($file);
+            }
+            $em->flush();
+
+            return $fileStored??$file;
+        }catch (Exception | NonUniqueResultException $e)
+        {
+            throw new CloudException(ErrorTypes::ERROR_LOG_METADATA->getErrorMessage().' - '.$e->getMessage(),
+                ErrorTypes::ERROR_LOG_METADATA->getErrorCode());
+        }
+    }
+
     /**
      * @param Metadata $file
      * @return Metadata|null
@@ -87,9 +106,11 @@ class MetadataRepository extends EntityRepository
         $qb->where('m.path = :path')
             ->andWhere('m.name = :name')
             ->andWhere('m.account = :account')
+            ->andWhere('m.type = :type')
             ->setParameter('path', $file->getPath())
             ->setParameter('name', $file->getName())
-            ->setParameter('account', $file->getAccount());
+            ->setParameter('account', $file->getAccount())
+            ->setParameter('type', $file->getType());
 
         return $qb->getQuery()->getOneOrNullResult();
 
