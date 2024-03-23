@@ -354,6 +354,7 @@ abstract class CloudService
             null,
             $visibility,
             FileStatus::EXISTENT->value,
+            null,
             $account
         );
     }

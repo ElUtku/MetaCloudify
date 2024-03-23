@@ -45,12 +45,14 @@ class Metadata
     #[ORM\Column(length: 20, nullable: false)]
     private ?string $status = null;
 
+    #[ORM\Column(type: Types::JSON)]
+    private ?string $extra = null;
+
     #[ORM\ManyToOne(cascade: ["persist"], inversedBy: 'metadata' )]
     #[ORM\JoinColumn(nullable: false)]
     private ?Account $account = null;
 
     /**
-     * @param int|null $id
      * @param string|null $name
      * @param string|null $virtualName
      * @param string|null $path
@@ -62,9 +64,10 @@ class Metadata
      * @param string|null $author
      * @param string|null $visibility
      * @param string|null $status
+     * @param string|null $extra
      * @param Account|null $account
      */
-    public function __construct(?string $name, ?string $virtualName, ?string $path, ?string $virtualPath, ?string $type, ?float $size, ?string $mime_type, ?DateTimeInterface $lastModified, ?string $author, ?string $visibility, ?string $status, ?Account $account)
+    public function __construct(?string $name, ?string $virtualName, ?string $path, ?string $virtualPath, ?string $type, ?float $size, ?string $mime_type, ?DateTimeInterface $lastModified, ?string $author, ?string $visibility, ?string $status, ?string $extra, ?Account $account)
     {
         $this->name = $name;
         $this->virtualName = $virtualName;
@@ -77,6 +80,7 @@ class Metadata
         $this->author = $author;
         $this->visibility = $visibility;
         $this->status = $status;
+        $this->extra = $extra;
         $this->account = $account;
     }
 
@@ -229,6 +233,23 @@ class Metadata
     {
         $this->status = $status;
     }
+
+    /**
+     * @return string|null
+     */
+    public function getExtra(): ?string
+    {
+        return $this->extra;
+    }
+
+    /**
+     * @param string|null $extra
+     */
+    public function setExtra(?string $extra): void
+    {
+        $this->extra = $extra;
+    }
+
 
 
     public function getAccount(): ?Account

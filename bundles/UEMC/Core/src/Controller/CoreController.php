@@ -252,7 +252,7 @@ class CoreController extends AbstractController
             $this->retriveCore($session,$request);
             $this->core->createDir($path,$name);
 
-            $entityManager->getRepository(Metadata::class)->store(new Metadata($name,null,$path,null,'dir',null,null,new \DateTime(),null,null,FileStatus::NEW->value,$entityManager->getRepository(Account::class)->getAccount($this->account)));
+            $entityManager->getRepository(Metadata::class)->store(new Metadata($name,null,$path,null,'dir',null,null,new \DateTime(),null,null,FileStatus::NEW->value,null,$entityManager->getRepository(Account::class)->getAccount($this->account)));
             return new JsonResponse();
         }catch (CloudException $e)
         {
@@ -275,7 +275,7 @@ class CoreController extends AbstractController
             $this->retriveCore($session,$request);
             $this->core->createFile($path,$name);
 
-            $entityManager->getRepository(Metadata::class)->store(new Metadata($name,null,$path,null,'file',0,pathinfo($name, PATHINFO_EXTENSION),new \DateTime(),null,null,FileStatus::NEW->value,$entityManager->getRepository(Account::class)->getAccount($this->account)));
+            $entityManager->getRepository(Metadata::class)->store(new Metadata($name,null,$path,null,'file',0,pathinfo($name, PATHINFO_EXTENSION),new \DateTime(),null,null,FileStatus::NEW->value,null,$entityManager->getRepository(Account::class)->getAccount($this->account)));
 
             return new JsonResponse();
         }catch (CloudException $e)
