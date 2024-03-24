@@ -11,7 +11,9 @@ function Account(accountId,controller,user,root,pathActual,parent)
 let accountE1;
 
 $(document).ready(function() {
-
+    $('#modalMetadatos').on('hidden.bs.modal', function () {
+        $('.mb-3.dynamic').remove(); // Eliminar todos los elementos con la clase 'mb-3' y 'dynamic'
+    });
 });
 
 function loadData(accountId,path) {
@@ -88,11 +90,14 @@ function formatDate(timestamp)
    return  format.format(fecha);
 }
 function updatePageContent(data,accountId,account) {
+
     $('#explorer').removeClass('d-none');
 
+    //----Recuperamos la tabla y la limpiamos
     let table=$('#tableBody');
     table.empty();
 
+    //----Pinta una fila con cada objeto y le asignamos funciones
     $.each(data, function(index, item) {
 
         item.path=item.path.replace(/\//g, '\\');
@@ -100,6 +105,7 @@ function updatePageContent(data,accountId,account) {
         let name = parts[parts.length - 1];
 
         let fecha = formatDate(item.last_modified);
+
 
         let col = $('<tr></tr>');
 
@@ -142,11 +148,6 @@ function updatePageContent(data,accountId,account) {
             event.preventDefault();
 
             let contextMenu = $('#contextMenu');
-            let clickedElement = {
-                'path': item.path,
-                'name': name,
-                'id': accountId
-            }; //Se guarda el elemento sobre el que se hizo click
 
             contextMenu.removeClass('d-none').addClass('d-block');
             contextMenu.css({
@@ -168,7 +169,29 @@ function updatePageContent(data,accountId,account) {
             //Se ejecuta si se hace click sobre eliminar cuando el meu contextual esta desplegado para un elemento
             $('#buttonDlt').on('click', function() {
                 event.preventDefault();
-                dlt(clickedElement); // Enviar el objeto como parámetro a la función dlt()
+                dlt(item); // Enviar el objeto como parámetro a la función dlt()
+            });
+
+            //Se ejecuta si se hace click sobre editar cuando el meu contextual esta desplegado para un elemento
+            $('#buttonEdit').on('click', function() {
+                $('#archivoName').val(name);
+                $('#archivoAuthor').val(item.extra_metadata['author']);
+                $('#archivoVisibilidad').val(item.visibility);
+
+                const elementosExcluidos = ['id','display_path','filename','virtual_name','extension','virtual_path', 'status','author','visibility'];
+
+                Object.entries(item.extra_metadata).forEach(([paramName, paramValue]) => {
+                    if (!elementosExcluidos.includes(paramName)) {
+                        if (!$('#' + paramName).length) {
+                            let nuevoBloque = crearExtraBloque(paramName, paramValue);
+                            $('#editMetadataBtn').before(nuevoBloque);
+                        }
+                    }
+                });
+
+                $('#modalMetadatos').modal('show');
+                $('#modalMetadatos').data('item', item);
+                $('#modalMetadatos').data('accountId', accountId);
             });
 
         });
@@ -335,4 +358,47 @@ function logout(accountId)
 function back()
 {
     loadData(accountE1.accountId,accountE1.parent);
+}
+
+function editarMetadata()
+{
+    let item = $('#modalMetadatos').data('item');
+    let accountId=$('#modalMetadatos').data('accountId');
+    let account = getAccount(accountId)
+    item.extra_metadata['author'] = $('#archivoAuthor').val();
+    item.name = $('#archivoName').val();
+    item.visibility = $('#archivoVisibilidad').val();
+    $.each(item.extra_metadata['extra'], function(nombre, valor) {
+        item.extra_metadata['extra'][nombre] = $('#'.nombre).val();
+    });
+    $.ajax({
+        url: account.controller+'/drive/editMetadata',
+        method: 'POST',
+        data: {
+            content: JSON.stringify(item),
+            accountId: accountId
+        },
+        success: function () {
+                console.log('ok');
+        },
+        error: function (xhr, status, error) {
+            console.error(error);
+        }
+    });
+}
+
+function addMetadata(name)
+{
+    $('#editMetadataBtn').before(crearExtraBloque(name,''));
+    let item = $('#modalMetadatos').data('item');
+    item.extra_metadata['extra'] = { [name]: null };
+    $('#modalMetadatos').data('item', item);
+}
+
+function crearExtraBloque(paramName, paramValue) {
+    return $('<div class="mb-3">\
+                <label for="' + paramName + '" class="form-label">' + paramName + '</label>\
+                <input type="text" class="form-control" id="' + paramName + '" name="' + paramName + '" value="' + paramValue + '">\
+            </div>\
+            ');
 }

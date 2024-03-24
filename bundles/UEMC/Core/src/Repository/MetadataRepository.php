@@ -150,10 +150,10 @@ class MetadataRepository extends EntityRepository
      * @param Account $account
      * @param String $path
      * @param String $name
-     * @return mixed
+     * @return Metadata|null
      * @throws NonUniqueResultException
      */
-    public function findByExactPathAndAccountNull(Account $account, String $path, String $name): mixed
+    public function findByExactPathAndAccountNull(Account $account, String $path, String $name): Metadata|null
     {
         $qb = $this->createQueryBuilder('m');
 

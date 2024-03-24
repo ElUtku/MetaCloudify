@@ -2,8 +2,10 @@
 
 namespace UEMC\Core\Controller;
 
+use DateTime;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
+use Microsoft\Graph\Model\File;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -353,4 +355,52 @@ class CoreController extends AbstractController
         }
     }
 
+    /**
+     * @Route("/{cloud}/drive/editMetadata", name="editMetadata")
+     */
+    public function editMetadata(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
+    {
+        try {
+            $entityManager = $doctrine->getManager();
+
+            $this->createContext($cloud);
+            $this->retriveCore($session,$request);
+
+            $account = $entityManager->getRepository(Account::class)->getAccount($this->account);
+
+            $content=json_decode($request->get('content'),true);
+
+            $file=$entityManager->getRepository(Metadata::class)->findByExactPathAndAccountNull($account,dirname($content['path']),$content['name']);
+            if($file)
+            {
+                $file->setAuthor($content['extra_metadata']['author']);
+                $file->setVisibility($content['extra_metadata']['visibility']);
+                $file->setExtra(json_encode($content['extra_metadata']['extra']));
+                $file->setStatus(FileStatus::MODIFIED->value);
+                $file->setName($content['name']);
+            } else //Si $file no existe es probable que sea una primera modificación de un fichero no indexado
+            {
+                $file = new Metadata(
+                    $content['name'],
+                    $content['extra_metadata']['virtual_name']??null,
+                    $content['path'],
+                    $content['extra_metadata']['virtual_path']??null,
+                    $content['type'],
+                    $content['file_size']??null,
+                    $content['mime_type']??null,
+                    (new DateTime())->setTimestamp($content['last_modified']),
+                    $content['extra_metadata']['author']??null,
+                    $content['visibility'],
+                    $content['extra_metadata']['status']??FileStatus::MODIFIED->value,
+                    json_encode($content['extra_metadata']['extra'])??null,
+                    $account);
+            }
+
+            $entityManager->getRepository(Metadata::class)->store($file);
+            return new JsonResponse(null,Response::HTTP_OK);
+        }catch (CloudException $e)
+        {
+            return new JsonResponse($e->getMessage(),$e->getStatusCode());
+        }
+    }
 }
