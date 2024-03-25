@@ -6,6 +6,7 @@
             <link rel="stylesheet" href="{{ asset('bundles/uemc_home/css/sidebar.css') }}">
             <link rel="stylesheet" href="{{ asset('bundles/uemc_home/css/_home.css') }}">
 
+            <link rel="stylesheet" href="https://cdn.datatables.net/v/bs5/dt-2.0.3/b-3.0.1/b-colvis-3.0.1/cr-2.0.0/date-1.5.2/fc-5.0.0/fh-4.0.1/kt-2.12.0/r-3.0.0/rg-1.5.0/rr-1.5.0/sc-2.4.1/sb-1.7.0/sp-2.3.0/sl-2.0.0/sr-1.4.0/datatables.min.css">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/10.7.0/css/jquery.fileupload.min.css">
         {% endblock %}
 
@@ -17,8 +18,9 @@
             <!-- Manejo de directorios y ficheros -->
             <script src="{{ asset('bundles/uemc_home/js/cloud.js') }}"></script>
             <script src="{{ asset('bundles/uemc_home/js/localStore.js') }}"></script>
+            <script src="{{ asset('bundles/uemc_home/js/utils.js') }}"></script>
 
-            <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+            <script src="https://cdn.datatables.net/v/bs5/dt-2.0.3/b-3.0.1/b-colvis-3.0.1/cr-2.0.0/date-1.5.2/fc-5.0.0/fh-4.0.1/kt-2.12.0/r-3.0.0/rg-1.5.0/rr-1.5.0/sc-2.4.1/sb-1.7.0/sp-2.3.0/sl-2.0.0/sr-1.4.0/datatables.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/10.7.0/js/vendor/jquery.ui.widget.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/10.7.0/js/jquery.iframe-transport.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/10.7.0/js/jquery.fileupload.min.js"></script>
@@ -39,48 +41,37 @@
         <div id="mainContent" class="min-vh-auto col-md-10 d-flex flex-column flex-wrap align-items-start justify-content-start border-start"  style="width: 69.5%;">
                 <div class="container col-md-12">
                     <h1>Bienvenido</h1>
-                    <div id="divRuta" class="d-none btn-toggle-nav  col-12 flex-row align-items-center d-flex mb-2 pb-3 border-bottom">
-                        <div class="col-auto me-auto no-select" role="button" onclick="back();">
-                            <i id="return" class="bi bi-arrow-return-left"></i>
-                            <label for="return" style="cursor: pointer">Volver atras</label>
-                        </div>
-                        <div class="col-3 me-auto d-flex flex-row align-items-center">
-                            <a id="crearCarpeta" href="" onclick="event.preventDefault();$('#newNameButton').attr('onclick','createDir($(\'#newName\').val());')" class="link-body-emphasis d-inline-flex text-decoration-none rounded" data-bs-toggle="modal" data-bs-target="#newDirFileModal">
-                                <i class="bi bi-folder-fill me-1"></i>
-                                Crear carpeta
-                            </a>
-                            <a id="crearFichero" href="" onclick="event.preventDefault();$('#newNameButton').attr('onclick','createFile($(\'#newName\').val());')" class="link-body-emphasis d-inline-flex text-decoration-none rounded" data-bs-toggle="modal" data-bs-target="#newDirFileModal">
-                                <i class="bi bi-file-earmark-text me-1"></i>
-                                Crear fichero
-                            </a>
-
-                        </div>
-                        <div class="col-6 d-flex flex-row align-items-center">
-                            <label class="col-2" for="path" id="lpath" >Ruta actual</label>
-                            <input class="form-control" id="path" type="text" placeholder="">
-                            <button class="btn btn-outline-secondary d-inline-flex align-items-center ms-2" type="button" onclick="loadData(accountE1.accountId,$('#path').val());">
-                                Ir
-                                <i class="bi bi-arrow-right-short"></i>
-                            </button>
-                        </div>
-                    </div>
+                    <p>Cloud Bundle es una aplicación web que permite gestionar ficheros y metadatos de distintas nubes.</p>
                 </div>
 
                 <div class="container d-flex flex-column col-md-12 mt-2">
-                    <table id="explorer" class="table table-striped d-none">
+                    <h4>Explorador 1</h4>
+                    <div class="d-flex align-items-center col-4 mb-2">
+                        <label for="selectTabla1" class="col-3">Cuenta 1:</label>
+                        <select id="selectTabla1" class="form-select">
+                        </select>
+                    </div>
+                    <table id="explorer1" class="table table-striped" style="width: 100%">
                         <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Fecha</th>
-                            <th>Propietario</th>
-                        </tr>
+                            <tr>
+                            </tr>
                         </thead>
-                        <tbody id="tableBody">
-                        </tbody>
                     </table>
                 </div>
 
-                <div id="explorer" class="container d-flex flex-column col-md-12 mt-2" meta="">
+                <div class="container d-flex flex-column col-md-12 mt-2 mb-2 border-top">
+                    <h4>Explorador 2</h4>
+                    <div class="d-flex align-items-center col-4 mb-2">
+                        <label for="selectTabla2" class="col-3">Cuenta 2:</label>
+                        <select id="selectTabla2" class="form-select">
+                        </select>
+                    </div>
+                    <table id="explorer2" class="table table-striped" style="width: 100%">
+                        <thead>
+                            <tr>
+                            </tr>
+                        </thead>
+                    </table>
                 </div>
 
                 <div id="divUpload" class="d-none col-md-5 border-top m-3 pt-2">

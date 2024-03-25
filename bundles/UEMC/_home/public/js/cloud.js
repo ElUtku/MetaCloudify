@@ -8,20 +8,37 @@ function Account(accountId,controller,user,root,pathActual,parent)
     this.parent=parent ?? undefined;
 }
 
-let accountE1;
-
 $(document).ready(function() {
+
+    /*--- Carga de selectes de los epxloradores ---*/
+    loadSelects();
+
+    $('#selectTabla1').change(function() {
+        let accountId = $(this).children("option:selected").val();
+        let path = '';
+        loadData(accountId,path,'explorer1');
+    });
+
+    $('#selectTabla2').change(function() {
+        let accountId = $(this).children("option:selected").val();
+        let path = '';
+
+        loadData(accountId,path,'explorer2');
+    });
+
+    /*--- Esconder y borrar modal de metadatos en cada interacción ---*/
     $('#modalMetadatos').on('hidden.bs.modal', function () {
         $('.mb-3.dynamic').remove(); // Eliminar todos los elementos con la clase 'mb-3' y 'dynamic'
     });
+
 });
 
-function loadData(accountId,path) {
+function loadData(accountId,path,explorer) {
 
     path = (typeof path !== 'undefined') ? path : '';
 
     let account = getAccount(accountId);
-
+    $.data($('#'+explorer,'account',account));
     try {
         //test/a/b/c -> [test],[a],[b],[c] -> [test],[a],[b] -> test/a/b
         account.parent=path.split('\\');
@@ -31,12 +48,6 @@ function loadData(accountId,path) {
     {
         account.parent = '';
     }
-
-    let ruta = path;
-    $("#path").val(path);
-    let divRuta = $("#divRuta");
-    divRuta.addClass('d-flex');
-    divRuta.removeClass('d-none');
 
     $.ajax({
         url: account.controller+'/drive',
@@ -50,12 +61,9 @@ function loadData(accountId,path) {
             {
                 data=cleanOwncloudData(data);
             }
-            account.pathActual=ruta;
-            accountE1=account;
+            account.pathActual=path;
             setAccount(account);
-            updatePageContent(data,accountId,account);
-
-            $('#divUpload').removeClass('d-none').addClass('d-block');
+            refrescarTabla(data,explorer,account);
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -63,147 +71,105 @@ function loadData(accountId,path) {
     });
 }
 
-//Se debe eliminar remote.php/dav/files/{user} para poder navegar por los directorios
-function cleanOwncloudData(data)
+function refrescarTabla(data,explorer,account)
 {
-    return data.map(function (elemento) {
-        elemento.path = elemento.path.replace(/remote\.php\/dav\/files\/\w+\//g, '');
-        return elemento;
-    });
-}
-
-function formatDate(timestamp)
-{
-    let fecha = new Date();
-    fecha.setTime(timestamp * 1000);
-
-    let opcionesDeFormato = {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-    };
-
-    let format = new Intl.DateTimeFormat('es-ES', opcionesDeFormato);
-
-   return  format.format(fecha);
-}
-function updatePageContent(data,accountId,account) {
-
-    $('#explorer').removeClass('d-none');
-
-    //----Recuperamos la tabla y la limpiamos
-    let table=$('#tableBody');
-    table.empty();
-
-    //----Pinta una fila con cada objeto y le asignamos funciones
-    $.each(data, function(index, item) {
-
-        item.path=item.path.replace(/\//g, '\\');
-        let parts=item.path.split('\\');
-        let name = parts[parts.length - 1];
-
-        let fecha = formatDate(item.last_modified);
-
-
-        let col = $('<tr></tr>');
-
-            if (item.type === 'dir') {
-                col.append('<td role="button"  class="no-select underline-on-hover" data-bs-toggle="tooltip" title="' + item.path + '"><i class="bi bi-folder-fill me-2"></i>'+name+'</td>');
-            } else if (item.type === 'file') {
-                col.append('<td role="button"  class="no-select underline-on-hover" data-bs-toggle="tooltip" title="' + item.path + '"><i class="bi bi-file-text-fill me-2"></i>'+name+'</td>');
-            }
-
-            col.append('<td>' + fecha + '</td>');
-
-            switch(account.controller) {
-                case 'ftp':
-                    col.append('<td title="' + account.controller + '"><i class="bi bi-hdd-rack me-2"></i>'+account.user+'</td>');
-                    break;
-                case 'onedrive':
-                    col.append('<td title="' + account.controller + '"><i class="bi bi-microsoft me-2"></i>'+account.user+'</td>');
-                    break;
-                case 'googledrive':
-                    col.append('<td title="' + account.controller + '"><i class="bi bi-google me-2"></i>'+account.user+'</td>');
-                    break;
-                case 'owncloud':
-                    col.append('<td title="' + account.controller + '"><i class="bi bi-clouds me-2"></i>'+account.user+'</td>');
-                    break;
-                default:
-            }
-
-
-        // Si se hace click en un elemento seleccionado se recarga la pagina
-        col.on('dblclick', function() {
-            if (item.type==='dir')
-            {
-                loadData(accountId,item.path.charAt(0) === '\\' ? item.path.slice(1) : item.path);
-            }else if (item.type==='file')
-            {
-                download(item.path,name,accountId);
-            }
-        });
-        col.on('contextmenu', function(event) {
-            event.preventDefault();
-
-            let contextMenu = $('#contextMenu');
-
-            contextMenu.removeClass('d-none').addClass('d-block');
-            contextMenu.css({
-                left: event.clientX-27 ,
-                top: event.clientY-50
-            });
-
-
-            // Se agrega un evento de clic fuera del menú
-            $(document).on('click.menuClose', function(event) {
-                // Se verifica si el clic fue fuera del menú contextual
-                if (!contextMenu.is(event.target) && contextMenu.has(event.target).length === 0) {
-                    contextMenu.addClass('d-none').removeClass('d-block');
-                    // Se quita el evento de clic fuera del menú una vez que se ha ejecutado
-                    $(document).off('click.menuClose');
-                }
-            });
-
-            //Se ejecuta si se hace click sobre eliminar cuando el meu contextual esta desplegado para un elemento
-            $('#buttonDlt').on('click', function() {
-                event.preventDefault();
-                dlt(item); // Enviar el objeto como parámetro a la función dlt()
-            });
-
-            //Se ejecuta si se hace click sobre editar cuando el meu contextual esta desplegado para un elemento
-            $('#buttonEdit').on('click', function() {
-                $('#archivoName').val(name);
-                $('#archivoAuthor').val(item.extra_metadata['author']);
-                $('#archivoVisibilidad').val(item.visibility);
-
-                const elementosExcluidos = ['id','display_path','filename','virtual_name','extension','virtual_path', 'status','author','visibility'];
-
-                Object.entries(item.extra_metadata).forEach(([paramName, paramValue]) => {
-                    if (!elementosExcluidos.includes(paramName)) {
-                        if (!$('#' + paramName).length) {
-                            let nuevoBloque = crearExtraBloque(paramName, paramValue);
-                            $('#editMetadataBtn').before(nuevoBloque);
-                        }
+    let tabla=$('#'+explorer)
+    tabla.DataTable().destroy();
+    tabla.DataTable({
+        dom: 'Bfrtip', // 'B' option para activar los botones
+        dom: "<'row'<'col-sm-6'B><'col-sm-6'f>>" +
+            "<'row'<'col-sm-12'tr>>" +
+            "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+        buttons: [
+            { text: '<i class="bi bi-arrow-return-left me-2"></i>Volver atrás', className: 'btn', action: function (){back(explorer,account);} },
+            { text: '<i class="bi bi-folder-fill me-2"></i>Crear carpeta', className: 'btn ', action: function () {$('#newDirFileModal').modal('show');$('#newNameButton').attr('onclick','createDir($(\'#newName\').val(),\''+account.accountId+'\',\''+explorer+'\')');}},
+            { text: '<i class="bi bi-file-text-fill me-2"></i>Crear fichero', className: 'btn ', action: function () {$('#newDirFileModal').modal('show');$('#newNameButton').attr('onclick','createFile($(\'#newName\').val(),\''+account.accountId+'\',\''+explorer+'\')');}},
+        ],
+        info: false,
+        ordering: false,
+        paging: false,
+        data: data,
+        columns: [
+            { title: '',
+                data: 'type',
+                visible: true,
+                width: '0.1%',
+                className: 'dt-body-right',
+                orderable: false,
+                searchable: false,
+                render: function (data) {
+                    if (data === 'dir') {
+                        return '<i class="bi bi-folder-fill"></i>';
+                    } else if (data === 'file') {
+                        return '<i class="bi bi-file-text-fill"></i>';
                     }
-                });
+                }
+            },
+            { title: 'Nombre',
+                data: 'path',
+                visible: true,
+                render: function (data) {
+                    data=data.replace(/\//g, '\\');
+                    let parts=data.split('\\');
+                    let name = parts[parts.length - 1];
+                    return name;
+                }
+            },
+            { title: 'Visibility',
+                data: 'visibility',
+                visible: false,
+            },
+            { title: 'Fecha',
+                data: 'last_modified',
+                visible: true,
+                render:function (data)
+                {
+                    return formatDate(data);
+                },
+            },
+            { title: 'Metadata',
+                data: 'extra_metadata',
+                visible: false,
+            },
+            { title: 'Propietario',
+                visible: true,
+                render:function ()
+                {
+                    return account.user;
+                },
+            }
+        ]
+    });
+// Añadir botones personalizados después de inicializar DataTable
+    tabla.DataTable().buttons().container().appendTo('#' + explorer + ' .col-md-6:eq(0)'); // Ajusta el selector según tu estructura HTML
 
-                $('#modalMetadatos').modal('show');
-                $('#modalMetadatos').data('item', item);
-                $('#modalMetadatos').data('accountId', accountId);
-            });
-
-        });
-        table.append(col);
+    tabla.off('mouseenter', 'td:nth-child(2)'); //Hay que desvincular el elemtno para que no se repita
+    tabla.off('mouseleave', 'td:nth-child(2)'); //Hay que desvincular el elemtno para que no se repita
+    tabla.on('mouseenter', 'td:nth-child(2)', function() {
+        $(this).addClass('text-primary').css('cursor', 'pointer'); // Cambiar color del texto y cursor al pasar el ratón sobre la celda
+    }).on('mouseleave', 'td:nth-child(2)', function() {
+        $(this).removeClass('text-primary').css('cursor', 'default'); // Restaurar color del texto y cursor al salir del ratón de la celda
     });
 
+    tabla.off('click', 'td:nth-child(2)'); //Hay que desvincular el elemtno para que no se repita
+    tabla.on('click', 'td:nth-child(2)', function () {
+
+        let data = tabla.DataTable().row(this).data();
+        if (data.type==='dir')
+        {
+           loadData(account.accountId,data.path.charAt(0) === '\\' ? data.path.slice(1) : data.path ,explorer);
+        }else if (data.type==='file')
+        {
+            data.path=data.path.replace(/\//g, '\\');
+            let parts=data.path.split('\\');
+            let name = parts[parts.length - 1];
+            download(data.path,name,account.accountId);
+        }
+    });
 }
-
-function createDir(name)
+function createDir(name,accountId,explorer)
 {
-    let account = accountE1;
-
+    let account = getAccount(accountId);
     $.ajax({
         url: account.controller+"/drive/createDir",
         method: 'POST',
@@ -214,7 +180,7 @@ function createDir(name)
         },
         success: function () {
             // Actualiza dinámicamente el contenido en la página
-            loadData(account.accountId,account.pathActual);
+            loadData(account.accountId,account.pathActual,explorer);
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -222,10 +188,9 @@ function createDir(name)
     });
 }
 
-function createFile(name)
+function createFile(name,accountId,explorer)
 {
-    let account = accountE1;
-
+    let account = getAccount(accountId);
     $.ajax({
         url: account.controller+"/drive/createFile",
         method: 'POST',
@@ -236,7 +201,7 @@ function createFile(name)
         },
         success: function () {
             // Actualiza dinámicamente el contenido en la página
-            loadData(account.accountId,account.pathActual);
+            loadData(account.accountId,account.pathActual,explorer);
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -355,9 +320,9 @@ function logout(accountId)
     });
 }
 
-function back()
+function back(explorer, account)
 {
-    loadData(accountE1.accountId,accountE1.parent);
+    loadData(account.accountId,account.parent,explorer);
 }
 
 function editarMetadata()
