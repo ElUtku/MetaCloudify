@@ -189,9 +189,9 @@ class CoreController extends AbstractController
 
             $path=$request->get('path');
             $archives=$this->core->listDirectory($path);
+
             foreach ($archives as $archive)
             {
-
                 $path=$archive['path'];
                 $account = $entityManager->getRepository(Account::class)->getAccount($this->account);
 
@@ -214,6 +214,7 @@ class CoreController extends AbstractController
 
                 $archivesWhitMetadata[]=$archive;
             }
+
             return new JsonResponse($archivesWhitMetadata??$archives);
 
         }catch (CloudException $e)
@@ -382,6 +383,7 @@ class CoreController extends AbstractController
             {
                $file['extra_metadata']['extra'] = $fileMetadata->getExtra();
                $file['extra_metadata']['author'] = $fileMetadata->getAuthor();
+                $file['visibility'] = $fileMetadata->getVisibility();
             }
             return new JsonResponse($file);
         }catch (CloudException $e)

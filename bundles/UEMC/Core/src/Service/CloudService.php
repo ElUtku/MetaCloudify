@@ -331,8 +331,6 @@ abstract class CloudService
         return $account;
     }
 
-
-
     public function getMetadata(StorageAttributes $file, Account $account):Metadata
     {
 
@@ -379,7 +377,9 @@ abstract class CloudService
             $contents = $filesystem->listContents(dirname($ruta))->toArray();
 
             $filteredItems = array_filter($contents, function ($item) use ($ruta) {
-                return $item['path'] === $ruta || str_replace('\\', '/', $item['path']) === $ruta;
+                return $item['path'] === $ruta ||
+                        str_replace('\\', '/', $item['path']) === $ruta ||
+                        $this->cleanOwncloudPath($item['path'])==$ruta;
             });
 
             if (!empty($filteredItems)) {
@@ -388,7 +388,7 @@ abstract class CloudService
 
                 if ($item instanceof FileAttributes) {
                     return new FileAttributes($ruta, $item->fileSize(), $item->visibility(), $item->lastModified(), $item->mimeType(), $item->extraMetadata());
-                } elseif ($item instanceof \League\Flysystem\DirectoryAttributes) {
+                } elseif ($item instanceof DirectoryAttributes) {
                     return new DirectoryAttributes($ruta, $item->visibility(), $item->lastModified(), $item->extraMetadata());
                 }
             }
@@ -412,16 +412,24 @@ abstract class CloudService
             $contents=$filesystem->listContents(dirname($ruta),false)->toArray();
             foreach ($contents as $item) {
                 if ($item['path']==$ruta ||
-                    str_replace('\\', '/',$item['path']) == $ruta) {  // /a/b/c.txt == /a/b/c.txt
+                    str_replace('\\', '/',$item['path']) == $ruta ||
+                    $this->cleanOwncloudPath($item['path']) == $ruta) // remote.php/webdav/usuario/a/b/c.txt == /a/b/c.txt
+                {
 
                     return json_decode(json_encode($item),true); //El objeto se convierte a un array
                 }
             }
-            return array();
+
+            throw new CloudException(ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorMessage(),
+                ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorCode());
         } catch (FilesystemException $e) {
             throw new CloudException(ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorMessage().' - '.$e->getMessage(),
                 ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorCode());
         }
+    }
+
+    function cleanOwncloudPath($path) {
+        return preg_replace('/remote\.php\/dav\/files\/\w+\//', '', $path);
     }
 
     /**
