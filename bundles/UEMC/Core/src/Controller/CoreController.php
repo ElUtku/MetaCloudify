@@ -422,7 +422,7 @@ class CoreController extends AbstractController
                 $file = new Metadata(
                     basename($fileMetadata['path']),
                     $fileMetadata['extra_metadata']['virtual_name']??null,
-                    dirname($fileMetadata['path']),
+                    dirname($this->core->cleanOwncloudPath($fileMetadata['path'])),
                     $metadata['virtual_path']??null,
                     $fileMetadata['type'],
                     $fileMetadata['file_size']??null,

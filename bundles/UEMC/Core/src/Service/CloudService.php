@@ -415,7 +415,6 @@ abstract class CloudService
                     str_replace('\\', '/',$item['path']) == $ruta ||
                     $this->cleanOwncloudPath($item['path']) == $ruta) // remote.php/webdav/usuario/a/b/c.txt == /a/b/c.txt
                 {
-
                     return json_decode(json_encode($item),true); //El objeto se convierte a un array
                 }
             }
@@ -428,7 +427,11 @@ abstract class CloudService
         }
     }
 
-    function cleanOwncloudPath($path) {
+    /**
+     * @param $path
+     * @return string
+     */
+    function cleanOwncloudPath($path):string {
         return preg_replace('/remote\.php\/dav\/files\/\w+\//', '', $path);
     }
 
