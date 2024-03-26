@@ -12,11 +12,13 @@ $(document).ready(function() {
 
     /*--- Carga de selectes de los epxloradores ---*/
     loadSelects();
-
     $('#selectTabla1').change(function() {
         let accountId = $(this).children("option:selected").val();
         let path = '';
+
         loadData(accountId,path,'explorer1');
+
+        $('#uploadexplorer1').removeClass('d-none');
     });
 
     $('#selectTabla2').change(function() {
@@ -24,6 +26,8 @@ $(document).ready(function() {
         let path = '';
 
         loadData(accountId,path,'explorer2');
+
+        $('#uploadexplorer2').removeClass('d-none');
     });
 
     /*--- Esconder y borrar modal de metadatos en cada interacción ---*/
@@ -73,11 +77,12 @@ function loadData(accountId,path,explorer) {
 
 function refrescarTabla(data,explorer,account)
 {
+
     let tabla=$('#'+explorer)
     tabla.DataTable().destroy();
     tabla.DataTable({
         dom: 'Bfrtip', // 'B' option para activar los botones
-        dom: "<'row'<'col-sm-6'B><'col-sm-6'f>>" +
+        dom: "<'row'<'col-sm-4'B><'col-sm-4 custom-field" + explorer + "'><'col-sm-4'f>>" +
             "<'row'<'col-sm-12'tr>>" +
             "<'row'<'col-sm-5'i><'col-sm-7'p>>",
         buttons: [
@@ -85,8 +90,25 @@ function refrescarTabla(data,explorer,account)
             { text: '<i class="bi bi-folder-fill me-2"></i>Crear carpeta', className: 'btn ', action: function () {$('#newDirFileModal').modal('show');$('#newNameButton').attr('onclick','createDir($(\'#newName\').val(),\''+account.accountId+'\',\''+explorer+'\')');}},
             { text: '<i class="bi bi-file-text-fill me-2"></i>Crear fichero', className: 'btn ', action: function () {$('#newDirFileModal').modal('show');$('#newNameButton').attr('onclick','createFile($(\'#newName\').val(),\''+account.accountId+'\',\''+explorer+'\')');}},
         ],
+        initComplete: function () {
+            // Aquí puedes agregar tu campo personalizado después de que DataTables se haya inicializado completamente
+            $('div.custom-field'+explorer).html('' +
+                '<div id="divUpload" class="m-1 d-flex align-items-center">\n' +
+                    '<form id="fileupload' + explorer + '" method="POST" enctype="multipart/form-data">\n' +
+                        '<div class="mb-3 d-flex align-items-center">\n' +
+                            '<input class="form-control form-control-sm me-2" id="formFile" type="file" name="content" multiple>\n' +
+                            '<button type="button" class="btn btn-sm btn-outline-secondary" id="enviarBtn" onclick="upload(\'' + account.accountId + '\', \'' + explorer + '\');">Enviar</button>\n'+
+                        '</div>\n' +
+                    '</form>\n' +
+                    '<!-- Contenedor para mostrar la progresión de la carga -->\n' +
+                    '<div id="progress"></div>\n' +
+                    '<!-- Lista de archivos cargados -->\n' +
+                    '<div id="files"></div>\n' +
+                '</div>');
+        },
+        stateSave: true,
         info: false,
-        ordering: false,
+        ordering: true,
         paging: false,
         data: data,
         columns: [
@@ -137,11 +159,20 @@ function refrescarTabla(data,explorer,account)
                 {
                     return account.user;
                 },
+            },
+            { title: 'Acciones',
+                orderable: false,
+                searchable: false,
+                width: '20%',
+                data: 'path',
+                render: function (data, type, row) {
+                    data=data.replace('\\', '/');
+                    return '<button class="btn btn-primary btn-editar me-2" onclick="editarModalMetadata(\'' + data + '\',\'' + account.accountId + '\');">Editar</button>'+
+                           '<button class="btn btn-danger btn-eliminar" onclick="dlt(\'' + data + '\', \'' + account.accountId + '\', \'' + explorer + '\')">Eliminar</button>'
+                }
             }
         ]
     });
-// Añadir botones personalizados después de inicializar DataTable
-    tabla.DataTable().buttons().container().appendTo('#' + explorer + ' .col-md-6:eq(0)'); // Ajusta el selector según tu estructura HTML
 
     tabla.off('mouseenter', 'td:nth-child(2)'); //Hay que desvincular el elemtno para que no se repita
     tabla.off('mouseleave', 'td:nth-child(2)'); //Hay que desvincular el elemtno para que no se repita
@@ -209,21 +240,19 @@ function createFile(name,accountId,explorer)
     });
 }
 
-function dlt(data)
+function dlt(path,accountId,explorer)
 {
-    let account = accountE1;
-
+    let account = getAccount(accountId);
     $.ajax({
         url: account.controller+"/drive/delete",
         method: 'POST',
         data: {
-            path: data.path,
-            name: data.name,
-            accountId: account.accountId
+            path: path,
+            accountId: accountId
         },
         success: function () {
             // Actualiza dinámicamente el contenido en la página
-            loadData(account.accountId,account.pathActual);
+            loadData(accountId,account.pathActual,explorer);
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -235,11 +264,11 @@ function dlt(data)
     $(document).off('click.menuClose');
 }
 
-function upload(accountId)
+function upload(accountId,explorer)
 {
     let account = getAccount(accountId)
 
-    let fileupload = $('#fileupload');
+    let fileupload = $('#fileupload'+explorer);
     fileupload.fileupload({
         url: account.controller+'/drive/upload',
         dataType: 'json',
@@ -247,7 +276,7 @@ function upload(accountId)
                     accountId: accountId
         },
         done: function () {
-            loadData(accountId,account.pathActual);
+            loadData(accountId,account.pathActual,explorer);
         },
         /*progressall: function (e, data) {
             // Actualiza la barra de progreso
@@ -260,7 +289,7 @@ function upload(accountId)
     });
 
     // Desactiva el envío automático del formulario
-    fileupload.prop('action', '');
+    //fileupload.prop('action', '');
 
     // Inicia la carga del archivo
     fileupload.fileupload('send', { files: $('#formFile')[0].files });
@@ -325,23 +354,53 @@ function back(explorer, account)
     loadData(account.accountId,account.parent,explorer);
 }
 
-function editarMetadata()
+function guardarMetadata(path, accountId)
 {
-    let item = $('#modalMetadatos').data('item');
-    let accountId=$('#modalMetadatos').data('accountId');
-    let account = getAccount(accountId)
-    item.extra_metadata['author'] = $('#archivoAuthor').val();
-    item.name = $('#archivoName').val();
-    item.visibility = $('#archivoVisibilidad').val();
-    $.each(item.extra_metadata['extra'], function(nombre, valor) {
-        item.extra_metadata['extra'][nombre] = $('#'.nombre).val();
+
+    //----------------Detectar y establcer campos----------------
+// Crear un objeto formData para almacenar los datos del formulario
+    let formData = {};
+
+// Bandera para verificar si se han encontrado campos adicionales aparte de 'author' y 'visibility'
+    let extraFieldsFound = false;
+
+// Iterar sobre los elementos del formulario en el modal (se seleccionan los inputs y el select)
+    $('#modalMetadatos .modal-body input, #modalMetadatos .modal-body select').each(function() {
+        let fieldName = $(this).attr('name');
+        let fieldValue = $(this).val();
+
+        // Verificar si el campo es 'author' o 'visibility'
+        if (fieldName === 'author' || fieldName === 'visibility') {
+            // Agregar el campo directamente al objeto formData
+            formData[fieldName] = fieldValue;
+        } else {
+            // Agregar el campo al objeto extra con su respectivo nombre y valor
+            if (!formData.hasOwnProperty('extra')) {
+                formData.extra = {};
+                extraFieldsFound = true; // Se encontraron campos adicionales
+            }
+            formData.extra[fieldName] = fieldValue;
+        }
     });
+
+// Si no se encontraron campos adicionales, establecer extra en null
+    if (!extraFieldsFound) {
+        formData.extra = null;
+    }
+
+// Convertir el objeto formData a JSON
+    formData = JSON.stringify(formData);
+
+    //----------------Realizar llamada----------------
+
+    let account = getAccount(accountId);
     $.ajax({
         url: account.controller+'/drive/editMetadata',
         method: 'POST',
         data: {
-            content: JSON.stringify(item),
-            accountId: accountId
+            path: path,
+            accountId: accountId,
+            metadata: formData,
         },
         success: function () {
                 console.log('ok');
@@ -352,18 +411,25 @@ function editarMetadata()
     });
 }
 
-function addMetadata(name)
+function getArchiveMetadata(accountId,path)
 {
-    $('#editMetadataBtn').before(crearExtraBloque(name,''));
-    let item = $('#modalMetadatos').data('item');
-    item.extra_metadata['extra'] = { [name]: null };
-    $('#modalMetadatos').data('item', item);
-}
-
-function crearExtraBloque(paramName, paramValue) {
-    return $('<div class="mb-3">\
-                <label for="' + paramName + '" class="form-label">' + paramName + '</label>\
-                <input type="text" class="form-control" id="' + paramName + '" name="' + paramName + '" value="' + paramValue + '">\
-            </div>\
-            ');
+    let account = getAccount(accountId);
+    let metadata=null;
+    $.ajax({
+        url: account.controller+'/drive/getArchive',
+        method: 'POST',
+        async:false,
+        data: {
+            path: path,
+            accountId: accountId,
+        },
+        success: function (data) {
+            metadata=data;
+        },
+        error: function (xhr, status, error) {
+            console.error(error);
+            metadata=null;
+        }
+    });
+    return metadata;
 }

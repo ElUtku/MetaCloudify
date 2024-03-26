@@ -71,7 +71,7 @@ class Metadata
     {
         $this->name = $name;
         $this->virtualName = $virtualName;
-        $this->path = $path;
+        $this->path = $path=($path === '.') ? '' : $path; // Si el directorio es '' dirname suiele devolver '.' y hat que limpiarlo;
         $this->virtualPath = $virtualPath;
         $this->type = $type;
         $this->size = $size;

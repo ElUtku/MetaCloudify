@@ -155,8 +155,9 @@ class MetadataRepository extends EntityRepository
      */
     public function findByExactPathAndAccountNull(Account $account, String $path, String $name): Metadata|null
     {
-        $qb = $this->createQueryBuilder('m');
+        $path=($path === '.') ? '' : $path; // Si el directorio es '' dirname suiele devolver '.' y hat que limpiarlo
 
+        $qb = $this->createQueryBuilder('m');
         $qb->where('m.path = :path')
             ->andWhere('m.name = :name')
             ->andWhere('m.account = :account')

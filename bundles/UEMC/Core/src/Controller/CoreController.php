@@ -188,17 +188,16 @@ class CoreController extends AbstractController
             $this->retriveCore($session,$request);
 
             $path=$request->get('path');
-
             $archives=$this->core->listDirectory($path);
             foreach ($archives as $archive)
             {
+
                 $path=$archive['path'];
                 $account = $entityManager->getRepository(Account::class)->getAccount($this->account);
 
                 if ($entityManager->getRepository(Metadata::class)->findByExactPathAndAccountNull($account,dirname($path),basename($path)))
                 {
                     $archivo=$this->core->getArchivo($path);
-
                     $metadata = $this->core->getMetadata($archivo,$account);
 
                     $extraMetadata=$entityManager->getRepository(Metadata::class)->getCloudMetadata($metadata);
@@ -208,7 +207,8 @@ class CoreController extends AbstractController
                         'virtual_path' => $extraMetadata->getVirtualPath(),
                         'author' => $extraMetadata->getAuthor(),
                         'visibility' => $extraMetadata->getVisibility(),
-                        'status' => $extraMetadata->getStatus()
+                        'status' => $extraMetadata->getStatus(),
+                        'extra' => $extraMetadata->getExtra(),
                     ];
                 }
 
@@ -338,7 +338,14 @@ class CoreController extends AbstractController
 
             $this->core->upload($destinationPath,$content);
 
-            $archivo=$this->core->getArchivo(str_replace('\\', '/', ($destinationPath.'\\'.$content->getClientOriginalName())));
+            if(!empty($destinationPath))
+            {
+                $uploadPath=$destinationPath.'\\'.$content->getClientOriginalName();
+            } else{
+                $uploadPath=$content->getClientOriginalName();
+            }
+
+            $archivo=$this->core->getArchivo(str_replace('\\', '/', ($uploadPath)));
 
             $metadata = $this->core->getMetadata($archivo,$entityManager->getRepository(Account::class)->getAccount($this->account));
 
@@ -356,6 +363,34 @@ class CoreController extends AbstractController
     }
 
     /**
+     * @Route("/{cloud}/drive/getArchive", name="getArchive")
+     */
+    public function getArchive(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
+    {
+        try {
+            $entityManager = $doctrine->getManager();
+
+            $this->createContext($cloud);
+            $this->retriveCore($session,$request);
+            $path=$request->get('path');
+
+            $account = $entityManager->getRepository(Account::class)->getAccount($this->account);
+
+            $fileMetadata=$entityManager->getRepository(Metadata::class)->findByExactPathAndAccountNull($account,dirname($path),basename($path));
+            $file=$this->core->getAnArchive($path);
+            if ($fileMetadata)
+            {
+               $file['extra_metadata']['extra'] = $fileMetadata->getExtra();
+                $file['extra_metadata']['author'] = $fileMetadata->getAuthor();
+            }
+            return new JsonResponse($file);
+        }catch (CloudException $e)
+        {
+            return new JsonResponse($e->getMessage(),$e->getStatusCode());
+        }
+
+    }
+    /**
      * @Route("/{cloud}/drive/editMetadata", name="editMetadata")
      */
     public function editMetadata(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
@@ -368,31 +403,32 @@ class CoreController extends AbstractController
 
             $account = $entityManager->getRepository(Account::class)->getAccount($this->account);
 
-            $content=json_decode($request->get('content'),true);
+            $path=$request->get('path');
+            $metadata=json_decode($request->get('metadata'),true);
 
-            $file=$entityManager->getRepository(Metadata::class)->findByExactPathAndAccountNull($account,dirname($content['path']),$content['name']);
+            $file=$entityManager->getRepository(Metadata::class)->findByExactPathAndAccountNull($account,dirname($path),basename($path));
             if($file)
             {
-                $file->setAuthor($content['extra_metadata']['author']);
-                $file->setVisibility($content['extra_metadata']['visibility']);
-                $file->setExtra(json_encode($content['extra_metadata']['extra']));
+                $file->setAuthor($metadata['author']);
+                $file->setVisibility($metadata['visibility']);
+                $file->setExtra(json_encode($metadata['extra']));
                 $file->setStatus(FileStatus::MODIFIED->value);
-                $file->setName($content['name']);
             } else //Si $file no existe es probable que sea una primera modificación de un fichero no indexado
             {
+                $fileMetadata=$this->core->getAnArchive($path);
                 $file = new Metadata(
-                    $content['name'],
-                    $content['extra_metadata']['virtual_name']??null,
-                    $content['path'],
-                    $content['extra_metadata']['virtual_path']??null,
-                    $content['type'],
-                    $content['file_size']??null,
-                    $content['mime_type']??null,
-                    (new DateTime())->setTimestamp($content['last_modified']),
-                    $content['extra_metadata']['author']??null,
-                    $content['visibility'],
-                    $content['extra_metadata']['status']??FileStatus::MODIFIED->value,
-                    json_encode($content['extra_metadata']['extra'])??null,
+                    basename($fileMetadata['path']),
+                    $fileMetadata['extra_metadata']['virtual_name']??null,
+                    dirname($fileMetadata['path']),
+                    $metadata['virtual_path']??null,
+                    $fileMetadata['type'],
+                    $fileMetadata['file_size']??null,
+                    $fileMetadata['mime_type']??null,
+                    (new DateTime())->setTimestamp($fileMetadata['last_modified']),
+                    $metadata['author']??null,
+                    $metadata['visibility']??$fileMetadata['visibility'],
+                    $metadata['status']??FileStatus::MODIFIED->value,
+                    json_encode($metadata['extra']??null),
                     $account);
             }
 

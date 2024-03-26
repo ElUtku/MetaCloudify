@@ -9,6 +9,8 @@ use League\Flysystem\FilesystemException;
 use League\Flysystem\Filesystem;
 use League\Flysystem\StorageAttributes;
 use League\Flysystem\UnableToCreateDirectory;
+use League\Flysystem\UnableToDeleteDirectory;
+use League\Flysystem\UnableToDeleteFile;
 use League\Flysystem\UnableToWriteFile;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -161,11 +163,18 @@ abstract class CloudService
     {
         $this->logger->info("Deleting " . $path);
 
-        $filesystem=$this->getFilesystem();
-
         try {
-            $filesystem->delete($path);
-        } catch (FilesystemException | UnableToWriteFile $e) {
+            $filesystem=$this->getFilesystem();
+
+            $archivo=$this->getArchivo($path);
+            if($archivo->isDir())
+            {
+                $filesystem->deleteDirectory($path);
+            } else if($archivo->isFile()){
+                $filesystem->delete($path);
+            }
+
+        } catch (FilesystemException | UnableToDeleteFile | UnableToDeleteDirectory $e) {
             throw new CloudException(ErrorTypes::ERROR_BORRAR->getErrorMessage().' - '.$e->getMessage(),
                 ErrorTypes::ERROR_BORRAR->getErrorCode());
         }

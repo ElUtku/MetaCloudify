@@ -1,4 +1,4 @@
-<div class="modal-sm modal fade  " id="modalMetadatos" tabindex="-1" role="dialog" aria-labelledby="modalMetadatosLabel" aria-hidden="true">
+<div class="modal-auto modal fade" id="modalMetadatos" tabindex="-1" role="dialog" aria-labelledby="modalMetadatosLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
@@ -6,28 +6,19 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
-                <div class="mb-3">
-                    <label for="archivoName" class="form-label">Nombre</label>
-                    <input type="text" class="form-control" id="archivoName" name="archivoName">
-                </div>
-                <div class="mb-3">
-                    <label for="archivoAuthor" class="form-label">Autor</label>
-                    <input type="text" class="form-control" id="archivoAuthor" name="archivoAuthor">
-                </div>
-                <div class="mb-3">
-                    <label for="archivoVisibilidad" class="form-label">Visibilidad</label>
-                    <select class="form-select" id="archivoVisibilidad" name="archivoVisibilidad">
-                        <option value="private">Private</option>
-                        <option value="public">Public</option>
-                    </select>
-                </div>
-                <button id="editMetadataBtn" type="button" class="btn btn-primary" onclick="editarMetadata()">Editar</button>
-                <button type="button" class="btn btn-secondary" onclick="addMetadata($('#addNewMetadataName').val()); $('#addNewMetadataName').val('')">Añadir</button>
-                <div class="col-5 d-block">
-                    <label for="addNewMetadataName" class="form-label">Nombre: </label>
-                    <input type="text" class="form-control" id="addNewMetadataName" name="addNewMetadataName">
+
+            </div>
+            <div class="modal-footer d-flex justify-content-between">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoCampo">Nuevo campo</button>
+                <div>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="guardarMetadata($('#modalMetadatos').data('path'),$('#modalMetadatos').data('accountId'))">Guardar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+
+<!-- Modal para nuevos campos -->
+{{ include('@UEMC_homeBundle/Includes/modalNuevoCampoMetadata.html.twig') }}
