@@ -68,6 +68,7 @@ function loadData(accountId,path,explorer) {
             account.pathActual=path;
             setAccount(account);
             refrescarTabla(data,explorer,account);
+            $("#ruta-p-"+explorer).html('Ruta: '+path);
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -82,28 +83,24 @@ function refrescarTabla(data,explorer,account)
     tabla.DataTable().destroy();
     tabla.DataTable({
         dom: 'Bfrtip', // 'B' option para activar los botones
-        dom: "<'row'<'col-sm-4'B><'col-sm-4 custom-field" + explorer + "'><'col-sm-4'f>>" +
+        dom: "<'row'<'col-sm-6'B><'col-sm-3 ruta-" + explorer + "'><'col-sm-3'f>>" +
             "<'row'<'col-sm-12'tr>>" +
             "<'row'<'col-sm-5'i><'col-sm-7'p>>",
         buttons: [
             { text: '<i class="bi bi-arrow-return-left me-2"></i>Volver atrás', className: 'btn', action: function (){back(explorer,account);} },
             { text: '<i class="bi bi-folder-fill me-2"></i>Crear carpeta', className: 'btn ', action: function () {$('#newDirFileModal').modal('show');$('#newNameButton').attr('onclick','createDir($(\'#newName\').val(),\''+account.accountId+'\',\''+explorer+'\')');}},
             { text: '<i class="bi bi-file-text-fill me-2"></i>Crear fichero', className: 'btn ', action: function () {$('#newDirFileModal').modal('show');$('#newNameButton').attr('onclick','createFile($(\'#newName\').val(),\''+account.accountId+'\',\''+explorer+'\')');}},
+            { text: '<i class="bi bi-upload me-2"></i>Subir archivo', className: 'btn ', action: function () {
+                $('#formFile-'+explorer).change(function() {
+                    upload(account.accountId, explorer);
+                });
+                $('#formFile-'+explorer).trigger('click');
+            }},
         ],
         initComplete: function () {
-            // Aquí puedes agregar tu campo personalizado después de que DataTables se haya inicializado completamente
-            $('div.custom-field'+explorer).html('' +
+            $('div.ruta-'+explorer).html('' +
                 '<div id="divUpload" class="m-1 d-flex align-items-center">\n' +
-                    '<form id="fileupload' + explorer + '" method="POST" enctype="multipart/form-data">\n' +
-                        '<div class="mb-3 d-flex align-items-center">\n' +
-                            '<input class="form-control form-control-sm me-2" id="formFile" type="file" name="content" multiple>\n' +
-                            '<button type="button" class="btn btn-sm btn-outline-secondary" id="enviarBtn" onclick="upload(\'' + account.accountId + '\', \'' + explorer + '\');">Enviar</button>\n'+
-                        '</div>\n' +
-                    '</form>\n' +
-                    '<!-- Contenedor para mostrar la progresión de la carga -->\n' +
-                    '<div id="progress"></div>\n' +
-                    '<!-- Lista de archivos cargados -->\n' +
-                    '<div id="files"></div>\n' +
+                   '<pre id="ruta-p-'+explorer+'" ></pre>\n'+
                 '</div>');
         },
         stateSave: true,
@@ -268,7 +265,7 @@ function upload(accountId,explorer)
 {
     let account = getAccount(accountId)
 
-    let fileupload = $('#fileupload'+explorer);
+    let fileupload = $('#fileupload-'+explorer);
     fileupload.fileupload({
         url: account.controller+'/drive/upload',
         dataType: 'json',
@@ -292,7 +289,7 @@ function upload(accountId,explorer)
     //fileupload.prop('action', '');
 
     // Inicia la carga del archivo
-    fileupload.fileupload('send', { files: $('#formFile')[0].files });
+    fileupload.fileupload('send', { files: $('#formFile-'+explorer)[0].files });
 }
 
 function download(path,name,accountId)
