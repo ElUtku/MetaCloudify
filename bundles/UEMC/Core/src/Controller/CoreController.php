@@ -381,7 +381,7 @@ class CoreController extends AbstractController
             if ($fileMetadata)
             {
                $file['extra_metadata']['extra'] = $fileMetadata->getExtra();
-                $file['extra_metadata']['author'] = $fileMetadata->getAuthor();
+               $file['extra_metadata']['author'] = $fileMetadata->getAuthor();
             }
             return new JsonResponse($file);
         }catch (CloudException $e)
@@ -390,6 +390,7 @@ class CoreController extends AbstractController
         }
 
     }
+
     /**
      * @Route("/{cloud}/drive/editMetadata", name="editMetadata")
      */

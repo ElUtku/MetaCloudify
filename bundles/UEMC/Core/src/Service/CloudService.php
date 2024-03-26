@@ -60,8 +60,6 @@ abstract class CloudService
         $this->logger = $logger;
     }
 
-
-
     /**
      *  Devuelve todos los elementos que se encuentren en la ruta seleccionada.
      *
@@ -408,7 +406,6 @@ abstract class CloudService
      */
     public function getAnArchive(string $ruta): array // ruta=a/b/c.txt
     {
-
         try {
             $filesystem=$this->getFilesystem();
 
