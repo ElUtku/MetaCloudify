@@ -74,6 +74,7 @@ abstract class CloudService
 
         try {
             $contents = $filesystem->listContents($path, false);
+
             $contenido=[];
             foreach ($contents as $item) {
                 $contenido[] = json_decode(json_encode($item), true); //Para poder modificarlo hay que convertirlo a array
