@@ -59,7 +59,7 @@ enum ErrorTypes: string
             ErrorTypes::ERROR_GET_NATIVE_METADATA => 640,
             ErrorTypes::ERROR_LOG_METADATA => 645,
             ErrorTypes::ERROR_DELETE_MULTIPLE_FILES =>646,
-            ErrorTypes::ERROR_GET_METADATA => 646,
+            ErrorTypes::ERROR_GET_METADATA => 647,
         };
     }
 
