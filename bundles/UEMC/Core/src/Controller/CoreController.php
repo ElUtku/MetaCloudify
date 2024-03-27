@@ -381,9 +381,9 @@ class CoreController extends AbstractController
             $file=$this->core->getAnArchive($path);
             if ($fileMetadata)
             {
-               $file['extra_metadata']['extra'] = $fileMetadata->getExtra();
+               $file['visibility'] = $fileMetadata->getVisibility()??$file['visibility'];
                $file['extra_metadata']['author'] = $fileMetadata->getAuthor();
-                $file['visibility'] = $fileMetadata->getVisibility();
+               $file['extra_metadata']['extra'] = $fileMetadata->getExtra();
             }
             return new JsonResponse($file);
         }catch (CloudException $e)
@@ -419,18 +419,19 @@ class CoreController extends AbstractController
             } else //Si $file no existe es probable que sea una primera modificación de un fichero no indexado
             {
                 $fileMetadata=$this->core->getAnArchive($path);
+                dump($fileMetadata);
                 $file = new Metadata(
                     basename($fileMetadata['path']),
-                    $fileMetadata['extra_metadata']['virtual_name']??null,
+                    $fileMetadata['extra_metadata']['id']??null,
                     dirname($this->core->cleanOwncloudPath($fileMetadata['path'])),
-                    $metadata['virtual_path']??null,
+                    $fileMetadata['extra_metadata']['virtual_path']??null,
                     $fileMetadata['type'],
                     $fileMetadata['file_size']??null,
                     $fileMetadata['mime_type']??null,
                     (new DateTime())->setTimestamp($fileMetadata['last_modified']),
                     $metadata['author']??null,
                     $metadata['visibility']??$fileMetadata['visibility'],
-                    $metadata['status']??FileStatus::MODIFIED->value,
+                    FileStatus::MODIFIED->value,
                     json_encode($metadata['extra']??null),
                     $account);
             }

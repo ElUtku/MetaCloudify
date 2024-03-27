@@ -65,10 +65,10 @@ function refrescarTabla(data,explorer,account)
             "<'row'<'col-sm-12'tr>>" +
             "<'row'<'col-sm-5'i><'col-sm-7'p>>",
         buttons: [
-            { text: '<i class="bi bi-arrow-return-left me-2"></i>Volver atrás', className: 'btn', action: function (){back(explorer,account);} },
-            { text: '<i class="bi bi-folder-fill me-2"></i>Crear carpeta', className: 'btn ', action: function () {$('#newDirFileModal').modal('show');$('#newNameButton').attr('onclick','createDir($(\'#newName\').val(),\''+account.accountId+'\',\''+explorer+'\')');}},
-            { text: '<i class="bi bi-file-text-fill me-2"></i>Crear fichero', className: 'btn ', action: function () {$('#newDirFileModal').modal('show');$('#newNameButton').attr('onclick','createFile($(\'#newName\').val(),\''+account.accountId+'\',\''+explorer+'\')');}},
-            { text: '<i class="bi bi-upload me-2"></i>Subir archivo', className: 'btn ', action: function () {
+            { text: '<i class="bi bi-arrow-return-left me-2"></i>Volver atrás', className: 'btn btn-md', action: function (){back(explorer,account);} },
+            { text: '<i class="bi bi-folder-fill me-2"></i>Crear carpeta', className: 'btn btn-md', action: function () {$('#newDirFileModal').modal('show');$('#newNameButton').attr('onclick','createDir($(\'#newName\').val(),\''+account.accountId+'\',\''+explorer+'\')');}},
+            { text: '<i class="bi bi-file-text-fill me-2"></i>Crear fichero', className: 'btn btn-md', action: function () {$('#newDirFileModal').modal('show');$('#newNameButton').attr('onclick','createFile($(\'#newName\').val(),\''+account.accountId+'\',\''+explorer+'\')');}},
+            { text: '<i class="bi bi-upload me-2"></i>Subir archivo', className: 'btn btn-md', action: function () {
                     $('#formFile-'+explorer).change(function() {
                         upload(account.accountId, explorer);
                     });
@@ -142,8 +142,8 @@ function refrescarTabla(data,explorer,account)
                 data: 'path',
                 render: function (data) {
                     data=data.replace('\\', '/');
-                    return '<button class="btn btn-primary btn-editar me-2" onclick="editarModalMetadata(\'' + data + '\',\'' + account.accountId + '\');">Editar</button>'+
-                        '<button class="btn btn-danger btn-eliminar" onclick="dlt(\'' + data + '\', \'' + account.accountId + '\', \'' + explorer + '\')">Eliminar</button>'
+                    return '<button class="btn btn-primary btn-sm btn-editar me-2" onclick="editarModalMetadata(\'' + data + '\',\'' + account.accountId + '\');">Editar</button>'+
+                        '<button class="btn btn-danger btn-sm btn-eliminar" onclick="dlt(\'' + data + '\', \'' + account.accountId + '\', \'' + explorer + '\')">Eliminar</button>'
                 }
             }
         ]
