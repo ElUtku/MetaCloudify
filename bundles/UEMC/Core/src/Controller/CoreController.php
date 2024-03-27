@@ -4,8 +4,7 @@ namespace UEMC\Core\Controller;
 
 use DateTime;
 use Doctrine\Persistence\ManagerRegistry;
-use Exception;
-use Microsoft\Graph\Model\File;
+
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -78,45 +77,41 @@ class CoreController extends AbstractController
 
     /**
      *
-     *  Login generico para autenticarse via web.
-      *
-     * @Route("/{cloud}/login", name="login")
+     * Login generico para autenticarse via web.
+     *
+     * @Route("/{cloud}/login", name="login", methods={"GET","POST"}) //GET es usado para solicitar la url OAUTH el resto de peticiones van por POST
      */
     public function login(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
     {
 
         try {
+            $entityManager = $doctrine->getManager();
+
             $this->createContext($cloud);
             $this->retriveCore($session,$request);
 
             $account=$this->core->login($session,$request);
 
-            $entityManager = $doctrine->getManager();
-            $accountExists=$entityManager->getRepository(Account::class)->getAccount($account);
-            if($accountExists==null)
-            {
-                $entityManager->getRepository(Account::class)->newAcount($account);
-                $accountExists=$entityManager->getRepository(Account::class)->getAccount($account); //Una vez guardada la nuva cuenta se recupera
-            } else
-            {
-                $accountExists->setLastSession($account->getLastSession());
-                $accountExists->setLastIp($account->getLastIp());
-                $entityManager->getRepository(Account::class)->updateAcount();
-            }
+            $accountExists=$entityManager->getRepository(Account::class)->loggin($account);
 
             $account->setId($accountExists->getId());
             $accountId=$this->core->setSession($session,$account);
 
+            $this->core->logger->info('LOGGIN | '.'AccountId:'.$accountId.' | id: '.
+                $accountExists->getId().' | controller: '.$account->getCloud().
+                ' | user:' . $account->getUser());
         }catch (CloudException $e)
         {
             $this->addFlash('error','CODE: '.$e->getStatusCode(). ' - MESSAGE: '.$e->getMessage());
+
+            $this->core->logger->warning('LOGGIN ERROR | '.$e->getMessage());
         }
         return $this->redirectToRoute('_home_index');
     }
 
     /**
      *
-     *  Este login debe ser usado como endpoint para obtener el identificador de la cuenta en la sesion.
+     * Este login debe ser usado como endpoint para obtener el identificador de la cuenta en la sesion.
      *
      * @Route("/{cloud}/login/token", name="login_token", methods={"POST"})
      */
@@ -124,15 +119,20 @@ class CoreController extends AbstractController
     {
         try {
             $entityManager = $doctrine->getManager();
+
             $this->createContext($cloud);
             $this->retriveCore($session,$request);
 
             $account=$this->core->loginPost($session,$request);
+
+            $accountExists=$entityManager->getRepository(Account::class)->loggin($account);
+
+            $account->setId($accountExists->getId());
             $accountId=$this->core->setSession($session,$account);
 
-            $entityManager = $doctrine->getManager();
-            $entityManager->getRepository(Account::class)->logAcount($account);
-
+            $this->core->logger->info('LOGGIN | '.'AccountId:'.$accountId.' | id: '.
+                $accountExists->getId().' | controller: '.$account->getCloud().
+                ' | user:' . $account->getUser());
             return new JsonResponse('El identificador es ' .$accountId);
         }catch (CloudException $e)
         {
@@ -142,15 +142,11 @@ class CoreController extends AbstractController
 
     /**
      *
-     * Este login proporciona una interfaz web para aquiellas nubes que necesiten autentitcacion básica
+     * Este login proporciona una interfaz web para aquellas nubes que necesiten autentitcacion básica
      *
-     * @Route("/{cloud}/login/web", name="login_web")
-     * @param SessionInterface $session
-     * @param Request $request
-     * @param string $cloud
-     * @return Response
+     * @Route("/{cloud}/login/web", name="login_web", methods={"GET"})
      */
-    public function loginWeb(SessionInterface $session, Request $request, string $cloud) : Response
+    public function loginWeb(string $cloud) : Response
     {
         return match ($cloud) {
             'owncloud' => $this->render('@UEMCOwnCloudBundle/login.html.twig'),
@@ -161,7 +157,10 @@ class CoreController extends AbstractController
     }
 
     /**
-     * @Route("/{cloud}/logout", name="logout", methods={"POST"})
+     *
+     *  Elimina una cuenta de la sesión.
+     *
+     * @Route("/{cloud}/logout", name="logout", methods={"GET"})
      */
     public function logout(SessionInterface $session, Request $request, string $cloud): Response
     {
@@ -169,6 +168,10 @@ class CoreController extends AbstractController
             $this->createContext($cloud);
             $this->retriveCore($session,$request);
             $this->core->logout($session,$request);
+
+            $this->core->logger->info('LOGOUT | '.' | id: '.
+                $this->account->getCloud().
+                ' | user:' . $this->account->getUser());
             return new JsonResponse();
         }catch (CloudException $e)
         {
@@ -177,7 +180,10 @@ class CoreController extends AbstractController
     }
 
     /**
-     * @Route("/{cloud}/drive", name="drive")
+     *
+     * Lista todos los archvios de una ruta.
+     *
+     * @Route("/{cloud}/drive", name="drive", methods={"GET"})
      */
     public function drive(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
     {
@@ -188,21 +194,25 @@ class CoreController extends AbstractController
             $this->retriveCore($session,$request);
 
             $path=$request->get('path');
-            $archives=$this->core->listDirectory($path);
+            $contentInDirectory=$this->core->listDirectory($path);
+            $contentInDirectoryArray=$contentInDirectory->toArray();
 
-            foreach ($archives as $archive)
+            $account = $entityManager->getRepository(Account::class)->getAccount($this->account);
+
+            foreach ($contentInDirectoryArray as $archive)
             {
-                $path=$archive['path'];
-                $account = $entityManager->getRepository(Account::class)->getAccount($this->account);
+                $item=json_decode(json_encode($archive),true); //Se convierte a un objeto modificable
+                $path=$item['path'];
 
                 if ($entityManager->getRepository(Metadata::class)->findByExactPathAndAccountNull($account,dirname($path),basename($path)))
                 {
-                    $archivo=$this->core->getArchivo($path);
-                    $metadata = $this->core->getMetadata($archivo,$account);
+
+                    $archivoTipado=$this->core->getTypeOfArchive($archive); //Se define si es carpeta o fichero
+                    $metadata = $this->core->getMetadata($archivoTipado,$account);
 
                     $extraMetadata=$entityManager->getRepository(Metadata::class)->getCloudMetadata($metadata);
 
-                    $archive['extra_metadata'] = [
+                    $item['extra_metadata'] = [
                         'virtual_name' => $extraMetadata->getVirtualName(),
                         'virtual_path' => $extraMetadata->getVirtualPath(),
                         'author' => $extraMetadata->getAuthor(),
@@ -212,10 +222,14 @@ class CoreController extends AbstractController
                     ];
                 }
 
-                $archivesWhitMetadata[]=$archive;
+                $archivesWhitMetadata[]=$item;
             }
 
-            return new JsonResponse($archivesWhitMetadata??$archives);
+            $this->core->logger->info('DRIVE | '.' | id: '.
+                $account->getId().' | controller: '.$account->getCloud().
+                ' | user:' . $account->getUser());
+
+            return new JsonResponse($archivesWhitMetadata??$contentInDirectoryArray);
 
         }catch (CloudException $e)
         {
@@ -225,7 +239,10 @@ class CoreController extends AbstractController
     }
 
     /**
-     * @Route("/{cloud}/drive/download", name="download")
+     *
+     * Descarga el archivo pasado en la ruta
+     *
+     * @Route("/{cloud}/drive/download", name="download", methods={"GET"})
      */
     public function download(SessionInterface $session, Request $request, string $cloud): Response
     {
@@ -233,7 +250,14 @@ class CoreController extends AbstractController
             $this->createContext($cloud);
             $this->retriveCore($session,$request);
 
-            return $this->core->download($request->get('path'),$request->get('name'));
+            $path=$request->get('path');
+            $name=$request->get('name');
+
+            $this->core->logger->info('DOWNLOAD | '.' file: '.$path.'\\'.$name.
+               ' | controller: '.$this->account->getCloud().
+                ' | user:' . $this->account->getUser());
+
+            return $this->core->download($path,$name);
         }catch (CloudException $e)
         {
             return new JsonResponse($e->getMessage(),$e->getStatusCode());
@@ -241,7 +265,10 @@ class CoreController extends AbstractController
     }
 
     /**
-     * @Route("/{cloud}/drive/createDir", name="createDir")
+     *
+     * Crea una carpeta con el nombre y en la ruta especificados
+     *
+     * @Route("/{cloud}/drive/createDir", name="createDir", methods={"POST"})
      */
     public function createDir(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
     {
@@ -256,6 +283,12 @@ class CoreController extends AbstractController
             $this->core->createDir($path,$name);
 
             $entityManager->getRepository(Metadata::class)->store(new Metadata($name,null,$path,null,'dir',null,null,new \DateTime(),null,null,FileStatus::NEW->value,null,$entityManager->getRepository(Account::class)->getAccount($this->account)));
+
+            $this->core->logger->info('CREATE_DIR | '.' dir: '.$path.'\\'.$name.
+                ' | controller: '.$this->account->getCloud().
+                ' | user:' . $this->account->getUser());
+
+
             return new JsonResponse();
         }catch (CloudException $e)
         {
@@ -264,7 +297,10 @@ class CoreController extends AbstractController
     }
 
     /**
-     * @Route("/{cloud}/drive/createFile", name="createFile")
+     *
+     * Crea un fichero con el nombre y en la ruta especificados
+     *
+     * @Route("/{cloud}/drive/createFile", name="createFile", methods={"POST"})
      */
     public function createFile(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
     {
@@ -280,6 +316,10 @@ class CoreController extends AbstractController
 
             $entityManager->getRepository(Metadata::class)->store(new Metadata($name,null,$path,null,'file',0,pathinfo($name, PATHINFO_EXTENSION),new \DateTime(),null,null,FileStatus::NEW->value,null,$entityManager->getRepository(Account::class)->getAccount($this->account)));
 
+            $this->core->logger->info('CREATE_FILE | '.' file: '.$path.'\\'.$name.
+                ' | controller: '.$this->account->getCloud().
+                ' | user:' . $this->account->getUser());
+
             return new JsonResponse();
         }catch (CloudException $e)
         {
@@ -288,7 +328,10 @@ class CoreController extends AbstractController
     }
 
     /**
-     * @Route("/{cloud}/drive/delete", name="delete")
+     *
+     * Elimina el archivo que se encuentre en la ruta especificada
+     *
+     * @Route("/{cloud}/drive/delete", name="delete", methods={"DELETE"})
      */
     public function delete(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
     {
@@ -301,9 +344,10 @@ class CoreController extends AbstractController
 
             $path=$request->get('path');
 
+            $account = $entityManager->getRepository(Account::class)->getAccount($this->account);
             $archivo=$this->core->getArchivo(str_replace('\\', '/', ($path)));
 
-            $metadata = $this->core->getMetadata($archivo,$entityManager->getRepository(Account::class)->getAccount($this->account));
+            $metadata = $this->core->getMetadata($archivo,$account);
 
             $metadata->setName(basename($path));
             $metadata->setPath(dirname($path));
@@ -314,6 +358,10 @@ class CoreController extends AbstractController
 
             $this->core->delete($path);
 
+            $this->core->logger->info('DELETE | '.' file: '.$path.
+                ' | controller: '.$this->account->getCloud().
+                ' | user:' . $this->account->getUser());
+
             return new JsonResponse();
         }catch (CloudException $e)
         {
@@ -322,7 +370,10 @@ class CoreController extends AbstractController
     }
 
     /**
-     * @Route("/{cloud}/drive/upload", name="upload")
+     *
+     * Envia al cliente el archivo en crudo solicitado en la ruta
+     *
+     * @Route("/{cloud}/drive/upload", name="upload", methods={"POST"})
      */
     public function upload(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
     {
@@ -356,6 +407,10 @@ class CoreController extends AbstractController
 
             $entityManager->getRepository(Metadata::class)->store($metadata);
 
+            $this->core->logger->info('UPLOAD | '.' file: '.$destinationPath.'\\'.$content->getClientOriginalName().
+                ' | controller: '.$this->account->getCloud().
+                ' | user:' . $this->account->getUser());
+
             return new JsonResponse(null,Response::HTTP_OK);
         }catch (CloudException $e)
         {
@@ -364,7 +419,10 @@ class CoreController extends AbstractController
     }
 
     /**
-     * @Route("/{cloud}/drive/getArchive", name="getArchive")
+     *
+     * Envia los datos y metadatos del archivo especificado en la ruta
+     *
+     * @Route("/{cloud}/drive/getArchive", name="getArchive", methods={"GET"})
      */
     public function getArchive(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
     {
@@ -385,6 +443,11 @@ class CoreController extends AbstractController
                $file['extra_metadata']['author'] = $fileMetadata->getAuthor();
                $file['extra_metadata']['extra'] = $fileMetadata->getExtra();
             }
+
+            $this->core->logger->info('GET_ARCHIVE | '.' archive: '.$path.
+                ' | controller: '.$this->account->getCloud().
+                ' | user:' . $this->account->getUser());
+
             return new JsonResponse($file);
         }catch (CloudException $e)
         {
@@ -394,7 +457,10 @@ class CoreController extends AbstractController
     }
 
     /**
-     * @Route("/{cloud}/drive/editMetadata", name="editMetadata")
+     *
+     * Guarda los nuevos metadatos de un archvio en base de datos
+     *
+     * @Route("/{cloud}/drive/editMetadata", name="editMetadata", methods={"PUT","PATCH"})
      */
     public function editMetadata(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
     {
@@ -437,6 +503,11 @@ class CoreController extends AbstractController
             }
 
             $entityManager->getRepository(Metadata::class)->store($file);
+
+            $this->core->logger->info('EDIT_METADATA | '.' archive: '.$path.
+                ' | controller: '.$this->account->getCloud().
+                ' | user:' . $this->account->getUser());
+
             return new JsonResponse(null,Response::HTTP_OK);
         }catch (CloudException $e)
         {

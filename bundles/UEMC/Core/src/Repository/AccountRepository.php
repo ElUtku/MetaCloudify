@@ -23,6 +23,32 @@ class AccountRepository extends EntityRepository
 
     /**
      * @param Account $account
+     * @return Account|null
+     * @throws CloudException
+     */
+    public function loggin(Account $account): ?Account
+    {
+        try {
+            $accountExists=$this->getAccount($account);
+            if($accountExists==null) //Se crea en BD
+            {
+                $this->newAcount($account);
+                $accountExists=$this->getAccount($account); //Una vez guardada la nuva cuenta se recupera
+            } else //Se recupera de BD
+            {
+                $accountExists->setLastSession($account->getLastSession());
+                $accountExists->setLastIp($account->getLastIp());
+                $this->updateAcount();
+            }
+            return $accountExists;
+        }catch (CloudException | NonUniqueResultException $e) {
+            throw new CloudException(ErrorTypes::ERROR_LOG_ACCOUNT->getErrorMessage().' - '.$e->getMessage(),
+                ErrorTypes::ERROR_LOG_ACCOUNT->getErrorCode());
+        }
+    }
+
+    /**
+     * @param Account $account
      * @return void
      * @throws CloudException
      */

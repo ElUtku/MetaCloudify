@@ -19,7 +19,7 @@ function loadData(accountId,path,explorer) {
 
     $.ajax({
         url: account.controller+'/drive',
-        method: 'POST',
+        method: 'GET',
         data: { path: path,
                 accountId: accountId
         },
@@ -90,7 +90,7 @@ function dlt(path,accountId,explorer)
     let account = getAccount(accountId);
     $.ajax({
         url: account.controller+"/drive/delete",
-        method: 'POST',
+        method: 'DELETE',
         data: {
             path: path,
             accountId: accountId
@@ -112,6 +112,7 @@ function upload(accountId,explorer)
     fileupload.fileupload({
         url: account.controller+'/drive/upload',
         dataType: 'json',
+        method: 'POST',
         formData: { path: account.pathActual,
                     accountId: accountId
         },
@@ -133,7 +134,7 @@ function download(path,name,accountId)
 
     $.ajax({
         url: account.controller+"/drive/download",
-        method: 'POST',
+        method: 'GET',
         data: {
             path: path,
             name: name,
@@ -167,7 +168,7 @@ function logout(accountId)
 
     $.ajax({
         url: account.controller+'/logout',
-        method: 'POST',
+        method: 'GET',
         data: {
             accountId: accountId
         },
@@ -192,7 +193,7 @@ function getArchiveMetadata(accountId,path)
     let metadata=null;
     $.ajax({
         url: account.controller+'/drive/getArchive',
-        method: 'POST',
+        method: 'GET',
         async:false,
         data: {
             path: path,
@@ -215,7 +216,7 @@ function guardarMetadata(path, accountId)
     let formData = extraerMetadatosModal();
     $.ajax({
         url: account.controller+'/drive/editMetadata',
-        method: 'POST',
+        method: 'PATCH',
         data: {
             path: path,
             accountId: accountId,

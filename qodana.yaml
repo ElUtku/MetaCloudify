@@ -34,3 +34,14 @@ exclude:
   - name: All
     paths:
       - composer.lock
+      - vendor/
+      - var/
+      - public/
+      - config/
+      - bin/
+      - assets/
+      - .github/
+      - src/
+      - templates/
+      - tests/
+      - translations/

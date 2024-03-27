@@ -4,6 +4,7 @@ namespace UEMC\Core\Service;
 
 use DateTime;
 use League\Flysystem\DirectoryAttributes;
+use League\Flysystem\DirectoryListing;
 use League\Flysystem\FileAttributes;
 use League\Flysystem\FilesystemException;
 use League\Flysystem\Filesystem;
@@ -12,6 +13,7 @@ use League\Flysystem\UnableToCreateDirectory;
 use League\Flysystem\UnableToDeleteDirectory;
 use League\Flysystem\UnableToDeleteFile;
 use League\Flysystem\UnableToWriteFile;
+use PHPUnit\Util\Exception;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -64,29 +66,20 @@ abstract class CloudService
      *  Devuelve todos los elementos que se encuentren en la ruta seleccionada.
      *
      * @param String $path
-     * @return array
+     * @return DirectoryListing
      * @throws CloudException
      */
-    public function listDirectory(String $path): array
+    public function listDirectory(String $path): DirectoryListing
     {
-
-        $filesystem=$this->getFilesystem();
-
         try {
-            $contents = $filesystem->listContents($path, false);
-
-            $contenido=[];
-            foreach ($contents as $item) {
-                $contenido[] = json_decode(json_encode($item), true); //Para poder modificarlo hay que convertirlo a array
-            }
-            return $contenido;
+            $filesystem=$this->getFilesystem();
+            return $filesystem->listContents($path, false);
 
         } catch (FilesystemException $e) {
             throw new CloudException(ErrorTypes::ERROR_LIST_CONTENT->getErrorMessage().' - '.$e->getMessage(),
                                     ErrorTypes::ERROR_LIST_CONTENT->getErrorCode());
         }
     }
-
 
     /**
      *  Crea un directorio.
@@ -115,7 +108,6 @@ abstract class CloudService
                 ErrorTypes::ERROR_CREAR_DIRECTORIO->getErrorCode());
         }
     }
-
 
     /**
      *  Crea un fichero de cualquier tipo.
@@ -150,7 +142,6 @@ abstract class CloudService
         }
     }
 
-
     /**
      *  Elimina ficheros y directorios.
      *
@@ -178,7 +169,6 @@ abstract class CloudService
                 ErrorTypes::ERROR_BORRAR->getErrorCode());
         }
     }
-
 
     /**
      *  Permite subir archivos de uno en uno.
@@ -232,8 +222,6 @@ abstract class CloudService
 
         $filesystem=$this->getFilesystem();
 
-        $this->logger->info("Downloading ".$path);
-
         try {
             $contents = $filesystem->read($path);
             //file_put_contents("/test.mp4", $contents); //Ver si el problema esta aqui
@@ -265,10 +253,10 @@ abstract class CloudService
 
             $id = $request->get('accountId');
             if (array_key_exists($id, $accounts)) {
-                // Eliminar el elemento del array
+// Eliminar el elemento del array
                 unset($accounts[$id]);
                 if (empty($accounts) || !is_array($accounts)) {
-                    // Si está vacío o no es un array, eliminarlo de la sesión
+// Si está vacío o no es un array, eliminarlo de la sesión
                     $session->remove('accounts');
                 }else{
                     $session->set('accounts', $accounts);
@@ -303,11 +291,10 @@ abstract class CloudService
                     ) {
                         return $accountId;
                     }
-
                 }
             }
 
-            //Si no se encuetra la cuenta se agrega
+//Si no se encuetra la cuenta se agrega
             $accountId=uniqid();
             $accounts[$accountId]=get_object_vars($account);
             $session->set('accounts',$accounts);
@@ -319,7 +306,6 @@ abstract class CloudService
         }
     }
 
-
     /**
      * @param SessionInterface $session
      * @param Request $request
@@ -328,10 +314,14 @@ abstract class CloudService
      */
     public function loginPost(SessionInterface $session, Request $request): Account
     {
-        $account=$this->login($session, $request);
-        return $account;
+        return $this->login($session, $request);
     }
 
+    /**
+     * @param StorageAttributes $file
+     * @param Account $account
+     * @return Metadata
+     */
     public function getMetadata(StorageAttributes $file, Account $account):Metadata
     {
 
@@ -367,17 +357,17 @@ abstract class CloudService
 
     /**
      * @param string $ruta
-     * @return StorageAttributes|null
+     * @return StorageAttributes
      * @throws CloudException
      */
-    public function getArchivo(string $ruta): StorageAttributes|null
+    public function getArchivo(string $ruta): StorageAttributes
     {
         try {
             $filesystem=$this->getFilesystem();
 
-            $contents = $filesystem->listContents(dirname($ruta))->toArray();
-
-            $filteredItems = array_filter($contents, function ($item) use ($ruta) {
+            $contents = $filesystem->listContents(dirname($ruta));
+            $contentsArray=$contents->toArray();
+            $filteredItems = array_filter($contentsArray, function ($item) use ($ruta) {
                 return $item['path'] === $ruta ||
                         str_replace('\\', '/', $item['path']) === $ruta ||
                         $this->cleanOwncloudPath($item['path'])==$ruta;
@@ -393,11 +383,30 @@ abstract class CloudService
                     return new DirectoryAttributes($ruta, $item->visibility(), $item->lastModified(), $item->extraMetadata());
                 }
             }
-        } catch (FilesystemException | \Exception $e) {
+//Si $filteredItems esta vacio es porque hay un error
+            throw new Exception();
+        } catch (FilesystemException | Exception $e) {
             throw new CloudException(ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorMessage().' - '.$e->getMessage(),
                 ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorCode());
         }
-        return null;
+    }
+
+    /**
+     * @param $item
+     * @return StorageAttributes
+     * @throws CloudException
+     */
+    public function getTypeOfArchive($item) : StorageAttributes
+    {
+        if ($item instanceof FileAttributes) {
+            return new FileAttributes($item->path(), $item->fileSize(), $item->visibility(), $item->lastModified(), $item->mimeType(), $item->extraMetadata());
+        } elseif ($item instanceof DirectoryAttributes) {
+            return new DirectoryAttributes($item->path(), $item->visibility(), $item->lastModified(), $item->extraMetadata());
+        } else
+        {
+            throw new CloudException(ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorMessage(),
+                ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorCode());
+        }
     }
 
     /**
@@ -420,9 +429,8 @@ abstract class CloudService
                 }
             }
 
-            throw new CloudException(ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorMessage(),
-                ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorCode());
-        } catch (FilesystemException $e) {
+            throw new Exception();
+        } catch (FilesystemException | Exception $e) {
             throw new CloudException(ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorMessage().' - '.$e->getMessage(),
                 ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorCode());
         }
