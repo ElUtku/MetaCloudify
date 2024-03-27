@@ -9,10 +9,7 @@ use Exception;
 use Google_Client;
 use Google\Service\Drive;
 use League\Flysystem\Config;
-use League\Flysystem\DirectoryAttributes;
-use League\Flysystem\FileAttributes;
 use League\Flysystem\Filesystem;
-use League\Flysystem\FilesystemException;
 use League\Flysystem\Visibility;
 use League\OAuth2\Client\Provider\Google;
 use Masbug\Flysystem\GoogleDriveAdapter;
@@ -21,10 +18,8 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Yaml\Yaml;
 
 use UEMC\Core\Entity\Account;
-use UEMC\Core\Entity\Metadata;
 use UEMC\Core\Resources\CloudTypes;
 use UEMC\Core\Resources\ErrorTypes;
-use UEMC\Core\Resources\FileStatus;
 use UEMC\Core\Service\CloudService as Core;
 use UEMC\Core\Service\CloudException;
 

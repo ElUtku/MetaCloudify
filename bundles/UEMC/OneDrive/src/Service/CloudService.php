@@ -100,7 +100,7 @@ class CloudService extends Core
             $account=$this->arrayToObject($user);
 
             $account->setLastIp($request->getClientIp());
-            $account->setLastSession(new \DateTime);
+            $account->setLastSession(new DateTime);
             $account->setToken($token);
             $account->setCloud(CloudTypes::OneDrive->value);
 

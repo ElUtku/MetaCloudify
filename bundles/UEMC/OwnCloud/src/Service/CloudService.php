@@ -2,6 +2,7 @@
 
 namespace UEMC\OwnCloud\Service;
 
+use DateTime;
 use Exception;
 use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemException;
@@ -41,7 +42,7 @@ class CloudService extends Core
             $account->setURL($request->get('URL'));
             $account->setPort($request->get('port') ?? 443);
             $account->setLastIp($request->getClientIp());
-            $account->setLastSession(new \DateTime);
+            $account->setLastSession(new DateTime);
             $account->setCloud(CloudTypes::OwnCloud->value);
 
             return $account;

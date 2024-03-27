@@ -1,8 +1,6 @@
 <?php
 namespace UEMC\OneDrive;
 
-use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 class UEMCOneDriveBundle extends Bundle
@@ -12,6 +10,6 @@ class UEMCOneDriveBundle extends Bundle
      */
     public function getPath(): string
     {
-        return \dirname(__DIR__);
+        return dirname(__DIR__);
     }
 }

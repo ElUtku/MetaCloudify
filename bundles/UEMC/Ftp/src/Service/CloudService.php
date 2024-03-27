@@ -3,10 +3,11 @@
 namespace UEMC\Ftp\Service;
 
 
+use DateTime;
+use Exception;
 use League\Flysystem\Filesystem;
 use League\Flysystem\Ftp\FtpConnectionOptions;
 use League\Flysystem\Ftp\FtpAdapter;
-use PHPUnit\Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
@@ -23,26 +24,19 @@ class CloudService extends Core
      * @param SessionInterface $session
      * @param Request $request
      * @return Account
-     * @throws CloudException
      */
     public function login(SessionInterface $session, Request $request): Account
     {
-        try {
-            $account = new Account();
-            $account->setPassword($request->get('password'));
-            $account->setUser($request->get('userName'));
-            $account->setURL($request->get('URL'));
-            $account->setPort($request->get('port') ?? 21);
-            $account->setLastIp($request->getClientIp());
-            $account->setLastSession(new \DateTime);
-            $account->setCloud(CloudTypes::FTP->value);
+        $account = new Account();
+        $account->setPassword($request->get('password'));
+        $account->setUser($request->get('userName'));
+        $account->setURL($request->get('URL'));
+        $account->setPort($request->get('port') ?? 21);
+        $account->setLastIp($request->getClientIp());
+        $account->setLastSession(new DateTime);
+        $account->setCloud(CloudTypes::FTP->value);
 
-            return $account;
-        }catch (Exception $e)
-        {
-            throw new CloudException(ErrorTypes::ERROR_INICIO_SESION->getErrorMessage().' - '.$e->getMessage(),
-                                    ErrorTypes::ERROR_INICIO_SESION->getErrorCode());
-        }
+        return $account;
 
     }
 
@@ -61,7 +55,7 @@ class CloudService extends Core
                 }
             }
             return $account;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw new CloudException(ErrorTypes::ERROR_CONSTRUIR_OBJETO->getErrorMessage().' - '.$e->getMessage(),
                 ErrorTypes::ERROR_CONSTRUIR_OBJETO->getErrorCode());
         }
@@ -96,7 +90,7 @@ class CloudService extends Core
             $adapter = new FtpAdapter(FtpConnectionOptions::fromArray($options));
             return new Filesystem($adapter);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw new CloudException(ErrorTypes::ERROR_CONSTRUIR_FILESYSTEM->getErrorMessage().' - '.$e->getMessage(),
                 ErrorTypes::ERROR_CONSTRUIR_FILESYSTEM->getErrorCode());
         }

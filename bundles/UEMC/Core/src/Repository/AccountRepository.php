@@ -58,7 +58,7 @@ class AccountRepository extends EntityRepository
             $em=$this->getEntityManager();
             $em->persist($account);
             $em->flush();
-        }catch (Exception | NonUniqueResultException $e)
+        }catch (Exception $e)
         {
             throw new CloudException(ErrorTypes::ERROR_LOG_ACCOUNT->getErrorMessage().' - '.$e->getMessage(),
                                     ErrorTypes::ERROR_LOG_ACCOUNT->getErrorCode());

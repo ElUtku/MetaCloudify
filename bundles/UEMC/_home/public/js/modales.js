@@ -71,9 +71,12 @@ function agregarNuevoCampo() {
 
     let contenidoModalMetadatos=$('#modalMetadatos .modal-body');
 
+    let nuevoCampoNombre=$('#nuevoCampoNombre');
+    let nuevoValorCampo=$('#nuevoValorCampo');
+
 // Se obtiene el nombre y el valor del nuevo campo del modal
-    let nombreCampo = $('#nuevoCampoNombre').val();
-    let valorCampo = $('#nuevoCampoValor').val();
+    let nombreCampo = nuevoCampoNombre.val();
+    let valorCampo = nuevoValorCampo.val();
 
 // Se crea el campo input para el nuevo campo y agregarlo al modal de metadatos
     let newFormGroup = $('<div class="form-group"></div>');
@@ -94,8 +97,8 @@ function agregarNuevoCampo() {
     $('#modalNuevoCampo').modal('hide');
 
 // Se limpian los campos del modal de nuevo campo para la próxima vez
-    $('#nuevoCampoNombre').val('');
-    $('#nuevoCampoValor').val('');
+    nuevoCampoNombre.val('');
+    nuevoValorCampo.val('');
 }
 
 // Función para crear un botón de eliminar

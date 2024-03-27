@@ -16,41 +16,41 @@ class Metadata
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $name = null;
+    private ?string $name;
 
     #[ORM\Column(length: 1000, nullable: true)]
-    private ?string $virtualName = null;
+    private ?string $virtualName;
 
     #[ORM\Column(length: 1000)]
-    private ?string $path = null;
+    private ?string $path;
 
     #[ORM\Column(length: 1000, nullable: true)]
-    private ?string $virtualPath = null;
+    private ?string $virtualPath;
 
     #[ORM\Column(length: 50)]
-    private ?string $type = null;
+    private ?string $type;
     #[ORM\Column(type:Types::FLOAT, nullable:true)]
     private ?float $size;
     #[ORM\Column(length: 50)]
     private ?string $mime_type;
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?DateTimeInterface $lastModified = null;
+    private ?DateTimeInterface $lastModified;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $author = null;
+    private ?string $author;
 
     #[ORM\Column(length: 50, nullable: true)]
-    private ?string $visibility = null;
+    private ?string $visibility;
 
     #[ORM\Column(length: 20, nullable: false)]
-    private ?string $status = null;
+    private ?string $status;
 
     #[ORM\Column(type: Types::JSON)]
-    private ?string $extra = null;
+    private ?string $extra;
 
     #[ORM\ManyToOne(cascade: ["persist"], inversedBy: 'metadata' )]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Account $account = null;
+    private ?Account $account;
 
     /**
      * @param string|null $name
@@ -71,7 +71,7 @@ class Metadata
     {
         $this->name = $name;
         $this->virtualName = $virtualName;
-        $this->path = $path=($path === '.') ? '' : $path; // Si el directorio es '' dirname suiele devolver '.' y hat que limpiarlo;
+        $this->path = ($path === '.') ? '' : $path; // Si el directorio es '' dirname suiele devolver '.' y hat que limpiarlo;
         $this->virtualPath = $virtualPath;
         $this->type = $type;
         $this->size = $size;
