@@ -58,6 +58,7 @@ function refrescarTabla(data,explorer,account)
 {
 
     let tabla=$('#'+explorer)
+    tabla.data('account',account);
     tabla.DataTable().destroy();
     tabla.DataTable({
         dom: 'Bfrtip', // 'B' option para activar los botones
@@ -151,12 +152,26 @@ function refrescarTabla(data,explorer,account)
             { title: 'Acciones',
                 orderable: false,
                 searchable: false,
-                width: '20%',
+                width: '30%',
                 data: 'path',
-                render: function (data) {
-                    data=data.replace('\\', '/');
-                    return '<button class="btn btn-primary btn-sm btn-editar me-2" onclick="editarModalMetadata(\'' + data + '\',\'' + account.accountId + '\');">Editar</button>'+
-                        '<button class="btn btn-danger btn-sm btn-eliminar" onclick="dlt(\'' + data + '\', \'' + account.accountId + '\', \'' + explorer + '\')">Eliminar</button>'
+                render: function (data,type, row) {
+                    let path=row.path.replace('\\', '/');
+                    let explorer2='';
+                    if(explorer==='explorer1')
+                    {
+                        explorer2='explorer2';
+                    } else
+                    {
+                        explorer2='explorer1';
+                    }
+                    let botones = '';
+                    botones += '<button class="btn btn-primary btn-xs btn-editar me-2" onclick="editarModalMetadata(\'' + path + '\',\'' + account.accountId + '\');">Editar</button>';
+                    botones += '<button class="btn btn-danger btn-xs btn-eliminar me-2" onclick="dlt(\'' + path + '\', \'' + account.accountId + '\', \'' + explorer + '\')">Eliminar</button>';
+                    if (row.type === 'file') {
+                        botones += '<button class="btn btn-secondary btn-xs btn-copiar me-2" onclick="copy(\'' + path + '\', \'' + account.accountId + '\', \'' + explorer2 + '\')">Copiar</button>';
+                        botones += '<button class="btn btn-secondary btn-xs btn-mover me-2" onclick="move(\'' + path + '\', \'' + account.accountId + '\', \'' + explorer2 + '\')">Mover</button>';
+                    }
+                    return botones;
                 }
             }
         ]

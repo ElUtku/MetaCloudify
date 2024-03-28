@@ -282,3 +282,65 @@ function guardarMetadata(path, accountId)
     });
 }
 
+function copy(sourcePath,sourceAccountId,explorerDestino)
+{
+    let account1 = getAccount(sourceAccountId);
+    let account2=$('#'+explorerDestino).data('account');
+
+    $.ajax({
+        url: account1.controller+'/copy',
+        method: 'POST',
+        data: {
+            sourcePath: sourcePath,
+            destinationPath: account2.pathActual,
+            accountId1: sourceAccountId,
+            accountId2: account2.accountId,
+            destinationCloud: account2.controller
+        },
+        success: function () {
+            if(explorerDestino==='explorer2') //Solo refreseco el explorador que recibe le archivp
+            {
+                loadData(account2.accountId, account2.pathActual,'explorer2');
+            } else
+            {
+                loadData(account2.accountId, account2.pathActual,'explorer1');
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error(error);
+        }
+    });
+}
+
+function move(sourcePath,sourceAccountId,explorerDestino)
+{
+    let account1 = getAccount(sourceAccountId);
+    let account2=$('#'+explorerDestino).data('account');
+
+    $.ajax({
+        url: account1.controller+'/move',
+        method: 'PUT',
+        data: {
+            sourcePath: sourcePath,
+            destinationPath: account2.pathActual,
+            accountId1: sourceAccountId,
+            accountId2: account2.accountId,
+            destinationCloud: account2.controller
+        },
+        success: function () {
+            if(explorerDestino==='explorer2') //Se refrescan los dos explroadores
+            {
+                loadData(account1.accountId, account1.pathActual,'explorer1');
+                loadData(account2.accountId, account2.pathActual,'explorer2');
+            } else
+            {
+                loadData(account1.accountId, account1.pathActual,'explorer2');
+                loadData(account2.accountId, account2.pathActual,'explorer1');
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error(error);
+        }
+    });
+}
+

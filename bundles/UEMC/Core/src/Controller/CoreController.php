@@ -5,6 +5,8 @@ namespace UEMC\Core\Controller;
 use DateTime;
 use Doctrine\Persistence\ManagerRegistry;
 
+use League\Flysystem\FilesystemException;
+use League\Flysystem\MountManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -30,6 +32,7 @@ class CoreController extends AbstractController
 
     private Account $account;
     private Core $core;
+    private MountManager $mountManager;
 
     /**
      *
@@ -72,6 +75,38 @@ class CoreController extends AbstractController
             $this->account = $this->core->arrayToObject($session->get('accounts')[$accountId]);
             $filesystem = $this->core->constructFilesystem($this->account);
             $this->core->setFilesystem($filesystem);
+        }
+    }
+
+    /**
+     *
+     * Se recupera el dos cuentas y se configura un mount manager para operar con varios core
+     *
+     * @param SessionInterface $session
+     * @param Request $request
+     * @return void
+     * @throws CloudException
+     */
+    private function retriveMountManager(SessionInterface $session, Request $request, String $cloud1, String $cloud2): void
+    {
+        $ruta=$request->attributes->get('_route');
+        $accountId1 = $request->query->get('accountId1') ?? $request->request->get('accountId1') ?? null;
+        $accountId2 = $request->query->get('accountId2') ?? $request->request->get('accountId2') ?? null;
+
+        if($session->has('accounts') and $ruta !== 'login' and $ruta !== 'login_token' and $ruta !== 'loginWeb' )
+        {
+            $this->createContext($cloud1);
+            $account1 = $this->core->arrayToObject($session->get('accounts')[$accountId1]);
+            $filesystem1 = $this->core->constructFilesystem($account1);
+
+            $this->createContext($cloud2);
+            $account2 = $this->core->arrayToObject($session->get('accounts')[$accountId2]);
+            $filesystem2 = $this->core->constructFilesystem($account2);
+
+            $this->mountManager = new MountManager([
+                'f1' => $filesystem1,
+                'f2' => $filesystem2,
+            ]);
         }
     }
 
@@ -514,4 +549,54 @@ class CoreController extends AbstractController
             return new JsonResponse($e->getMessage(),$e->getStatusCode());
         }
     }
+
+    /**
+     *
+     * Guarda los nuevos metadatos de un archvio en base de datos
+     *
+     * @Route("/{cloud}/copy", name="copy", methods={"POST"})
+     */
+    public function copy(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
+    {
+        try {
+
+            $sourcePath=$request->get('sourcePath');
+            $destinationPath=$request->get('destinationPath');
+            $destinationCloud=$request->get('destinationCloud');
+
+            $this->retriveMountManager($session,$request,$cloud,$destinationCloud);
+            $this->mountManager->copy('f1://'.$sourcePath, 'f2://'.$destinationPath.'/'.basename($sourcePath));
+
+            return new JsonResponse();
+        }catch (CloudException | FilesystemException $e)
+        {
+            return new JsonResponse($e->getMessage());
+        }
+    }
+
+    /**
+     *
+     * Mueve un fichero de un directorio a otro
+     *
+     * @Route("/{cloud}/move", name="move", methods={"PUT"})
+     */
+    public function move(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
+    {
+        try {
+
+            $sourcePath=$request->get('sourcePath');
+            $destinationPath=$request->get('destinationPath');
+            $destinationCloud=$request->get('destinationCloud');
+
+            $this->retriveMountManager($session,$request,$cloud,$destinationCloud);
+
+            $this->mountManager->move('f1://'.$sourcePath, 'f2://'.$destinationPath.'/'.basename($sourcePath));
+
+            return new JsonResponse();
+        }catch (CloudException | FilesystemException $e)
+        {
+            return new JsonResponse($e->getMessage());
+        }
+    }
+
 }
