@@ -242,8 +242,6 @@ function getArchiveMetadata(accountId, path) {
     let account = getAccount(accountId);
     let metadata = null;
 
-    $('#loading-modal').modal('show');
-
     $.ajax({
         url: account.controller + '/drive/getArchive',
         method: 'GET',
@@ -258,9 +256,6 @@ function getArchiveMetadata(accountId, path) {
         error: function (xhr, status, error) {
             console.error(error);
             metadata = null;
-        },
-        complete: function () {
-            $('#loading-modal').modal('hide');
         }
     });
 
@@ -269,8 +264,6 @@ function getArchiveMetadata(accountId, path) {
 
 function guardarMetadata(path, accountId)
 {
-    $('#loading-modal').modal('show');
-
     let account = getAccount(accountId);
     let formData = extraerMetadatosModal();
     $.ajax({
@@ -282,14 +275,10 @@ function guardarMetadata(path, accountId)
             metadata: formData,
         },
         success: function () {
-                console.log('ok');
-
+            console.log('ok');
         },
         error: function (xhr, status, error) {
             console.error(error);
-        },
-        complete: function () {
-            $('#loading-modal').modal('hide');
         }
     });
 }

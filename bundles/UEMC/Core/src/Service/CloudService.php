@@ -151,8 +151,6 @@ abstract class CloudService
      */
     public function delete(String $path): void
     {
-        $this->logger->info("Deleting " . $path);
-
         try {
             $filesystem=$this->getFilesystem();
 
@@ -180,8 +178,6 @@ abstract class CloudService
      */
     public function upload(String $path, UploadedFile $content): void
     {
-        $this->logger->info("Uploading ".$content->getPathname());
-
         $filesystem=$this->getFilesystem();
 
         $stream = fopen($content->getPathname(), 'r');
@@ -366,8 +362,8 @@ abstract class CloudService
             $filesystem=$this->getFilesystem();
 
             $contents = $filesystem->listContents(dirname($ruta));
-            $contentsArray=$contents->toArray();
-            $filteredItems = array_filter($contentsArray, function ($item) use ($ruta) {
+
+            $filteredItems = array_filter($contents->toArray(), function ($item) use ($ruta) {
                 return $item['path'] === $ruta ||
                         str_replace('\\', '/', $item['path']) === $ruta ||
                         $this->cleanOwncloudPath($item['path'])==$ruta;
@@ -419,8 +415,10 @@ abstract class CloudService
         try {
             $filesystem=$this->getFilesystem();
 
-            $contents=$filesystem->listContents(dirname($ruta),false)->toArray();
-            foreach ($contents as $item) {
+            $contents=$filesystem->listContents(dirname($ruta),false);
+            $contentArrays=$contents->toArray();
+
+            foreach ($contentArrays as $item) {
                 if ($item['path']==$ruta ||
                     str_replace('\\', '/',$item['path']) == $ruta ||
                     $this->cleanOwncloudPath($item['path']) == $ruta) // remote.php/webdav/usuario/a/b/c.txt == /a/b/c.txt
