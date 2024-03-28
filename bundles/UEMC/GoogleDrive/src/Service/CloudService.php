@@ -12,6 +12,7 @@ use League\Flysystem\Config;
 use League\Flysystem\Filesystem;
 use League\Flysystem\Visibility;
 use League\OAuth2\Client\Provider\Google;
+use League\OAuth2\Client\Token\AccessToken;
 use Masbug\Flysystem\GoogleDriveAdapter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -106,7 +107,7 @@ class CloudService extends Core
                 'redirectUri'  => $config['redirectUri']
             ]);
 
-            $token=$request->get('token');
+            $token=new AccessToken(['access_token'=>$request->get('token')]);
 
             $user=$provider->getResourceOwner($token)->toArray(); //Se obtiene el usuario y se transforma en objeto
             $account=$this->arrayToObject($user);
