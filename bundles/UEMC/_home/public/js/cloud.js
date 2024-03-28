@@ -179,39 +179,38 @@ function upload(accountId, explorer) {
 
 
 
-function download(path,name,accountId)
-{
+function download(path, name, accountId) {
+    $('#loading-modal').modal('show');
+
     let account = getAccount(accountId);
 
     $.ajax({
-        url: account.controller+"/drive/download",
+        url: account.controller + "/drive/download",
         method: 'GET',
+        xhrFields: {
+            responseType: 'blob'
+        },
         data: {
             path: path,
             name: name,
             accountId: accountId
         },
         success: function (data) {
-
-//Se obtiene el nombre del archivo a descargar
-            let pathSplit = path.split('\\');
-            let name = pathSplit[pathSplit.length - 1];
-
-//Se descarga el archivo
-            let blob = new Blob([data], { type: 'application/octet-stream' });
-            let link = document.createElement('a');
+            var blob = new Blob([data]);
+            var link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
             link.download = name;
-            document.body.appendChild(link);
             link.click();
-// Se limpia el enlace después de la descarga
-            document.body.removeChild(link);
         },
         error: function (xhr, status, error) {
             console.error(error);
+        },
+        complete: function () {
+            $('#loading-modal').modal('hide');
         }
     });
 }
+
 
 function logout(accountId)
 {

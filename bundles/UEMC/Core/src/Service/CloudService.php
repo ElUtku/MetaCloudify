@@ -18,6 +18,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 use UEMC\Core\Entity\Metadata;
 use UEMC\Core\Resources\ErrorTypes;
@@ -219,15 +220,14 @@ abstract class CloudService
         $filesystem=$this->getFilesystem();
 
         try {
-            $contents = $filesystem->read($path);
-            //file_put_contents("/test.mp4", $contents); //Ver si el problema esta aqui
-            $mimetype=$filesystem->mimeType($path);
+            $stream = $filesystem->readStream($path);
+            $response = new StreamedResponse(function () use ($stream) {
+                fpassthru($stream);
+                fclose($stream);
+            });
 
-            $response = new Response($contents);
-
-            $response->headers->set('Content-Type', "'$mimetype'");
-            //Añadir content lenght
-            $response->headers->set('Content-Disposition', 'attachment; filename="' . $name .'"');
+            $response->headers->set('Content-Type', $filesystem->mimeType($path));
+            $response->headers->set('Content-Disposition', 'attachment; filename="' . $name . '"');
 
             return $response;
         } catch (FilesystemException | \Exception $e) {
