@@ -9,6 +9,7 @@ function Account(accountId,controller,user,root,pathActual,parent)
 }
 
 function loadData(accountId,path,explorer) {
+    $('#loading-modal').modal('show');
 
     path = (typeof path !== 'undefined') ? path : '';
     path=path.replace(/\//g, '\\');
@@ -39,12 +40,17 @@ function loadData(accountId,path,explorer) {
         },
         error: function (xhr, status, error) {
             console.error(error);
+        },
+        complete: function () {
+            $('#loading-modal').modal('hide');
         }
     });
 }
 
 function createDir(name,accountId,explorer)
 {
+    $('#loading-modal').modal('show');
+
     let account = getAccount(accountId);
     $.ajax({
         url: account.controller+"/drive/createDir",
@@ -60,12 +66,17 @@ function createDir(name,accountId,explorer)
         },
         error: function (xhr, status, error) {
             console.error(error);
+        },
+        complete: function () {
+            $('#loading-modal').modal('hide');
         }
     });
 }
 
 function createFile(name,accountId,explorer)
 {
+    $('#loading-modal').modal('show');
+
     let account = getAccount(accountId);
     $.ajax({
         url: account.controller+"/drive/createFile",
@@ -81,12 +92,17 @@ function createFile(name,accountId,explorer)
         },
         error: function (xhr, status, error) {
             console.error(error);
+        },
+        complete: function () {
+            $('#loading-modal').modal('hide');
         }
     });
 }
 
 function dlt(path,accountId,explorer)
 {
+    $('#loading-modal').modal('show');
+
     let account = getAccount(accountId);
     $.ajax({
         url: account.controller+"/drive/delete",
@@ -100,33 +116,68 @@ function dlt(path,accountId,explorer)
         },
         error: function (xhr, status, error) {
             console.error(error);
+        },
+        complete: function () {
+            $('#loading-modal').modal('hide');
         }
     });
 }
 
-function upload(accountId,explorer)
-{
-    let account = getAccount(accountId)
+function upload(accountId, explorer) {
+    let account = getAccount(accountId);
 
-    let fileupload = $('#fileupload-'+explorer);
+    let fileupload = $('#fileupload-' + explorer);
+    let progressBar = $('#progress-bar');
+    let progressText = $('#progress-text');
+    let uploadedSize = 0;
+    let totalSize = 0;
+
     fileupload.fileupload({
-        url: account.controller+'/drive/upload',
+        url: account.controller + '/drive/upload',
         dataType: 'json',
         method: 'POST',
-        formData: { path: account.pathActual,
-                    accountId: accountId
+        formData: {
+            path: account.pathActual,
+            accountId: accountId
         },
         done: function () {
-            loadData(accountId,account.pathActual,explorer);
+            $('#loading-progress-bar').modal('hide');
+            loadData(accountId, account.pathActual, explorer);
         },
         fail: function (e, data) {
             console.log('Error al cargar el archivo:', data.errorThrown);
+            $('#loading-progress-bar').modal('hide');
+        },
+        progressall: function (e, data) { //Este evento procesa muestra el modal y el porcentajee
+            $('#loading-progress-bar').modal('show');
+
+            totalSize = data.total;
+
+// Se calcula el porcentaje
+            let progress = parseInt(data.loaded / data.total * 100, 10);
+// Se actualiza la barra de progreso
+            progressBar.css('width', progress + '%').attr('aria-valuenow', progress);
+// Se actualiza el texto de progreso
+            progressText.text(formatBytes(uploadedSize) + ' de ' + formatBytes(totalSize) + ' (' + progress + '%)');
+        },
+        progress: function (e, data) { //Este evento procesa los mb/s que se estan subiendo
+            uploadedSize = data.loaded;
+
+            let progress = parseInt(data.loaded / data.total * 100, 10);
+
+            progressBar.css('width', progress + '%').attr('aria-valuenow', progress);
+
+            progressText.text(formatBytes(uploadedSize) + ' de ' + formatBytes(totalSize) + ' (' + progress + '%)');
         }
     });
 
     // Inicia la carga del archivo
-    fileupload.fileupload('send', { files: $('#formFile-'+explorer)[0].files });
+    fileupload.fileupload('send', {
+        files: $('#formFile-' + explorer)[0].files
+    });
 }
+
+
 
 function download(path,name,accountId)
 {
@@ -187,31 +238,39 @@ function back(explorer, account)
     loadData(account.accountId,account.parent,explorer);
 }
 
-function getArchiveMetadata(accountId,path)
-{
+function getArchiveMetadata(accountId, path) {
     let account = getAccount(accountId);
-    let metadata=null;
+    let metadata = null;
+
+    $('#loading-modal').modal('show');
+
     $.ajax({
-        url: account.controller+'/drive/getArchive',
+        url: account.controller + '/drive/getArchive',
         method: 'GET',
-        async:false,
+        async: false, // Debe ser sincrónico para que el modal pueda leer los datos devueltos
         data: {
             path: path,
             accountId: accountId,
         },
         success: function (data) {
-            metadata=data;
+            metadata = data;
         },
         error: function (xhr, status, error) {
             console.error(error);
-            metadata=null;
+            metadata = null;
+        },
+        complete: function () {
+            $('#loading-modal').modal('hide');
         }
     });
+
     return metadata;
 }
 
 function guardarMetadata(path, accountId)
 {
+    $('#loading-modal').modal('show');
+
     let account = getAccount(accountId);
     let formData = extraerMetadatosModal();
     $.ajax({
@@ -224,9 +283,13 @@ function guardarMetadata(path, accountId)
         },
         success: function () {
                 console.log('ok');
+
         },
         error: function (xhr, status, error) {
             console.error(error);
+        },
+        complete: function () {
+            $('#loading-modal').modal('hide');
         }
     });
 }

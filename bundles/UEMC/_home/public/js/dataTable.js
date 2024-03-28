@@ -81,12 +81,11 @@ function refrescarTabla(data,explorer,account)
                 }},
             { text: '<i class="bi bi-upload me-2"></i>Subir archivo', className: 'btn btn-md', action: function ()
                 {
-                    let formFile=$('#formFile-'+explorer);
-
-                    formFile.change(function() {
+                    //Off desvincula el boton cada vez que se recrea la tabla
+                    $('#formFile-'+explorer).off('change').on('change', function() {
                         upload(account.accountId, explorer);
                     });
-                    formFile.trigger('click');
+                    $('#formFile-'+explorer).trigger('click');
                 }},
         ],
         initComplete: function () { //Se modifica el bloque ruta- definido en dom:

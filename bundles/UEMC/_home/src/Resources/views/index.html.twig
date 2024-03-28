@@ -78,7 +78,7 @@
                         </thead>
                     </table>
                     <form class="d-none" id="fileupload-explorer2" method="POST" enctype="multipart/form-data" style="display: none;">
-                        <input class="form-control form-control-sm me-2" id="formFile-explorer2" type="file" name="content" multiple>
+                        <input class="form-control form-control-sm me-2" id="formFile-explorer2" type="file" name="content">
                     </form>
                 </div>
 
@@ -100,6 +100,12 @@
 
     <!-- Modal de metadatos -->
     {{ include('@UEMC_homeBundle/Includes/modalMetadatos.html.twig') }}
+
+    <!-- Elemento para la pantalla de upload -->
+    {{ include('@UEMC_homeBundle/Includes/progressBarUpload.html.twig') }}
+
+    <!-- Elemento para la pantalla de carga -->
+    {{ include('@UEMC_homeBundle/Includes/modalPantallaCarga.html.twig') }}
 
     <!-- FOOTER -->
     {{ include('@UEMC_homeBundle/Includes/footer.html.twig') }}
