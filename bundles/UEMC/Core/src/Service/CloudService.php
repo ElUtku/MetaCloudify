@@ -434,6 +434,21 @@ abstract class CloudService
         }
     }
 
+    public function copy(Filesystem $source, Filesystem $destination, String $sourcePath, String $destinationPath)
+    {
+        try {
+            $this->setFilesystem($source);
+            $content=$source->read($sourcePath);
+
+            $this->setFilesystem($destination);
+            $destination->write($destinationPath . "\\" . basename($sourcePath), $content);
+        }catch (FilesystemException | Exception $e) {
+            throw new CloudException(ErrorTypes::ERROR_COPY->getErrorMessage().' - '.$e->getMessage(),
+                ErrorTypes::ERROR_COPY->getErrorCode());
+        }
+
+    }
+
     /**
      * @param $path
      * @return string

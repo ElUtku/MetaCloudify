@@ -29,6 +29,9 @@ enum ErrorTypes: string
     case NO_SUCH_FILE_OR_DIRECTORY ='La ruta no es un directorio ni un archivo.';
     case ERROR_DELETE_MULTIPLE_FILES = 'Imposible maborrar todos los ficheros que contien la carpeta en la BD.';
     case ERROR_GET_METADATA = 'Error al obtener los metadatos de la base de datos.';
+    case ERROR_COPY = 'Error al copiar los archivos.';
+    case ERROR_MOVE = 'Error al mover los archivos';
+
     /**
      * @return int
      */
@@ -60,6 +63,8 @@ enum ErrorTypes: string
             ErrorTypes::ERROR_LOG_METADATA => 645,
             ErrorTypes::ERROR_DELETE_MULTIPLE_FILES =>646,
             ErrorTypes::ERROR_GET_METADATA => 647,
+            ErrorTypes::ERROR_COPY => 650,
+            ErrorTypes::ERROR_MOVE => 651,
         };
     }
 
@@ -94,6 +99,8 @@ enum ErrorTypes: string
             ErrorTypes::NO_SUCH_FILE_OR_DIRECTORY => 'La ruta no es un directorio ni un archivo',
             ErrorTypes::ERROR_DELETE_MULTIPLE_FILES => 'Imposible maborrar todos los ficheros que contien la carpeta en la BD',
             ErrorTypes::ERROR_GET_METADATA => 'Error al obtener los metadatos de la base de datos',
+            ErrorTypes::ERROR_COPY => 'Error al copiar los archivos.',
+            ErrorTypes::ERROR_MOVE => 'Error al mover los archivos.',
         };
     }
 }

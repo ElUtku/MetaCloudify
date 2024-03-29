@@ -5,7 +5,7 @@ namespace UEMC\Core\Controller;
 use DateTime;
 use Doctrine\Persistence\ManagerRegistry;
 
-use League\Flysystem\FilesystemException;
+use Exception;
 use League\Flysystem\MountManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -25,6 +25,7 @@ use UEMC\OwnCloud\Service\CloudService as OwnCloudCore;
 use UEMC\Ftp\Service\CloudService as FtpCore;
 use UEMC\GoogleDrive\Service\CloudService as GoogleDriveCore;
 use UEMC\OneDrive\Service\CloudService as OneDriveCore;
+use function PHPUnit\Framework\throwException;
 
 
 class CoreController extends AbstractController
@@ -78,16 +79,19 @@ class CoreController extends AbstractController
         }
     }
 
+
     /**
      *
-     * Se recupera el dos cuentas y se configura un mount manager para operar con varios core
+     *  Se recupera el dos cuentas y se configura un mount manager para operar con varios core
      *
      * @param SessionInterface $session
      * @param Request $request
-     * @return void
+     * @param String $cloud1
+     * @param String $cloud2
+     * @return array
      * @throws CloudException
      */
-    private function retriveMountManager(SessionInterface $session, Request $request, String $cloud1, String $cloud2): void
+    private function retriveMultiFileSystem(SessionInterface $session, Request $request, String $cloud1, String $cloud2): array
     {
         $ruta=$request->attributes->get('_route');
         $accountId1 = $request->query->get('accountId1') ?? $request->request->get('accountId1') ?? null;
@@ -95,18 +99,19 @@ class CoreController extends AbstractController
 
         if($session->has('accounts') and $ruta !== 'login' and $ruta !== 'login_token' and $ruta !== 'loginWeb' )
         {
-            $this->createContext($cloud1);
-            $account1 = $this->core->arrayToObject($session->get('accounts')[$accountId1]);
-            $filesystem1 = $this->core->constructFilesystem($account1);
-
             $this->createContext($cloud2);
             $account2 = $this->core->arrayToObject($session->get('accounts')[$accountId2]);
             $filesystem2 = $this->core->constructFilesystem($account2);
 
-            $this->mountManager = new MountManager([
-                'f1' => $filesystem1,
-                'f2' => $filesystem2,
-            ]);
+//El flysistem de orgien debe quedar seteado en $this->core
+            $this->createContext($cloud1);
+            $account1 = $this->core->arrayToObject($session->get('accounts')[$accountId1]);
+            $filesystem1 = $this->core->constructFilesystem($account1);
+
+            return [$filesystem1, $filesystem2];
+        } else
+        {
+            throw new Exception();
         }
     }
 
@@ -520,7 +525,7 @@ class CoreController extends AbstractController
             } else //Si $file no existe es probable que sea una primera modificación de un fichero no indexado
             {
                 $fileMetadata=$this->core->getAnArchive($path);
-                dump($fileMetadata);
+
                 $file = new Metadata(
                     basename($fileMetadata['path']),
                     $fileMetadata['extra_metadata']['id']??null,
@@ -552,25 +557,31 @@ class CoreController extends AbstractController
 
     /**
      *
-     * Guarda los nuevos metadatos de un archvio en base de datos
+     * Copia los ficheros de un filesystem a otro
      *
      * @Route("/{cloud}/copy", name="copy", methods={"POST"})
      */
     public function copy(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
     {
         try {
+            $entityManager = $doctrine->getManager();
 
             $sourcePath=$request->get('sourcePath');
             $destinationPath=$request->get('destinationPath');
             $destinationCloud=$request->get('destinationCloud');
 
-            $this->retriveMountManager($session,$request,$cloud,$destinationCloud);
-            $this->mountManager->copy('f1://'.$sourcePath, 'f2://'.$destinationPath.'/'.basename($sourcePath));
+            $filesSystems=$this->retriveMultiFileSystem($session,$request,$cloud,$destinationCloud);
+            $sourceFileSystem=$filesSystems[0];
+            $destinationFileSystem=$filesSystems[1];
 
+            $this->core->setFilesystem($destinationFileSystem);
+            $this->core->copy($sourceFileSystem,$destinationFileSystem,$sourcePath,$destinationPath);
+
+            $this->core->logger->info('COPY | origen: '.$cloud.'::'.$sourcePath.' | destination: '.$destinationCloud.'::'.$destinationPath);
             return new JsonResponse();
-        }catch (CloudException | FilesystemException $e)
+        }catch (CloudException $e)
         {
-            return new JsonResponse($e->getMessage());
+            return new JsonResponse($e->getMessage(), response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -583,19 +594,33 @@ class CoreController extends AbstractController
     public function move(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
     {
         try {
+            $entityManager = $doctrine->getManager();
+
 
             $sourcePath=$request->get('sourcePath');
             $destinationPath=$request->get('destinationPath');
             $destinationCloud=$request->get('destinationCloud');
 
-            $this->retriveMountManager($session,$request,$cloud,$destinationCloud);
+            $filesSystems=$this->retriveMultiFileSystem($session,$request,$cloud,$destinationCloud);
+            $sourceFileSystem=$filesSystems[0];
+            $destinationFileSystem=$filesSystems[1];
 
-            $this->mountManager->move('f1://'.$sourcePath, 'f2://'.$destinationPath.'/'.basename($sourcePath));
+            $this->core->setFilesystem($destinationFileSystem);
+
+            $this->core->copy($sourceFileSystem,$destinationFileSystem,$sourcePath,$destinationPath);
+
+            $this->core->setFilesystem($sourceFileSystem);
+
+            $this->core->delete($sourcePath);
+
+
+
+            $this->core->logger->info('COPY | origen: '.$cloud.'::'.$sourcePath.' | destination: '.$destinationCloud.'::'.$destinationPath  );
 
             return new JsonResponse();
-        }catch (CloudException | FilesystemException $e)
+        }catch (CloudException $e)
         {
-            return new JsonResponse($e->getMessage());
+            return new JsonResponse($e->getMessage(), response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
