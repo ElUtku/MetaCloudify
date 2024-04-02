@@ -54,40 +54,142 @@ function loadSelects() {
     }
 }
 
+
 function refrescarTabla(data,explorer,account)
 {
-
     let tabla=$('#'+explorer)
     tabla.data('account',account);
+
+    /* -------------- BOTONES TABLA ---------------- */
+    let buttonBack =
+        {
+            text: '<i class="bi bi-arrow-return-left me-2"></i>Volver atrás',
+            className: 'btn btn-xs',
+            action: function ()
+            {
+                back(explorer,account);
+            }
+        }
+    let buttonCrearCarpeta =
+        {
+            text: '<i class="bi bi-folder-fill me-2"></i>Crear carpeta',
+            className: 'btn btn-xs',
+            action: function ()
+            {
+                $('#newDirFileModal').modal('show');
+                $('#newNameButton').attr('onclick','createDir($(\'#newName\').val(),\''+account.accountId+'\',\''+explorer+'\')');
+            }
+        }
+    let buttonCrearFichero =
+        {
+            text: '<i class="bi bi-file-text-fill me-2"></i>Crear fichero',
+            className: 'btn btn-xs',
+            action: function ()
+            {
+                $('#newDirFileModal').modal('show');
+                $('#newNameButton').attr('onclick','createFile($(\'#newName\').val(),\''+account.accountId+'\',\''+explorer+'\')');
+            }
+        }
+    let buttonSubirArchivo =
+        {
+            text: '<i class="bi bi-upload me-2"></i>Subir archivo',
+            className: 'btn btn-xs',
+            action: function ()
+            {
+                //Off desvincula el boton cada vez que se recrea la tabla
+                $('#formFile-'+explorer).off('change').on('change', function() {
+                    upload(account.accountId, explorer);
+                });
+                $('#formFile-'+explorer).trigger('click');
+            }
+        }
+    let buttonEditarArchivo =
+        {
+            text: '<i class="bi bi-pencil-square me-2"></i>Editar archivo',
+            className: 'btn-xs',
+            action: function ()
+            {
+                let filaSeleccionada = tabla.DataTable().row({ selected: true }).data();
+
+                if (filaSeleccionada) {
+                    editarModalMetadata(filaSeleccionada.path,account.accountId);
+                    console.log('Fila seleccionada:', filaSeleccionada);
+                } else {
+                    // Manejo para cuando no se ha seleccionado ninguna fila
+                    console.log('No se ha seleccionado ninguna fila');
+                }
+            }
+        }
+    let buttonEliminarArchivo =
+        {
+            text: '<i class="bi bi-trash me-2"></i>Elimiar archivo',
+            className: 'btn-xs',
+            action: function ()
+            {
+                let filaSeleccionada = tabla.DataTable().row({ selected: true }).data();
+
+                if (filaSeleccionada) {
+                    dlt(filaSeleccionada.path,account.accountId,explorer);
+                    console.log('Fila seleccionada:', filaSeleccionada);
+                } else {
+                    // Manejo para cuando no se ha seleccionado ninguna fila
+                    console.log('No se ha seleccionado ninguna fila');
+                }
+            }
+        }
+    let buttonCopiarArchivo =
+        {
+            text: '<i class="bi bi-clipboard me-2"></i>Copiar archivo',
+            className: 'btn btn-secondary btn-xs',
+            action: function ()
+            {
+                let filaSeleccionada = tabla.DataTable().row({ selected: true }).data();
+
+                if (filaSeleccionada) {
+                    copy(filaSeleccionada.path,account.accountId,explorer);
+                    console.log('Fila seleccionada:', filaSeleccionada);
+                } else {
+                    // Manejo para cuando no se ha seleccionado ninguna fila
+                    console.log('No se ha seleccionado ninguna fila');
+                }
+            }
+        }
+    let buttonMoverArchivo =
+        {
+            text: '<i class="bi bi-arrows-move me-2"></i>Mover archivo',
+            className: 'btn btn-secondary btn-xs',
+            action: function ()
+            {
+                let filaSeleccionada = tabla.DataTable().row({ selected: true }).data();
+
+                if (filaSeleccionada) {
+                    move(filaSeleccionada.path,account.accountId,explorer);
+                    console.log('Fila seleccionada:', filaSeleccionada);
+                } else {
+                    // Manejo para cuando no se ha seleccionado ninguna fila
+                    console.log('No se ha seleccionado ninguna fila');
+                }
+            }
+        }
+
+    /* -------------- TABLA ---------------- */
+
     tabla.DataTable().destroy();
     tabla.DataTable({
         dom: 'Bfrtip', // 'B' option para activar los botones
-        dom: "<'row'<'col-sm-6'B><'col-sm-3 ruta-" + explorer + "'><'col-sm-3'f>>" +
-            "<'row'<'col-sm-12'tr>>" +
-            "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+        dom: "<'row'<'col-sm-12'B>>" +
+             "<'row mt-2'<'col-sm-6 ruta-" + explorer + "'><'col-sm-6'f>>"+
+             "<'row'<'col-sm-12'tr>>" +
+             "<'row'<'col-sm-5'i><'col-sm-7'p>>",
         buttons: [
-            { text: '<i class="bi bi-arrow-return-left me-2"></i>Volver atrás', className: 'btn btn-md', action: function ()
-                {
-                    back(explorer,account);
-                }},
-            { text: '<i class="bi bi-folder-fill me-2"></i>Crear carpeta', className: 'btn btn-md', action: function ()
-                {
-                    $('#newDirFileModal').modal('show');
-                    $('#newNameButton').attr('onclick','createDir($(\'#newName\').val(),\''+account.accountId+'\',\''+explorer+'\')');
-                }},
-            { text: '<i class="bi bi-file-text-fill me-2"></i>Crear fichero', className: 'btn btn-md', action: function ()
-                {
-                    $('#newDirFileModal').modal('show');
-                    $('#newNameButton').attr('onclick','createFile($(\'#newName\').val(),\''+account.accountId+'\',\''+explorer+'\')');
-                }},
-            { text: '<i class="bi bi-upload me-2"></i>Subir archivo', className: 'btn btn-md', action: function ()
-                {
-                    //Off desvincula el boton cada vez que se recrea la tabla
-                    $('#formFile-'+explorer).off('change').on('change', function() {
-                        upload(account.accountId, explorer);
-                    });
-                    $('#formFile-'+explorer).trigger('click');
-                }},
+            buttonBack,
+            buttonCrearCarpeta,
+            buttonCrearFichero,
+            buttonSubirArchivo,
+            buttonEliminarArchivo,
+            buttonEditarArchivo,
+            buttonCopiarArchivo,
+            buttonMoverArchivo,
         ],
         initComplete: function () { //Se modifica el bloque ruta- definido en dom:
             $('div.ruta-'+explorer).html('' +
@@ -98,14 +200,24 @@ function refrescarTabla(data,explorer,account)
         stateSave: true,
         info: false,
         ordering: true,
+        select: {
+            style: 'os',
+            selector: 'td:first-child'
+        },
+        order: [[3, 'desc']],
         paging: false,
         data: data,
         columns: [
+            {
+                data: null,
+                orderable: false,
+                render: DataTable.render.select()
+            },
             { title: '', //Simbolo carpeta o fichero
                 data: 'type',
                 visible: true,
                 width: '0.1%',
-                className: 'dt-body-right',
+                className: 'dt-body-right align-middle',
                 orderable: false,
                 searchable: false,
                 render: function (data) {
@@ -118,12 +230,13 @@ function refrescarTabla(data,explorer,account)
             },
             { title: 'Nombre',
                 data: 'path',
+                className: 'dt-body-left align-middle',
                 visible: true,
                 render: function (data) {
                     data=data.replace(/\//g, '\\');
                     let parts=data.split('\\');
                     let name = parts[parts.length - 1];
-                    return name;
+                    return '<span class="btn p-0 border-0">'+name+'</span>';
                 }
             },
             { title: 'Visibility',
@@ -132,6 +245,7 @@ function refrescarTabla(data,explorer,account)
             },
             { title: 'Fecha',
                 data: 'last_modified',
+                className: 'align-middle',
                 visible: true,
                 render:function (data)
                 {
@@ -144,51 +258,21 @@ function refrescarTabla(data,explorer,account)
             },
             { title: 'Propietario',
                 visible: true,
+                class: 'align-middle',
                 render:function ()
                 {
                     return account.user;
                 },
-            },
-            { title: 'Acciones',
-                orderable: false,
-                searchable: false,
-                width: '30%',
-                data: 'path',
-                render: function (data,type, row) {
-                    let path=row.path.replace('\\', '/');
-                    let explorer2='';
-                    if(explorer==='explorer1')
-                    {
-                        explorer2='explorer2';
-                    } else
-                    {
-                        explorer2='explorer1';
-                    }
-                    let botones = '';
-                    botones += '<button class="btn btn-primary btn-xs btn-editar me-2" onclick="editarModalMetadata(\'' + path + '\',\'' + account.accountId + '\');">Editar</button>';
-                    botones += '<button class="btn btn-danger btn-xs btn-eliminar me-2" onclick="dlt(\'' + path + '\', \'' + account.accountId + '\', \'' + explorer + '\')">Eliminar</button>';
-                    if (row.type === 'file') {
-                        botones += '<button class="btn btn-secondary btn-xs btn-copiar me-2" onclick="copy(\'' + path + '\', \'' + account.accountId + '\', \'' + explorer2 + '\')">Copiar</button>';
-                        botones += '<button class="btn btn-secondary btn-xs btn-mover me-2" onclick="move(\'' + path + '\', \'' + account.accountId + '\', \'' + explorer2 + '\')">Mover</button>';
-                    }
-                    return botones;
-                }
             }
         ]
     });
 
-    tabla.off('mouseenter', 'td:nth-child(2)'); //Hay que desvincular el elemtno para que no se repita
-    tabla.off('mouseleave', 'td:nth-child(2)'); //Hay que desvincular el elemtno para que no se repita
-    tabla.on('mouseenter', 'td:nth-child(2)', function() {
-        $(this).addClass('text-primary').css('cursor', 'pointer'); // Cambiar color del texto y cursor al pasar el ratón sobre la celda
-    }).on('mouseleave', 'td:nth-child(2)', function() {
-        $(this).removeClass('text-primary').css('cursor', 'default'); // Restaurar color del texto y cursor al salir del ratón de la celda
-    });
+    /* -------------- ACCIONES ---------------- */
 
-    tabla.off('click', 'td:nth-child(2)'); //Hay que desvincular el elemtno para que no se repita
-    tabla.on('click', 'td:nth-child(2)', function () {
+    tabla.off('click', 'td:nth-child(3) span'); //Hay que desvincular el elemtno para que no se repita
+    tabla.on('click', 'td:nth-child(3) span', function () {
 
-        let data = tabla.DataTable().row(this).data();
+        let data = tabla.DataTable().row(this.parent).data();
         if (data.type==='dir')
         {
             loadData(account.accountId,data.path.charAt(0) === '\\' ? data.path.slice(1) : data.path ,explorer);
@@ -201,3 +285,4 @@ function refrescarTabla(data,explorer,account)
         }
     });
 }
+

@@ -15,7 +15,7 @@
 }
 
 .btn-xs {
-    padding: 0.25rem 0.5rem; /* Ajusta el padding según tus necesidades */
-    font-size: 0.75rem; /* Redefine el tamaño de fuente según tus necesidades */
-    line-height: 1.5; /* Ajusta el alto de línea según tus necesidades */
+    padding: 4px 8px;
+    font-size: 12px;
+    line-height: 18px;
 }
