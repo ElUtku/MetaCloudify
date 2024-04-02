@@ -1,6 +1,7 @@
 clientId: '423818169355-mjhnjfqs6ue9m2ni9eldol8h8oibgr8f.apps.googleusercontent.com'
 clientSecret: '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'
-redirectUri: 'http://localhost/cloudBundles5.4/public/index.php/googledrive/login'
+redirectUriLogin: 'http://localhost/cloudBundles5.4/public/index.php/googledrive/login'
+redirectUriLoginToken: 'http://localhost/cloudBundles5.4/public/index.php/googledrive/login/token'
 redirectUriAccessTap: 'http://localhost/cloudBundles5.4/public/index.php/GoogleDrive/accessTap'
 scopes:
   - 'https://www.googleapis.com/auth/drive.appdata'

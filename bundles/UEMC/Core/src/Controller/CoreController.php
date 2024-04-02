@@ -25,7 +25,6 @@ use UEMC\OwnCloud\Service\CloudService as OwnCloudCore;
 use UEMC\Ftp\Service\CloudService as FtpCore;
 use UEMC\GoogleDrive\Service\CloudService as GoogleDriveCore;
 use UEMC\OneDrive\Service\CloudService as OneDriveCore;
-use function PHPUnit\Framework\throwException;
 
 
 class CoreController extends AbstractController
@@ -153,7 +152,7 @@ class CoreController extends AbstractController
      *
      * Este login debe ser usado como endpoint para obtener el identificador de la cuenta en la sesion.
      *
-     * @Route("/{cloud}/login/token", name="login_token", methods={"POST"})
+     * @Route("/{cloud}/login/token", name="login_token", methods={"GET","POST"})
      */
     public function loginPost(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
     {
@@ -163,17 +162,23 @@ class CoreController extends AbstractController
             $this->createContext($cloud);
             $this->retriveCore($session,$request);
 
-            $account=$this->core->loginPost($session,$request);
+            $result=$this->core->loginPost($session,$request);
+            if($result instanceof Account)
+            {
+                $accountExists=$entityManager->getRepository(Account::class)->loggin($result);
 
-            $accountExists=$entityManager->getRepository(Account::class)->loggin($account);
+                $result->setId($accountExists->getId());
+                $accountId=$this->core->setSession($session,$result);
 
-            $account->setId($accountExists->getId());
-            $accountId=$this->core->setSession($session,$account);
+                $this->core->logger->info('LOGGIN | '.'AccountId:'.$accountId.' | id: '.
+                    $accountExists->getId().' | controller: '.$result->getCloud().
+                    ' | user:' . $result->getUser());
+                return new JsonResponse('El identificador es ' .$accountId);
+            } else
+            {
+                return new JsonResponse($result);
+            }
 
-            $this->core->logger->info('LOGGIN | '.'AccountId:'.$accountId.' | id: '.
-                $accountExists->getId().' | controller: '.$account->getCloud().
-                ' | user:' . $account->getUser());
-            return new JsonResponse('El identificador es ' .$accountId);
         }catch (CloudException $e)
         {
             return new JsonResponse($e->getMessage(),$e->getStatusCode());

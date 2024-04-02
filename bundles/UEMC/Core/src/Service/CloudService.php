@@ -13,6 +13,7 @@ use League\Flysystem\UnableToCreateDirectory;
 use League\Flysystem\UnableToDeleteDirectory;
 use League\Flysystem\UnableToDeleteFile;
 use League\Flysystem\UnableToWriteFile;
+use League\OAuth2\Client\Provider\AbstractProvider;
 use PHPUnit\Util\Exception;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -305,10 +306,10 @@ abstract class CloudService
     /**
      * @param SessionInterface $session
      * @param Request $request
-     * @return Account
+     * @return Account | String
      * @throws CloudException
      */
-    public function loginPost(SessionInterface $session, Request $request): Account
+    public function loginPost(SessionInterface $session, Request $request): Account | String
     {
         return $this->login($session, $request);
     }

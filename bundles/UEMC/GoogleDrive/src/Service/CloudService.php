@@ -40,7 +40,7 @@ class CloudService extends Core
         $provider = new Google([
             'clientId'     => $config['clientId'],
             'clientSecret' => $config['clientSecret'],
-            'redirectUri'  => $config['redirectUri']
+            'redirectUri'  => $config['redirectUriLogin']
         ]);
         $options = [ 'scope' => $config['scopes'] ];
 
@@ -92,36 +92,59 @@ class CloudService extends Core
     /**
      * @param SessionInterface $session
      * @param Request $request
-     * @return Account
+     * @return Account| String
      * @throws CloudException
      */
-    public function loginPost(SessionInterface $session, Request $request): Account
+    public function loginPost(SessionInterface $session, Request $request): Account | String
     {
-        try {
 
-            $config = Yaml::parseFile(__DIR__.'\..\Resources\config\googledrive.yaml');
+        $config = Yaml::parseFile(__DIR__.'\..\Resources\config\googledrive.yaml');
 
-            $provider = new Google([
-                'clientId'     => $config['clientId'],
-                'clientSecret' => $config['clientSecret'],
-                'redirectUri'  => $config['redirectUri']
-            ]);
+        $provider = new Google([
+            'clientId'     => $config['clientId'],
+            'clientSecret' => $config['clientSecret'],
+            'redirectUri'  => $config['redirectUriLoginToken']
+        ]);
+        $options = [ 'scope' => $config['scopes'] ];
 
-            $token=new AccessToken(['access_token'=>$request->get('token')]);
+        $code=$request->get('code');
+        $state=$request->get('state');
+        $oauth2state=$session->get('oauth2state');
 
-            $user=$provider->getResourceOwner($token)->toArray(); //Se obtiene el usuario y se transforma en objeto
-            $account=$this->arrayToObject($user);
+        if (empty($code)) { // Se obtiene el codigo de autorizacion si no lo tenemos.
 
-            $account->setLastIp($request->getClientIp());
-            $account->setLastSession(new DateTime);
-            $account->setToken($token);
-            $account->setCloud(CloudTypes::GoogleDrive->value);
+            $authUrl = $provider->getAuthorizationUrl($options);
+            $oauth2state=$provider->getState();
+            $session->set('oauth2state',$oauth2state);
 
-            return $account;
-        } catch (Exception $e)
-        {
-            throw new CloudException(ErrorTypes::ERROR_INICIO_SESION->getErrorMessage().' - '.$e->getMessage(),
-                ErrorTypes::ERROR_INICIO_SESION->getErrorCode());
+            return 'Navega en esta url para obtener una url nueva que deberas pegar como nueva peticion : '.$authUrl;
+
+        } elseif (empty($state) || ($state !== $oauth2state)) { // Si el codigo de estado esta vacio o coincide es
+            return 'Copia la URL y enviala de nuevo en el medio donde iniciaste la comunicacion';
+        } else { //Si el codigo es correcto solicitamos un token de acceso y gurdamos la cuenta en la sesion
+            try {
+
+                $session->remove('oauth2state');
+
+                $token = $provider->getAccessToken('authorization_code', [
+                    'code' => $request->get('code')
+                ]);
+
+                $user=$provider->getResourceOwner($token)->toArray(); //Se obtiene el usuario y se transforma en objeto
+                $account=$this->arrayToObject($user);
+
+                $account->setLastIp($request->getClientIp());
+                $account->setLastSession(new DateTime());
+                $account->setToken($token);
+                $account->setCloud(CloudTypes::GoogleDrive->value);
+
+                return $account;
+
+            } catch (Exception $e) {
+                throw new CloudException(ErrorTypes::ERROR_INICIO_SESION->getErrorMessage().' - '.$e->getMessage(),
+                    ErrorTypes::ERROR_INICIO_SESION->getErrorCode());
+            }
+
         }
     }
 

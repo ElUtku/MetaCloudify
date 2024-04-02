@@ -36,7 +36,7 @@ class CloudService extends Core
             // Required
             'clientId'                => $config['clientId'],
             'clientSecret'            => $config['clientSecret'],
-            'redirectUri'             => $config['redirectUri'],
+            'redirectUri'             => $config['redirectUriLogin'],
             'urlAuthorize'            => $config['urlAuthorize'],
             'urlAccessToken'          => $config['urlAccessToken'],
             'urlResourceOwnerDetails' => $config['urlResourceOwnerDetails'],
@@ -88,28 +88,59 @@ class CloudService extends Core
     /**
      * @param SessionInterface $session
      * @param Request $request
-     * @return Account
+     * @return Account | string
      * @throws CloudException
      */
-    public function loginPost(SessionInterface $session, Request $request): Account
+    public function loginPost(SessionInterface $session, Request $request): Account | String
     {
-        try {
-            $token=$request->get('token');
+        $config = Yaml::parseFile(__DIR__.'\..\Resources\config\onedrive.yaml'); //Configuraicon de la nube
 
-            $user=$this->getUserInfo($token);
-            $account=$this->arrayToObject($user);
+        $provider = new Microsoft([
+            // Required
+            'clientId'                => $config['clientId'],
+            'clientSecret'            => $config['clientSecret'],
+            'redirectUri'             => $config['redirectUriLoginToken'],
+            'urlAuthorize'            => $config['urlAuthorize'],
+            'urlAccessToken'          => $config['urlAccessToken'],
+            'urlResourceOwnerDetails' => $config['urlResourceOwnerDetails'],
+        ]);
+        $options = [ 'scope' => $config['scopes'] ];
 
-            $account->setLastIp($request->getClientIp());
-            $account->setLastSession(new DateTime);
-            $account->setToken($token);
-            $account->setCloud(CloudTypes::OneDrive->value);
+        $code=$request->get('code');
+        $state=$request->get('state');
+        $oauth2state=$session->get('oauth2state');
 
-            return $account;
+        if (empty($code)) { // Se obtiene el codigo de autorizacion si no lo tenemos.
 
-        } catch (Exception $e)
-        {
-            throw new CloudException(ErrorTypes::ERROR_INICIO_SESION->getErrorMessage().' - '.$e->getMessage(),
-                ErrorTypes::ERROR_INICIO_SESION->getErrorCode());
+            $authUrl = $provider->getAuthorizationUrl($options);
+            $oauth2state=$provider->getState();
+            $session->set('oauth2state',$oauth2state);
+
+            return 'Navega en esta url para obtener una url nueva que deberas pegar como nueva peticion : '.$authUrl;
+
+        } elseif (empty($state) || ($state !== $oauth2state)) { // Si el codigo de estado esta vacio o coincide es
+            return 'Copia la URL y enviala de nuevo en el medio donde iniciaste la comunicacion';
+        } else {
+            try {
+                $session->remove('oauth2state');
+
+                $token = $provider->getAccessToken('authorization_code', [
+                    'code' => $request->get('code')
+                ]);
+
+                $user=$this->getUserInfo($token);
+
+                $account=$this->arrayToObject($user);
+
+                $account->setLastIp($request->getClientIp());
+                $account->setLastSession(new DateTime());
+                $account->setToken($token);
+                $account->setCloud(CloudTypes::OneDrive->value);
+                return $account;
+
+            } catch (Exception $e) {
+                throw new CloudException(ErrorTypes::ERROR_INICIO_SESION->getErrorMessage().' - '.$e->getMessage(), ErrorTypes::ERROR_INICIO_SESION->getErrorCode());
+            }
         }
     }
     /**
