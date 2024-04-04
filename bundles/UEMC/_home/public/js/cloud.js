@@ -314,6 +314,8 @@ function copy(sourcePath,sourceAccountId,destinationAccountId)
     let account1 = getAccount(sourceAccountId);
     let account2= getAccount(destinationAccountId);
 
+    $('#loading-modal').modal('show');
+
     $.ajax({
         url: account1.controller+'/copy',
         method: 'POST',
@@ -329,14 +331,18 @@ function copy(sourcePath,sourceAccountId,destinationAccountId)
         },
         error: function (xhr, status, error) {
             console.error(error);
+        },complete: function () {
+            $('#loading-modal').modal('hide');
         }
     });
 }
 
-function move(sourcePath,sourceAccountId,explorerDestino)
+function move(sourcePath,sourceAccountId,destinationAccountId)
 {
     let account1 = getAccount(sourceAccountId);
-    let account2=$('#'+explorerDestino).data('account');
+    let account2= getAccount(destinationAccountId);
+
+    $('#loading-modal').modal('show');
 
     $.ajax({
         url: account1.controller+'/move',
@@ -345,22 +351,16 @@ function move(sourcePath,sourceAccountId,explorerDestino)
             sourcePath: sourcePath,
             destinationPath: account2.pathActual,
             accountId1: sourceAccountId,
-            accountId2: account2.accountId,
+            accountId2: destinationAccountId,
             destinationCloud: account2.controller
         },
         success: function () {
-            if(explorerDestino==='explorer2') //Se refrescan los dos explroadores
-            {
-                loadData(account1.accountId, account1.pathActual,'explorer1');
-                loadData(account2.accountId, account2.pathActual,'explorer2');
-            } else
-            {
-                loadData(account1.accountId, account1.pathActual,'explorer2');
-                loadData(account2.accountId, account2.pathActual,'explorer1');
-            }
+            loadData(account2.accountId, account2.pathActual);
         },
         error: function (xhr, status, error) {
             console.error(error);
+        },complete: function () {
+            $('#loading-modal').modal('hide');
         }
     });
 }

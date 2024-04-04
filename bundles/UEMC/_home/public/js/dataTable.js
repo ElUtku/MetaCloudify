@@ -18,6 +18,8 @@ function refrescarTabla(data,account,cleanAll)
 
 let archivoEnCopia;
 let pegar = false;
+let copyStatus=false;
+let moveStatus=false;
 function crearTabla(data,account)
 {
     let tabla=$('#explorer');
@@ -110,29 +112,18 @@ function crearTabla(data,account)
                     let filaSeleccionada = tabla.DataTable().row({ selected: true }).data();
                     if(filaSeleccionada)
                     {
+                        copyStatus=true;
                         archivoEnCopia = filaSeleccionada;
                         pegar = true;
 
-                        tabla.DataTable().button('.btn-cancelar').enable();
-                        tabla.DataTable().button('.btn-mover').disable();
-                        $('.btn-copiar').removeClass('btn-secondary');
-                        $('.btn-copiar').addClass('btn-success');
-
-                        $('.btn-cancelar').addClass('btn-danger');
-                        $('.btn-cancelar').removeClass('btn-secondary');
+                        activarBtnCopiar();
                     }
                 }else if (pegar===true) {
+                    copyStatus=false;
                     copy(archivoEnCopia.path, archivoEnCopia.accountId, account.accountId);
                     pegar = false;
 
-                    tabla.DataTable().button('.btn-cancelar').disable();
-                    tabla.DataTable().button('.btn-mover').enable();
-
-                    $('.btn-copiar').addClass('btn-secondary');
-                    $('.btn-copiar').removeClass('btn-success');
-
-                    $('.btn-cancelar').removeClass('btn-danger');
-                    $('.btn-cancelar').addClass('btn-secondary');
+                    descativarBtnCopiar();
 
                 } else {
                     console.log('No se ha seleccionado ninguna fila');
@@ -150,30 +141,21 @@ function crearTabla(data,account)
                     let filaSeleccionada = tabla.DataTable().row({ selected: true }).data();
                     if(filaSeleccionada)
                     {
+                        moveStatus=true;
                         archivoEnCopia = filaSeleccionada;
                         pegar = true;
 
-                        tabla.DataTable().button('.btn-cancelar').enable();
-                        tabla.DataTable().button('.btn-copiar').disable();
-
-                        $('.btn-mover').removeClass('btn-secondary');
-                        $('.btn-mover').addClass('btn-warning');
-
-                        $('.btn-cancelar').addClass('btn-danger');
-                        $('.btn-cancelar').removeClass('btn-secondary');
+                        activarBtnMover();
                     }
                 }else if (pegar===true) {
+                    let btnMover=$('.btn-mover');
+                    let btnCancelar=$('.btn-cancelar');
+
+                    moveStatus=false;
                     move(archivoEnCopia.path, archivoEnCopia.accountId, account.accountId);
                     pegar = false;
 
-                    tabla.DataTable().button('.btn-cancelar').disable();
-                    tabla.DataTable().button('.btn-copiar').enable();
-
-                    $('.btn-mover').addClass('btn-secondary');
-                    $('.btn-mover').removeClass('btn-warning');
-
-                    $('.btn-cancelar').removeClass('btn-danger');
-                    $('.btn-cancelar').addClass('btn-secondary');
+                    descartivarBtnMover();
 
                 } else {
                     console.log('No se ha seleccionado ninguna fila');
@@ -189,20 +171,17 @@ function crearTabla(data,account)
             enabled: false,
             action: function ()
             {
+                copyStatus=false;
+                moveStatus=false;
                 archivoEnCopia = undefined;
                 pegar = false;
 
-                $('.btn-copiar').addClass('btn-secondary');
-                $('.btn-copiar').removeClass('btn-success');
-                $('.btn-mover').addClass('btn-secondary');
-                $('.btn-mover').removeClass('btn-warning');
+                descativarBtnCopiar()
 
-                $('.btn-cancelar').removeClass('btn-danger');
-                $('.btn-cancelar').addClass('btn-secondary');
+                descartivarBtnMover()
 
                 tabla.DataTable().button('.btn-cancelar').disable();
-                tabla.DataTable().button('.btn-copair').enable();
-                tabla.DataTable().button('.btn-mover').enable();
+
                 tabla.DataTable().rows( { selected: true } ).deselect()
             }
         }
@@ -234,19 +213,12 @@ function crearTabla(data,account)
         stateSave: true,
         info: false,
         ordering: true,
-        select: {
-            style: 'multi+shift',
-            selector: 'td:first-child',
-        },
+        select: true,
         order: [[3, 'desc']],
         paging: false,
         data: data,
         columns: [
-            {
-                data: null,
-                orderable: false,
-                render: DataTable.render.select()
-            },
+
             { title: '', //Simbolo carpeta o fichero
                 data: 'type',
                 visible: true,
@@ -316,8 +288,8 @@ function crearTabla(data,account)
 
     /* -------------- ACCIONES ---------------- */
 
-    tabla.off('click', 'td:nth-child(3)'); //Hay que desvincular el elemtno para que no se repita
-    tabla.on('click', 'td:nth-child(3)', function () {
+    tabla.off('click', 'td:nth-child(2)'); //Hay que desvincular el elemtno para que no se repita
+    tabla.on('click', 'td:nth-child(2)', function () {
 
         let data = tabla.DataTable().row(this).data();
         if (data.type==='dir')
@@ -331,4 +303,74 @@ function crearTabla(data,account)
             download(data.path,name,data.accountId);
         }
     });
+
+    //Una vez recargada la tabla, se comprueba si exiten fichero apra mover o copiar
+    if(copyStatus)
+    {
+        activarBtnCopiar();
+    } else if(moveStatus)
+    {
+        activarBtnMover()
+    }
+}
+
+function activarBtnCopiar()
+{
+    let tabla=$('#explorer').DataTable();
+    let btnCopiar=$('.btn-copiar');
+    let btnCancelar=$('.btn-cancelar');
+
+    tabla.button('.btn-cancelar').enable();
+    tabla.button('.btn-mover').disable();
+    btnCopiar.removeClass('btn-secondary');
+    btnCopiar.addClass('btn-success');
+
+    btnCancelar.addClass('btn-danger');
+    btnCancelar.removeClass('btn-secondary');
+}
+
+function descativarBtnCopiar(){
+    let tabla=$('#explorer').DataTable();
+    let btnCopiar=$('.btn-copiar');
+    let btnCancelar=$('.btn-cancelar');
+
+    tabla.button('.btn-cancelar').disable();
+    tabla.button('.btn-mover').enable();
+
+    btnCopiar.addClass('btn-secondary');
+    btnCopiar.removeClass('btn-success');
+
+    btnCancelar.removeClass('btn-danger');
+    btnCancelar.addClass('btn-secondary');
+}
+
+function activarBtnMover()
+{
+    let tabla=$('#explorer').DataTable();
+    let btnMover=$('.btn-mover');
+    let btnCancelar=$('.btn-cancelar');
+
+    tabla.button('.btn-cancelar').enable();
+    tabla.button('.btn-copiar').disable();
+
+    btnMover.removeClass('btn-secondary');
+    btnMover.addClass('btn-warning');
+
+    btnCancelar.addClass('btn-danger');
+    btnCancelar.removeClass('btn-secondary');
+}
+function descartivarBtnMover()
+{
+    let tabla=$('#explorer').DataTable();
+    let btnMover=$('.btn-mover');
+    let btnCancelar=$('.btn-cancelar');
+
+    tabla.button('.btn-cancelar').disable();
+    tabla.button('.btn-copiar').enable();
+
+    btnMover.addClass('btn-secondary');
+    btnMover.removeClass('btn-warning');
+
+    btnCancelar.removeClass('btn-danger');
+    btnCancelar.addClass('btn-secondary');
 }
