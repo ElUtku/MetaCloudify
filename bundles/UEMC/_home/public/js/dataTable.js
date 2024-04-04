@@ -288,10 +288,10 @@ function crearTabla(data,account)
 
     /* -------------- ACCIONES ---------------- */
 
-    tabla.off('click', 'td:nth-child(2)'); //Hay que desvincular el elemtno para que no se repita
-    tabla.on('click', 'td:nth-child(2)', function () {
+    tabla.off('dblclick', 'td:nth-child(2) span'); //Hay que desvincular el elemtno para que no se repita
+    tabla.on('dblclick', 'td:nth-child(2) span', function () {
 
-        let data = tabla.DataTable().row(this).data();
+        let data = tabla.DataTable().row(this.parentNode).data();
         if (data.type==='dir')
         {
             loadData(data.accountId,data.path.charAt(0) === '\\' ? data.path.slice(1) : data.path );
