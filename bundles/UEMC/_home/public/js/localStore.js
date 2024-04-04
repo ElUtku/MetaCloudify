@@ -20,6 +20,11 @@ function getAccount(accountId)
     return JSON.parse(sessionStorage.getItem('storedAccounts'))[accountId];
 }
 
+function getAccounts()
+{
+    return JSON.parse(sessionStorage.getItem('storedAccounts'));
+}
+
 function setAccount(account)
 {
     try {

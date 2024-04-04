@@ -49,3 +49,27 @@ function formatBytes(bytes) {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
+
+
+let ultimaAccion = '';
+function manejarActualizacionTabla(data, account) {
+    if (account.pathActual === '') {
+        if (ultimaAccion === 'volverRaiz') {
+            // Actualiza el contenido de la tabla sin borrarla
+            refrescarTabla(data, account, false);
+        } else {
+            // Borra y refresca la tabla completa
+            refrescarTabla(data, account, true);
+        }
+    } else {
+        // Refresca la tabla completa
+        refrescarTabla(data, account, true);
+    }
+
+    // Actualiza la última acción del usuario
+    if (account.pathActual === '') {
+        ultimaAccion = 'volverRaiz';
+    } else {
+        ultimaAccion = 'navegar';
+    }
+}

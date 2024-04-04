@@ -8,7 +8,24 @@ function Account(accountId,controller,user,root,pathActual,parent)
     this.parent=parent ?? undefined;
 }
 
-function loadData(accountId,path,explorer) {
+$(document).ready(function() {
+    recargasCuentas();
+    $('#fileupload-explorer').removeClass('d-none');
+
+});
+
+function recargasCuentas()
+{
+    let accounts=getAccounts();
+    for (let accountId in accounts) {
+        if (accounts.hasOwnProperty(accountId)) {
+            let account = accounts[accountId];
+            loadData(account.accountId, account.root);
+        }
+    }
+}
+
+function loadData(accountId,path) {
     $('#loading-modal').modal('show');
 
     path = (typeof path !== 'undefined') ? path : '';
@@ -16,7 +33,7 @@ function loadData(accountId,path,explorer) {
 
     let account = getAccount(accountId);
 
-    $.data($('#'+explorer,'account',account));
+    $.data($('#explorer','account',account));
 
     $.ajax({
         url: account.controller+'/drive',
@@ -35,8 +52,9 @@ function loadData(accountId,path,explorer) {
 
             setAccount(account);
 
-            refrescarTabla(data,explorer,account);
-            $("#ruta-p-"+explorer).html('Ruta: '+path);
+            manejarActualizacionTabla(data,account);
+
+            $("#ruta-p-explorer").html('Ruta: '+path);
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -47,7 +65,7 @@ function loadData(accountId,path,explorer) {
     });
 }
 
-function createDir(name,accountId,explorer)
+function createDir(name,accountId)
 {
     $('#loading-modal').modal('show');
 
@@ -62,7 +80,7 @@ function createDir(name,accountId,explorer)
         },
         success: function () {
             // Actualiza dinámicamente el contenido en la página
-            loadData(account.accountId,account.pathActual,explorer);
+            loadData(account.accountId,account.pathActual);
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -73,7 +91,7 @@ function createDir(name,accountId,explorer)
     });
 }
 
-function createFile(name,accountId,explorer)
+function createFile(name,accountId)
 {
     $('#loading-modal').modal('show');
 
@@ -88,7 +106,7 @@ function createFile(name,accountId,explorer)
         },
         success: function () {
             // Actualiza dinámicamente el contenido en la página
-            loadData(account.accountId,account.pathActual,explorer);
+            loadData(account.accountId,account.pathActual);
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -99,7 +117,7 @@ function createFile(name,accountId,explorer)
     });
 }
 
-function dlt(path,accountId,explorer)
+function dlt(path,accountId)
 {
     $('#loading-modal').modal('show');
 
@@ -112,7 +130,7 @@ function dlt(path,accountId,explorer)
             accountId: accountId
         },
         success: function () {
-            loadData(accountId,account.pathActual,explorer);
+            loadData(accountId,account.pathActual);
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -123,10 +141,10 @@ function dlt(path,accountId,explorer)
     });
 }
 
-function upload(accountId, explorer) {
+function upload(accountId) {
     let account = getAccount(accountId);
 
-    let fileupload = $('#fileupload-' + explorer);
+    let fileupload = $('#fileupload-explorer');
     let progressBar = $('#progress-bar');
     let progressText = $('#progress-text');
     let uploadedSize = 0;
@@ -142,7 +160,7 @@ function upload(accountId, explorer) {
         },
         done: function () {
             $('#loading-progress-bar').modal('hide');
-            loadData(accountId, account.pathActual, explorer);
+            loadData(accountId, account.pathActual);
         },
         fail: function (e, data) {
             console.log('Error al cargar el archivo:', data.errorThrown);
@@ -173,7 +191,7 @@ function upload(accountId, explorer) {
 
     // Inicia la carga del archivo
     fileupload.fileupload('send', {
-        files: $('#formFile-' + explorer)[0].files
+        files: $('#formFile-explorer')[0].files
     });
 }
 
@@ -232,9 +250,18 @@ function logout(accountId)
     });
 }
 
-function back(explorer, account)
+function back(account)
 {
-    loadData(account.accountId,account.parent,explorer);
+    if(account.pathActual!== '')
+    {
+        if(account.parent === '')
+        {
+            recargasCuentas();
+        } else
+        {
+            loadData(account.accountId,account.parent);
+        }
+    }
 }
 
 function getArchiveMetadata(accountId, path) {
