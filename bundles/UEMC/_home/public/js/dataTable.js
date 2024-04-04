@@ -16,6 +16,8 @@ function refrescarTabla(data,account,cleanAll)
     }
 }
 
+let archivoEnCopia;
+let pegar = false;
 function crearTabla(data,account)
 {
     let tabla=$('#explorer');
@@ -27,6 +29,7 @@ function crearTabla(data,account)
             className: 'btn btn-xs',
             action: function ()
             {
+                tabla.DataTable().rows( { selected: true } ).deselect()
                 back(account);
             }
         }
@@ -100,42 +103,113 @@ function crearTabla(data,account)
     let buttonCopiarArchivo =
         {
             text: '<i class="bi bi-clipboard me-2"></i>Copiar archivo',
-            className: 'btn btn-secondary btn-xs',
+            className: 'btn btn-secondary btn-xs btn-copiar',
             action: function ()
             {
-                let filaSeleccionada = tabla.DataTable().row({ selected: true }).data();
+                if (pegar===false) {
+                    let filaSeleccionada = tabla.DataTable().row({ selected: true }).data();
+                    if(filaSeleccionada)
+                    {
+                        archivoEnCopia = filaSeleccionada;
+                        pegar = true;
 
-                if (filaSeleccionada) {
-                    copy(filaSeleccionada.path,filaSeleccionada.accountId);
-                    console.log('Fila seleccionada:', filaSeleccionada);
+                        tabla.DataTable().button('.btn-cancelar').enable();
+                        tabla.DataTable().button('.btn-mover').disable();
+                        $('.btn-copiar').removeClass('btn-secondary');
+                        $('.btn-copiar').addClass('btn-success');
+
+                        $('.btn-cancelar').addClass('btn-danger');
+                        $('.btn-cancelar').removeClass('btn-secondary');
+                    }
+                }else if (pegar===true) {
+                    copy(archivoEnCopia.path, archivoEnCopia.accountId, account.accountId);
+                    pegar = false;
+
+                    tabla.DataTable().button('.btn-cancelar').disable();
+                    tabla.DataTable().button('.btn-mover').enable();
+
+                    $('.btn-copiar').addClass('btn-secondary');
+                    $('.btn-copiar').removeClass('btn-success');
+
+                    $('.btn-cancelar').removeClass('btn-danger');
+                    $('.btn-cancelar').addClass('btn-secondary');
+
                 } else {
-                    // Manejo para cuando no se ha seleccionado ninguna fila
                     console.log('No se ha seleccionado ninguna fila');
                 }
+                tabla.DataTable().rows( { selected: true } ).deselect()
             }
         }
     let buttonMoverArchivo =
         {
             text: '<i class="bi bi-arrows-move me-2"></i>Mover archivo',
-            className: 'btn btn-secondary btn-xs',
+            className: 'btn btn-secondary btn-xs btn-mover',
             action: function ()
             {
-                let filaSeleccionada = tabla.DataTable().row({ selected: true }).data();
+                if (pegar===false) {
+                    let filaSeleccionada = tabla.DataTable().row({ selected: true }).data();
+                    if(filaSeleccionada)
+                    {
+                        archivoEnCopia = filaSeleccionada;
+                        pegar = true;
 
-                if (filaSeleccionada) {
-                    move(filaSeleccionada.path,filaSeleccionada.accountId);
-                    console.log('Fila seleccionada:', filaSeleccionada);
+                        tabla.DataTable().button('.btn-cancelar').enable();
+                        tabla.DataTable().button('.btn-copiar').disable();
+
+                        $('.btn-mover').removeClass('btn-secondary');
+                        $('.btn-mover').addClass('btn-warning');
+
+                        $('.btn-cancelar').addClass('btn-danger');
+                        $('.btn-cancelar').removeClass('btn-secondary');
+                    }
+                }else if (pegar===true) {
+                    move(archivoEnCopia.path, archivoEnCopia.accountId, account.accountId);
+                    pegar = false;
+
+                    tabla.DataTable().button('.btn-cancelar').disable();
+                    tabla.DataTable().button('.btn-copiar').enable();
+
+                    $('.btn-mover').addClass('btn-secondary');
+                    $('.btn-mover').removeClass('btn-warning');
+
+                    $('.btn-cancelar').removeClass('btn-danger');
+                    $('.btn-cancelar').addClass('btn-secondary');
+
                 } else {
-                    // Manejo para cuando no se ha seleccionado ninguna fila
                     console.log('No se ha seleccionado ninguna fila');
                 }
+
+                tabla.DataTable().rows( { selected: true } ).deselect()
+            }
+        }
+    let buttonCancelPaste =
+        {
+            text: '<i class="bi bi-x-circle me-2"></i>Cancelar',
+            className: 'btn btn-secondary btn-xs btn-cancelar',
+            enabled: false,
+            action: function ()
+            {
+                archivoEnCopia = undefined;
+                pegar = false;
+
+                $('.btn-copiar').addClass('btn-secondary');
+                $('.btn-copiar').removeClass('btn-success');
+                $('.btn-mover').addClass('btn-secondary');
+                $('.btn-mover').removeClass('btn-warning');
+
+                $('.btn-cancelar').removeClass('btn-danger');
+                $('.btn-cancelar').addClass('btn-secondary');
+
+                tabla.DataTable().button('.btn-cancelar').disable();
+                tabla.DataTable().button('.btn-copair').enable();
+                tabla.DataTable().button('.btn-mover').enable();
+                tabla.DataTable().rows( { selected: true } ).deselect()
             }
         }
 
     tabla.addClass('tabla-creada');
     tabla.DataTable().destroy();
     tabla.DataTable({
-        dom: 'Bfrtip', // 'B' option para activar los botones
         dom: "<'row'<'col-sm-12'B>>" +
             "<'row mt-2'<'col-sm-6 ruta-explorer'><'col-sm-6'f>>"+
             "<'row'<'col-sm-12'tr>>" +
@@ -149,6 +223,7 @@ function crearTabla(data,account)
             buttonEditarArchivo,
             buttonCopiarArchivo,
             buttonMoverArchivo,
+            buttonCancelPaste,
         ],
         initComplete: function () { //Se modifica el bloque ruta- definido en dom:
             $('div.ruta-explorer').html('' +
@@ -161,7 +236,7 @@ function crearTabla(data,account)
         ordering: true,
         select: {
             style: 'multi+shift',
-            selector: 'td:first-child'
+            selector: 'td:first-child',
         },
         order: [[3, 'desc']],
         paging: false,
