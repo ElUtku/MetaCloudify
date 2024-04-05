@@ -6,6 +6,7 @@ function Account(accountId,controller,user,root,pathActual,parent)
     this.root=root;
     this.pathActual=pathActual ?? undefined;
     this.parent=parent ?? undefined;
+    this.show=true;
 }
 
 $(document).ready(function() {
@@ -14,13 +15,25 @@ $(document).ready(function() {
 
 });
 
+function mostrarOcultar(accountId)
+{
+    let account = getAccount(accountId);
+
+    account.show = !account.show; //Se seta lo contrario de lo que tenga
+
+    setAccount(account);
+
+    location.reload();
+}
+
 function recargasCuentas()
 {
     let accounts=getAccounts();
     for (let accountId in accounts) {
         if (accounts.hasOwnProperty(accountId)) {
             let account = accounts[accountId];
-            loadData(account.accountId, account.root);
+            if(account.show)
+                loadData(account.accountId, account.root);
         }
     }
 }
