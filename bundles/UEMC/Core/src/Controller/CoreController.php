@@ -32,7 +32,6 @@ class CoreController extends AbstractController
 
     private Account $account;
     private Core $core;
-    private MountManager $mountManager;
 
     /**
      *
@@ -107,7 +106,7 @@ class CoreController extends AbstractController
             $account1 = $this->core->arrayToObject($session->get('accounts')[$accountId1]);
             $filesystem1 = $this->core->constructFilesystem($account1);
 
-            return [$filesystem1, $filesystem2];
+            return [$filesystem1,$account1, $filesystem2,$account2];
         } else
         {
             throw new Exception();
@@ -577,10 +576,19 @@ class CoreController extends AbstractController
 
             $filesSystems=$this->retriveMultiFileSystem($session,$request,$cloud,$destinationCloud);
             $sourceFileSystem=$filesSystems[0];
-            $destinationFileSystem=$filesSystems[1];
+            $destinationFileSystem=$filesSystems[2];
+            $account1=$filesSystems[1];
+            $account2=$filesSystems[3];
 
             $this->core->setFilesystem($destinationFileSystem);
             $this->core->copy($sourceFileSystem,$destinationFileSystem,$sourcePath,$destinationPath);
+
+            $file=$this->core->getArchivo($destinationPath);
+            $account2BD=$entityManager->getRepository(Account::class)->getAccount($account2);
+            $metadata=$this->core->getMetadata($file,$account2BD);
+            $metadata->setStatus(FileStatus::NEW->value);
+
+            $entityManager->getRepository(Metadata::class)->store($metadata);
 
             $this->core->logger->info('COPY | origen: '.$cloud.'::'.$sourcePath.' | destination: '.$destinationCloud.'::'.$destinationPath);
             return new JsonResponse();
@@ -601,24 +609,43 @@ class CoreController extends AbstractController
         try {
             $entityManager = $doctrine->getManager();
 
-
             $sourcePath=$request->get('sourcePath');
             $destinationPath=$request->get('destinationPath');
             $destinationCloud=$request->get('destinationCloud');
 
             $filesSystems=$this->retriveMultiFileSystem($session,$request,$cloud,$destinationCloud);
             $sourceFileSystem=$filesSystems[0];
-            $destinationFileSystem=$filesSystems[1];
+            $destinationFileSystem=$filesSystems[2];
+            $account1=$filesSystems[1];
+            $account2=$filesSystems[3];
 
             $this->core->setFilesystem($destinationFileSystem);
 
             $this->core->copy($sourceFileSystem,$destinationFileSystem,$sourcePath,$destinationPath);
 
+            $file=$this->core->getArchivo($destinationPath);
+
+            $account2BD=$entityManager->getRepository(Account::class)->getAccount($account2);
+            $metadata=$this->core->getMetadata($file,$account2BD);
+            $metadata->setStatus(FileStatus::NEW->value);
+
+            $entityManager->getRepository(Metadata::class)->store($metadata);
+
             $this->core->setFilesystem($sourceFileSystem);
 
+            $archivo=$this->core->getArchivo(str_replace('\\', '/', ($sourcePath)));
+
+            $account1BD=$entityManager->getRepository(Account::class)->getAccount($account1);
+            $metadata = $this->core->getMetadata($archivo,$account1BD);
+
+            $metadata->setName(basename($sourcePath));
+            $metadata->setPath(dirname($sourcePath));
+            $metadata->setStatus(FileStatus::DELETED->value);
+
+            $entityManager->getRepository(Metadata::class)->store($metadata);
+            $entityManager->getRepository(Metadata::class)->deleteDirectory($metadata);
+
             $this->core->delete($sourcePath);
-
-
 
             $this->core->logger->info('COPY | origen: '.$cloud.'::'.$sourcePath.' | destination: '.$destinationCloud.'::'.$destinationPath  );
 
