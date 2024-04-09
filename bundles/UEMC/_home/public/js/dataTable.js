@@ -148,8 +148,6 @@ function crearTabla(data,account)
                         activarBtnMover();
                     }
                 }else if (pegar===true) {
-                    let btnMover=$('.btn-mover');
-                    let btnCancelar=$('.btn-cancelar');
 
                     moveStatus=false;
                     move(archivoEnCopia.path, archivoEnCopia.accountId, account.accountId);
@@ -214,7 +212,7 @@ function crearTabla(data,account)
         info: false,
         ordering: true,
         select: true,
-        order: [[3, 'desc']],
+        order: [[4, 'desc']],
         paging: false,
         data: data,
         columns: [
