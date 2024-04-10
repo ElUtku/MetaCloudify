@@ -7,6 +7,8 @@ use Doctrine\Persistence\ManagerRegistry;
 
 use Exception;
 use League\Flysystem\MountManager;
+use League\Flysystem\PathPrefixer;
+use League\Flysystem\WhitespacePathNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -52,6 +54,8 @@ class CoreController extends AbstractController
                                                 ErrorTypes::ERROR_CONTROLLER->getErrorCode()),
         };
         $this->core->setLogger(new UemcLogger());
+        $this->core->setPathPrefixer(new PathPrefixer(''));
+        $this->core->setPathNormalizer(new WhitespacePathNormalizer());
         $this->account=new Account();
     }
 
@@ -107,7 +111,11 @@ class CoreController extends AbstractController
             $account2 = $this->core->arrayToObject($session->get('accounts')[$accountId2]);
             $filesystem2 = $this->core->constructFilesystem($account2);
 
-            return [$filesystem1,$account1, $filesystem2,$account2];
+            return [
+                'sourceFileSystem'=>$filesystem1,
+                'sourceAccount'=>$account1,
+                'destinationFileSystem'=>$filesystem2,
+                'destinationAccount'=>$account2];
         } else
         {
             throw new Exception();
@@ -260,7 +268,7 @@ class CoreController extends AbstractController
                 {
 
                     $archivoTipado=$this->core->getTypeOfArchive($archive); //Se define si es carpeta o fichero
-                    $metadata = $this->core->getMetadata($archivoTipado,$account);
+                    $metadata = $this->core->getBasicMetadata($archivoTipado,$account);
 
                     $extraMetadata=$entityManager->getRepository(Metadata::class)->getCloudMetadata($metadata);
 
@@ -429,7 +437,7 @@ class CoreController extends AbstractController
             /* --- Se obtiene y configura los metadatadatos del archivo. Si no existen registros
                    previos se crean y si existen se modifican --- */
 
-            $metadata = $this->core->getMetadata($archivo,$account);
+            $metadata = $this->core->getBasicMetadata($archivo,$account);
 
             $metadata->setName(basename($path));
             $metadata->setPath(dirname($path));
@@ -483,7 +491,7 @@ class CoreController extends AbstractController
 
             $archivo=$this->core->getArchivo(str_replace('\\', '/', ($uploadPath)));
 
-            $metadata = $this->core->getMetadata($archivo,$entityManager->getRepository(Account::class)->getAccount($this->account));
+            $metadata = $this->core->getBasicMetadata($archivo,$entityManager->getRepository(Account::class)->getAccount($this->account));
 
             $metadata->setName($content->getClientOriginalName());
             $metadata->setPath($destinationPath);
@@ -610,29 +618,17 @@ class CoreController extends AbstractController
         try {
             $entityManager = $doctrine->getManager();
 
-            $sourcePath=$request->get('sourcePath');
-            $destinationPath=$request->get('destinationPath');
+            $sourceFullPath=$request->get('sourcePath'); // aa/a.txt
+            $destinationDirectoryPath=$request->get('destinationPath'); // algun lugar/aa/
+            $destinationFullPath=$destinationDirectoryPath.'/'.basename($sourceFullPath); // algun lugar/aa/a.txt
             $destinationCloud=$request->get('destinationCloud');
 
 //Obtenemos las cuentas y filesystem que vamos a usar
             $filesSystems=$this->retriveMultiFileSystem($session,$request,$cloud,$destinationCloud);
-            $sourceFileSystem=$filesSystems[0];
-            $destinationFileSystem=$filesSystems[2];
-            $account1=$filesSystems[1];
-            $account2=$filesSystems[3];
 
-//Copiamos a la cuenta destino el archivo
-            $this->core->setFilesystem($destinationFileSystem);
-            $this->core->copy($sourceFileSystem,$destinationFileSystem,$sourcePath,$destinationPath);
+            $this->core->copyWithMetadata($filesSystems,$entityManager,$sourceFullPath,$destinationDirectoryPath,$destinationFullPath);
 
-            $file=$this->core->getArchivo($destinationPath);
-            $account2BD=$entityManager->getRepository(Account::class)->getAccount($account2);
-            $metadata=$this->core->getMetadata($file,$account2BD);
-            $metadata->setStatus(FileStatus::NEW->value);
-
-            $entityManager->getRepository(Metadata::class)->store($metadata);
-
-            $this->core->logger->info('COPY | origen: '.$cloud.'::'.$sourcePath.' | destination: '.$destinationCloud.'::'.$destinationPath);
+            $this->core->logger->info('COPY | origen: '.$cloud.'::'.$sourceFullPath.' | destination: '.$destinationCloud.'::'.$destinationFullPath);
 
             return new JsonResponse(null,Response::HTTP_OK);
         }catch (CloudException $e)
@@ -652,48 +648,35 @@ class CoreController extends AbstractController
         try {
             $entityManager = $doctrine->getManager();
 
-            $sourcePath=$request->get('sourcePath');
-            $destinationPath=$request->get('destinationPath');
+            $sourceFullPath=$request->get('sourcePath'); // aa/a.txt
+            $destinationDirectoryPath=$request->get('destinationPath'); // algun lugar/aa/
+            $destinationFullPath=$destinationDirectoryPath.'/'.basename($sourceFullPath); // algun lugar/aa/a.txt
             $destinationCloud=$request->get('destinationCloud');
+
 
 //Obtenemos las cuentas y filesystem que vamos a usar
             $filesSystems=$this->retriveMultiFileSystem($session,$request,$cloud,$destinationCloud);
-            $sourceFileSystem=$filesSystems[0];
-            $destinationFileSystem=$filesSystems[2];
-            $account1=$filesSystems[1];
-            $account2=$filesSystems[3];
 
-//Copiamos el archivo a la cuenta destino
-            $this->core->setFilesystem($destinationFileSystem);
-
-            $this->core->copy($sourceFileSystem,$destinationFileSystem,$sourcePath,$destinationPath);
-
-            $file=$this->core->getArchivo($destinationPath);
-
-            $account2BD=$entityManager->getRepository(Account::class)->getAccount($account2);
-            $metadata=$this->core->getMetadata($file,$account2BD);
-            $metadata->setStatus(FileStatus::NEW->value);
-
-            $entityManager->getRepository(Metadata::class)->store($metadata);
+            $this->core->copyWithMetadata($filesSystems,$entityManager,$sourceFullPath,$destinationDirectoryPath,$destinationFullPath);
 
 //Eliminamos el archivo de la cuenta origen
-            $this->core->setFilesystem($sourceFileSystem);
+            $this->core->setFilesystem($filesSystems['sourceFileSystem']);
 
-            $archivo=$this->core->getArchivo(str_replace('\\', '/', ($sourcePath)));
+            $archivo=$this->core->getArchivo(str_replace('\\', '/', ($sourceFullPath)));
 
-            $account1BD=$entityManager->getRepository(Account::class)->getAccount($account1);
-            $metadata = $this->core->getMetadata($archivo,$account1BD);
+            $sourceAccount=$entityManager->getRepository(Account::class)->getAccount($filesSystems['sourceAccount']);
+            $metadata = $this->core->getBasicMetadata($archivo,$sourceAccount);
 
-            $metadata->setName(basename($sourcePath));
-            $metadata->setPath(dirname($sourcePath));
+            $metadata->setName(basename($sourceFullPath));
+            $metadata->setPath(dirname($sourceFullPath));
             $metadata->setStatus(FileStatus::DELETED->value);
 
             $entityManager->getRepository(Metadata::class)->store($metadata);
             $entityManager->getRepository(Metadata::class)->deleteDirectory($metadata);
 
-            $this->core->delete($sourcePath);
+            $this->core->delete($sourceFullPath);
 
-            $this->core->logger->info('MOVE | origen: '.$cloud.'::'.$sourcePath.' | destination: '.$destinationCloud.'::'.$destinationPath  );
+            $this->core->logger->info('MOVE | origen: '.$cloud.'::'.$sourceFullPath.' | destination: '.$destinationCloud.'::'.$destinationFullPath  );
 
             return new JsonResponse(null,Response::HTTP_OK);
         }catch (CloudException $e)

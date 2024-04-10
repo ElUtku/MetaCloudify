@@ -9,6 +9,7 @@ use Exception;
 use UEMC\Core\Entity\Account;
 use UEMC\Core\Entity\Metadata;
 use UEMC\Core\Resources\ErrorTypes;
+use UEMC\Core\Resources\FileStatus;
 use UEMC\Core\Service\CloudException;
 
 /**
@@ -75,6 +76,22 @@ class MetadataRepository extends EntityRepository
             throw new CloudException(ErrorTypes::ERROR_DELETE_MULTIPLE_FILES->getErrorMessage().' - '.$e->getMessage(),
                 ErrorTypes::ERROR_DELETE_MULTIPLE_FILES->getErrorCode());
         }
+    }
+
+
+    /**
+     * @param Metadata $destiantionMetadataFile
+     * @param Metadata $originalCloudMetadataFile
+     * @return void
+     * @throws CloudException
+     */
+    public function copyMetadata(Metadata $destiantionMetadataFile, Metadata $originalCloudMetadataFile): void
+    {
+        $destiantionMetadataFile->setStatus(FileStatus::NEW->value);
+        $destiantionMetadataFile->setExtra($originalCloudMetadataFile->getExtra());
+        $destiantionMetadataFile->setAuthor($originalCloudMetadataFile->getAuthor());
+
+        $this->store($destiantionMetadataFile);
     }
 
     /**

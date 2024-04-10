@@ -3,6 +3,8 @@
 namespace UEMC\Core\Service;
 
 use DateTime;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\Persistence\ObjectManager;
 use League\Flysystem\DirectoryAttributes;
 use League\Flysystem\DirectoryListing;
 use League\Flysystem\FileAttributes;
@@ -13,6 +15,8 @@ use League\Flysystem\UnableToCreateDirectory;
 use League\Flysystem\UnableToDeleteDirectory;
 use League\Flysystem\UnableToDeleteFile;
 use League\Flysystem\UnableToWriteFile;
+use League\Flysystem\PathPrefixer;
+use League\Flysystem\PathNormalizer;
 use PHPUnit\Util\Exception;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -30,6 +34,9 @@ abstract class CloudService
 
     public Filesystem $filesystem;
     public UemcLogger $logger;
+    public PathPrefixer $pathPrefixer;
+    public PathNormalizer $pathNormalizer;
+
 
     /**
      * @return Filesystem
@@ -62,6 +69,40 @@ abstract class CloudService
     {
         $this->logger = $logger;
     }
+
+    /**
+     * @return PathPrefixer
+     */
+    public function getPathPrefixer(): PathPrefixer
+    {
+        return $this->pathPrefixer;
+    }
+
+    /**
+     * @param PathPrefixer $pathPrefixer
+     */
+    public function setPathPrefixer(PathPrefixer $pathPrefixer): void
+    {
+        $this->pathPrefixer = $pathPrefixer;
+    }
+
+    /**
+     * @return PathNormalizer
+     */
+    public function getPathNormalizer(): PathNormalizer
+    {
+        return $this->pathNormalizer;
+    }
+
+    /**
+     * @param PathNormalizer $pathNormalizer
+     */
+    public function setPathNormalizer(PathNormalizer $pathNormalizer): void
+    {
+        $this->pathNormalizer = $pathNormalizer;
+    }
+
+
 
     /**
      *  Devuelve todos los elementos que se encuentren en la ruta seleccionada.
@@ -318,7 +359,7 @@ abstract class CloudService
      * @param Account $account
      * @return Metadata
      */
-    public function getMetadata(StorageAttributes $file, Account $account):Metadata
+    public function getBasicMetadata(StorageAttributes $file, Account $account):Metadata
     {
 
         if ($file instanceof FileAttributes)
@@ -360,19 +401,24 @@ abstract class CloudService
     {
         try {
             $filesystem=$this->getFilesystem();
+            $ruta=$this->pathPrefixer->prefixPath($ruta);
+            $ruta=$this->pathNormalizer->normalizePath($ruta);
 
-            $contents = $filesystem->listContents(dirname($ruta));
+            $contents = $filesystem->listContents(dirname($ruta),false)->toArray();
 
-            $filteredItems = array_filter($contents->toArray(), function ($item) use ($ruta) {
-                return $item['path'] === $ruta ||
-                        str_replace('\\', '/', $item['path']) === $ruta ||
-                        $this->cleanOwncloudPath($item['path'])==$ruta;
+            $filteredItems = array_filter($contents, function ($item) use ($ruta) {
+
+                $thiItemRuta=$this->pathPrefixer->prefixPath($item['path']);
+                $thiItemRuta=$this->pathNormalizer->normalizePath($item['path']);
+
+                return $thiItemRuta === $ruta ||
+                        $this->cleanOwncloudPath($thiItemRuta)==$ruta;
             });
+
 
             if (!empty($filteredItems)) {
                 // El primer elemento encontrado (puede haber más si hay duplicados)
                 $item = reset($filteredItems);
-
                 if ($item instanceof FileAttributes) {
                     return new FileAttributes($ruta, $item->fileSize(), $item->visibility(), $item->lastModified(), $item->mimeType(), $item->extraMetadata());
                 } elseif ($item instanceof DirectoryAttributes) {
@@ -416,9 +462,8 @@ abstract class CloudService
             $filesystem=$this->getFilesystem();
 
             $contents=$filesystem->listContents(dirname($ruta),false);
-            $contentArrays=$contents->toArray();
-
-            foreach ($contentArrays as $item) {
+            $contentsArray=$contents->toArray();
+            foreach ($contentsArray as $item) {
                 if ($item['path']==$ruta ||
                     str_replace('\\', '/',$item['path']) == $ruta ||
                     $this->cleanOwncloudPath($item['path']) == $ruta) // remote.php/webdav/usuario/a/b/c.txt == /a/b/c.txt
@@ -434,7 +479,18 @@ abstract class CloudService
         }
     }
 
-    public function copy(Filesystem $source, Filesystem $destination, String $sourcePath, String $destinationPath)
+    /**
+     *
+     * Copia un archivo independientemente del tipo del tipo de nube.
+     *
+     * @param Filesystem $source
+     * @param Filesystem $destination
+     * @param String $sourcePath
+     * @param String $destinationPath
+     * @return void
+     * @throws CloudException
+     */
+    public function onlyCopy(Filesystem $source, Filesystem $destination, String $sourcePath, String $destinationPath): void
     {
         try {
             $this->setFilesystem($source);
@@ -447,6 +503,51 @@ abstract class CloudService
                 ErrorTypes::ERROR_COPY->getErrorCode());
         }
 
+    }
+
+    /**
+     *
+     * Copia un archivo y sus metadatos de la aplicaicon.
+     * Es necesario porporcionar un array con los Filesystem destino y origen asi como sus cuantas asociadas
+     * Es necesario porporiconar las rutas de origen y destino
+     *
+     * @param array $filesSystems
+     * @param ObjectManager $entityManager
+     * @param String $sourceFullPath
+     * @param String $destinationDirectoryPath
+     * @param String $destinationFullPath
+     * @return void
+     * @throws CloudException
+     */
+    public function copyWithMetadata(array $filesSystems, ObjectManager $entityManager, String $sourceFullPath, String $destinationDirectoryPath, String $destinationFullPath): void
+    {
+        $sourceFileSystem=$filesSystems['sourceFileSystem'];
+        $destinationFileSystem=$filesSystems['destinationFileSystem'];
+        $sourceAccount=$filesSystems['sourceAccount'];
+        $destinationAccount=$filesSystems['destinationAccount'];
+
+        try {
+            $sourceAccountBD = $entityManager->getRepository(Account::class)->getAccount($sourceAccount);
+            $destinationAccountBD=$entityManager->getRepository(Account::class)->getAccount($destinationAccount);
+        } catch (NonUniqueResultException $e) {
+            throw new CloudException(ErrorTypes::ERROR_OBTENER_USUARIO->getErrorMessage().' - '.$e->getMessage(),
+                ErrorTypes::ERROR_OBTENER_USUARIO->getErrorCode());
+        }
+
+//Obtenemos los metadatos del archivo original
+        $this->setFilesystem($sourceFileSystem);
+        $originalFile=$this->getArchivo($sourceFullPath);
+        $originalMetadataFile=$this->getBasicMetadata($originalFile,$sourceAccountBD);
+        $originalCloudMetadataFile=$entityManager->getRepository(Metadata::class)->getCloudMetadata($originalMetadataFile);
+
+//Copiamos a la cuenta destino el archivo
+        $this->onlyCopy($sourceFileSystem,$destinationFileSystem,$sourceFullPath,$destinationDirectoryPath);
+
+//Copiamos los metadatos del archivo original al de destino
+        $this->setFilesystem($destinationFileSystem);
+        $destiantionFile=$this->getArchivo($destinationFullPath);
+        $destiantionMetadataFile=$this->getBasicMetadata($destiantionFile,$destinationAccountBD);
+        $entityManager->getRepository(Metadata::class)->copyMetadata($destiantionMetadataFile,$originalCloudMetadataFile);
     }
 
     /**
