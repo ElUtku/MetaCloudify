@@ -34,7 +34,6 @@ abstract class CloudService
 
     public Filesystem $filesystem;
     public UemcLogger $logger;
-    public PathPrefixer $pathPrefixer;
     public PathNormalizer $pathNormalizer;
 
 
@@ -68,22 +67,6 @@ abstract class CloudService
     public function setLogger(UemcLogger $logger): void
     {
         $this->logger = $logger;
-    }
-
-    /**
-     * @return PathPrefixer
-     */
-    public function getPathPrefixer(): PathPrefixer
-    {
-        return $this->pathPrefixer;
-    }
-
-    /**
-     * @param PathPrefixer $pathPrefixer
-     */
-    public function setPathPrefixer(PathPrefixer $pathPrefixer): void
-    {
-        $this->pathPrefixer = $pathPrefixer;
     }
 
     /**
@@ -401,20 +384,15 @@ abstract class CloudService
     {
         try {
             $filesystem=$this->getFilesystem();
-            $ruta=$this->pathPrefixer->prefixPath($ruta);
             $ruta=$this->pathNormalizer->normalizePath($ruta);
 
             $contents = $filesystem->listContents(dirname($ruta),false)->toArray();
 
             $filteredItems = array_filter($contents, function ($item) use ($ruta) {
-
-                $thiItemRuta=$this->pathPrefixer->prefixPath($item['path']);
-                $thiItemRuta=$this->pathNormalizer->normalizePath($item['path']);
-
-                return $thiItemRuta === $ruta ||
-                        $this->cleanOwncloudPath($thiItemRuta)==$ruta;
-            });
-
+                                $thisItemRuta=$this->pathNormalizer->normalizePath($item['path']);
+                                return $thisItemRuta === $ruta ||
+                                        $this->cleanOwncloudPath($thisItemRuta)==$ruta;
+                            });
 
             if (!empty($filteredItems)) {
                 // El primer elemento encontrado (puede haber más si hay duplicados)
@@ -426,6 +404,35 @@ abstract class CloudService
                 }
             }
 //Si $filteredItems esta vacio es porque hay un error
+            throw new Exception();
+        } catch (FilesystemException | Exception $e) {
+            throw new CloudException(ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorMessage().' - '.$e->getMessage(),
+                ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorCode());
+        }
+    }
+
+    /**
+     * @param string $ruta
+     * @return array
+     * @throws CloudException
+     */
+    public function getAnArchive(string $ruta): array // ruta=a/b/c.txt
+    {
+        try {
+            $filesystem=$this->getFilesystem();
+
+            $contents=$filesystem->listContents(dirname($ruta),false);
+            $contentsArray=$contents->toArray();
+
+            foreach ($contentsArray as $item) {
+                if ($item['path']==$ruta ||
+                    str_replace('\\', '/',$item['path']) == $ruta ||
+                    $this->cleanOwncloudPath($item['path']) == $ruta) // remote.php/webdav/usuario/a/b/c.txt == /a/b/c.txt
+                {
+                    return json_decode(json_encode($item),true); //El objeto se convierte a un array
+                }
+            }
+
             throw new Exception();
         } catch (FilesystemException | Exception $e) {
             throw new CloudException(ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorMessage().' - '.$e->getMessage(),
@@ -447,34 +454,6 @@ abstract class CloudService
         } else
         {
             throw new CloudException(ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorMessage(),
-                ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorCode());
-        }
-    }
-
-    /**
-     * @param string $ruta
-     * @return array
-     * @throws CloudException
-     */
-    public function getAnArchive(string $ruta): array // ruta=a/b/c.txt
-    {
-        try {
-            $filesystem=$this->getFilesystem();
-
-            $contents=$filesystem->listContents(dirname($ruta),false);
-            $contentsArray=$contents->toArray();
-            foreach ($contentsArray as $item) {
-                if ($item['path']==$ruta ||
-                    str_replace('\\', '/',$item['path']) == $ruta ||
-                    $this->cleanOwncloudPath($item['path']) == $ruta) // remote.php/webdav/usuario/a/b/c.txt == /a/b/c.txt
-                {
-                    return json_decode(json_encode($item),true); //El objeto se convierte a un array
-                }
-            }
-
-            throw new Exception();
-        } catch (FilesystemException | Exception $e) {
-            throw new CloudException(ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorMessage().' - '.$e->getMessage(),
                 ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorCode());
         }
     }
@@ -555,7 +534,7 @@ abstract class CloudService
      * @return string
      */
     function cleanOwncloudPath($path):string {
-        return preg_replace('/remote\.php\/dav\/files\/\w+\//', '', $path);
+        return preg_replace('/.*\/remote\.php\/dav\/files\/\w+\//', '', $path);
     }
 
     /**

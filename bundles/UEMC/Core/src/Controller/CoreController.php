@@ -54,7 +54,6 @@ class CoreController extends AbstractController
                                                 ErrorTypes::ERROR_CONTROLLER->getErrorCode()),
         };
         $this->core->setLogger(new UemcLogger());
-        $this->core->setPathPrefixer(new PathPrefixer(''));
         $this->core->setPathNormalizer(new WhitespacePathNormalizer());
         $this->account=new Account();
     }
@@ -577,7 +576,6 @@ class CoreController extends AbstractController
             } else //Si $file no existe es probable que sea una primera modificación de un fichero no indexado
             {
                 $fileMetadata=$this->core->getAnArchive($path);
-
                 $file = new Metadata(
                     basename($fileMetadata['path']),
                     $fileMetadata['extra_metadata']['id']??null,

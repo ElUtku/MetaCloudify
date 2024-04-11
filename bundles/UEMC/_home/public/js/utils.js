@@ -20,7 +20,7 @@ function formatDate(timestamp)
 function cleanOwncloudData(data)
 {
     return data.map(function (elemento) {
-        elemento.path = elemento.path.replace(/remote\.php\/dav\/files\/\w+\//g, '');
+        elemento.path = elemento.path.replace(/.*\/remote\.php\/dav\/files\/\w+\//g, '');
         return elemento;
     });
 }
