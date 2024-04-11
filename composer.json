@@ -20,7 +20,8 @@
         "league/flysystem": "^3.23.0",
         "league/flysystem-ftp": "3.0",
         "league/flysystem-sftp-v3": "3.0",
-        "league/flysystem-webdav": "^3.24.0",
+        "league/flysystem-webdav": "^3.0",
+        "sabre/dav": ">=4.6.0",
         "league/oauth2-client": "^2.7",
         "league/oauth2-google": "^4.0",
         "masbug/flysystem-google-drive-ext": "v2.2.2",
@@ -60,7 +61,6 @@
         "vlucas/phpdotenv": "^5.6",
         "ext-dom": "*",
         "ext-libxml": "*",
-        "sabre/dav": "^4.6.0",
         "ext-xmlreader": "*"
     },
     "config": {

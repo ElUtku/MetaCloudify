@@ -2,23 +2,27 @@
 $(document).ready(function() {
 
 // Esconder y borrar modal de metadatos en cada interacción
-    $('#modalMetadatos').on('hidden.bs.modal', function () {
+    $('#modalEditarMetadatos').on('hidden.bs.modal', function () {
         $('.mb-3.dynamic').remove(); // Eliminar todos los elementos con la clase 'mb-3' y 'dynamic'
     });
 
 });
 
-function editarModalMetadata(path, accountId) {
+function editarModalMetadata() {
+
+    let modalVerMetadatos = $('#modalVerMetadatos');
+    let modalEditarMetadatos = $('#modalEditarMetadatos');
+    let contenidoModalEditarMetadatos = $('#modalEditarMetadatos .modal-body');
+
+    let path = modalVerMetadatos.data('path');
+    let accountId=modalVerMetadatos.data('accountId');
+    modalEditarMetadatos.data('path', path);
+    modalEditarMetadatos.data('accountId', accountId);
+
     let metadata = getArchiveMetadata(accountId, path);
 
-    let modalMetadatos = $('#modalMetadatos');
-    let contenidoModalMetadatos = $('#modalMetadatos .modal-body');
-
-    modalMetadatos.data('path', path);
-    modalMetadatos.data('accountId', accountId);
-
 // Limpia el contenido existente en el modal body
-    contenidoModalMetadatos.empty();
+    contenidoModalEditarMetadatos.empty();
 
 // Campo select para 'visibility'
     let visibilityFormGroup = $('<div class="form-group"></div>');
@@ -30,7 +34,7 @@ function editarModalMetadata(path, accountId) {
     visibilitySelect.val(metadata.visibility); //Se añade el valor actual
     visibilityFormGroup.append(labelSelect);
     visibilityFormGroup.append(visibilitySelect);
-    contenidoModalMetadatos.append(visibilityFormGroup);
+    contenidoModalEditarMetadatos.append(visibilityFormGroup);
 
 // Campo input para 'author'
     let authorFormGroup = $('<div class="form-group"></div>');
@@ -39,7 +43,7 @@ function editarModalMetadata(path, accountId) {
     authorInput.val(metadata.extra_metadata.author); //Se añade el valor actual
     authorFormGroup.append(labelInput);
     authorFormGroup.append(authorInput);
-    contenidoModalMetadatos.append(authorFormGroup);
+    contenidoModalEditarMetadatos.append(authorFormGroup);
 
 // Itera sobre los campos de 'extra' en 'extra_metadata' y crea inputs para cada uno
     if (metadata.extra_metadata.extra &&
@@ -55,21 +59,21 @@ function editarModalMetadata(path, accountId) {
                 input.val(metadata.extra_metadata.extra[key]);//Se añade el valor actual
                 headerFormGroup.append(labelExtra);
                 headerFormGroup.append(crearBotonEliminar(input));
+                extraFormGroup.append(headerFormGroup);
                 extraFormGroup.append(input);
-                contenidoModalMetadatos.append(headerFormGroup);
-                contenidoModalMetadatos.append(extraFormGroup);
+                contenidoModalEditarMetadatos.append(extraFormGroup);
             }
         }
     }
 
 // Muestra el modal de metadatos
-    modalMetadatos.modal('show');
+    modalEditarMetadatos.modal('show');
 }
 
 
 function agregarNuevoCampo() {
 
-    let contenidoModalMetadatos=$('#modalMetadatos .modal-body');
+    let contenidoModalEditarMetadatos=$('#modalEditarMetadatos .modal-body');
 
     let nuevoCampoNombre=$('#nuevoCampoNombre');
     let nuevoValorCampo=$('#nuevoValorCampo');
@@ -91,7 +95,7 @@ function agregarNuevoCampo() {
     newFormGroup.append(headerFormGroup);
     newFormGroup.append(nuevoCampoInput);
 
-    contenidoModalMetadatos.append(newFormGroup);
+    contenidoModalEditarMetadatos.append(newFormGroup);
 
 // Cerrar el modal de nuevo campo
     $('#modalNuevoCampo').modal('hide');
@@ -118,7 +122,7 @@ function extraerMetadatosModal(){
     let extraFieldsFound = false;
 
 // Iterar sobre los elementos del formulario en el modal (se seleccionan los inputs y el select)
-    $('#modalMetadatos .modal-body input, #modalMetadatos .modal-body select').each(function() {
+    $('#modalEditarMetadatos .modal-body input, #modalEditarMetadatos .modal-body select').each(function() {
         let fieldName = $(this).attr('name');
         let fieldValue = $(this).val();
 
@@ -143,3 +147,29 @@ function extraerMetadatosModal(){
     formData = JSON.stringify(formData);
     return formData;
 }
+
+function verModalMetadata(path, accountId) {
+    let modalVerMetadatos = $('#modalVerMetadatos');
+    modalVerMetadatos.data('path', path);
+    modalVerMetadatos.data('accountId', accountId);
+
+    let contenidoModalVerMetadatos = modalVerMetadatos.find('.modal-body');
+    let metadata = getArchiveMetadata(accountId, path);
+
+    let arrayExtra = [
+        `<li><b>Author</b>: ${metadata.extra_metadata.author}</li>`
+    ];
+
+    let extraObjeto = JSON.parse(metadata.extra_metadata.extra);
+    Object.keys(extraObjeto).forEach(key => {
+        arrayExtra.push(`<li><b>${key}</b>: ${extraObjeto[key]}</li>`);
+    });
+
+    contenidoModalVerMetadatos.html(
+        `<ul>${arrayExtra.join('')}</ul>`
+    );
+    modalVerMetadatos.modal('show');
+}
+
+
+

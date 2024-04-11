@@ -15,7 +15,6 @@ use League\Flysystem\UnableToCreateDirectory;
 use League\Flysystem\UnableToDeleteDirectory;
 use League\Flysystem\UnableToDeleteFile;
 use League\Flysystem\UnableToWriteFile;
-use League\Flysystem\PathPrefixer;
 use League\Flysystem\PathNormalizer;
 use PHPUnit\Util\Exception;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -386,7 +385,7 @@ abstract class CloudService
             $filesystem=$this->getFilesystem();
             $ruta=$this->pathNormalizer->normalizePath($ruta);
 
-            $contents = $filesystem->listContents(dirname($ruta),false)->toArray();
+            $contents=$filesystem->listContents(dirname($ruta),false)->toArray();
 
             $filteredItems = array_filter($contents, function ($item) use ($ruta) {
                                 $thisItemRuta=$this->pathNormalizer->normalizePath($item['path']);
@@ -406,6 +405,7 @@ abstract class CloudService
 //Si $filteredItems esta vacio es porque hay un error
             throw new Exception();
         } catch (FilesystemException | Exception $e) {
+
             throw new CloudException(ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorMessage().' - '.$e->getMessage(),
                 ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorCode());
         }
@@ -421,10 +421,9 @@ abstract class CloudService
         try {
             $filesystem=$this->getFilesystem();
 
-            $contents=$filesystem->listContents(dirname($ruta),false);
-            $contentsArray=$contents->toArray();
+            $contents=$filesystem->listContents(dirname($ruta),false)->toArray();
 
-            foreach ($contentsArray as $item) {
+            foreach ($contents as $item) {
                 if ($item['path']==$ruta ||
                     str_replace('\\', '/',$item['path']) == $ruta ||
                     $this->cleanOwncloudPath($item['path']) == $ruta) // remote.php/webdav/usuario/a/b/c.txt == /a/b/c.txt

@@ -68,16 +68,16 @@ function crearTabla(data,account)
                 $('#formFile-explorer').trigger('click');
             }
         }
-    let buttonEditarArchivo =
+    let buttonVerMetadatos =
         {
-            text: '<i class="bi bi-pencil-square me-2"></i>Editar archivo',
+            text: '<i class="bi bi-search me-2"></i>Ver Metadatos',
             className: 'btn-xs',
             action: function ()
             {
                 let filaSeleccionada = tabla.DataTable().row({ selected: true }).data();
 
                 if (filaSeleccionada) {
-                    editarModalMetadata(filaSeleccionada.path,filaSeleccionada.accountId);
+                    verModalMetadata(filaSeleccionada.path,filaSeleccionada.accountId);
                     console.log('Fila seleccionada:', filaSeleccionada);
                 } else {
                     // Manejo para cuando no se ha seleccionado ninguna fila
@@ -197,7 +197,7 @@ function crearTabla(data,account)
             buttonCrearFichero,
             buttonSubirArchivo,
             buttonEliminarArchivo,
-            buttonEditarArchivo,
+            buttonVerMetadatos,
             buttonCopiarArchivo,
             buttonMoverArchivo,
             buttonCancelPaste,

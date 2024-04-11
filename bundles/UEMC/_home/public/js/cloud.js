@@ -358,8 +358,8 @@ function move(sourcePath,sourceAccountId,destinationAccountId)
     $('#loading-modal').modal('show');
 
     $.ajax({
-        url: account1.controller+'/move',
-        method: 'PUT',
+        url: account1.controller+'/copy',
+        method: 'POST',
         data: {
             sourcePath: sourcePath,
             destinationPath: account2.pathActual,
@@ -368,6 +368,7 @@ function move(sourcePath,sourceAccountId,destinationAccountId)
             destinationCloud: account2.controller
         },
         success: function () {
+            dlt(sourcePath,sourceAccountId);
             loadData(account2.accountId, account2.pathActual);
         },
         error: function (xhr, status, error) {
