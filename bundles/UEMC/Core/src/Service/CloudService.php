@@ -247,7 +247,7 @@ abstract class CloudService
             $response = new StreamedResponse(function () use ($stream) {
                 fpassthru($stream);
                 fclose($stream);
-            });
+            },Response::HTTP_OK);
 
             $response->headers->set('Content-Type', $filesystem->mimeType($path));
             $response->headers->set('Content-Disposition', 'attachment; filename="' . $name . '"');

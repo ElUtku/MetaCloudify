@@ -56,18 +56,7 @@ function loadData(accountId,path) {
         },
         dataType: 'json',
         success: function (data) {
-            if(account.controller.indexOf("owncloud")!==-1 )
-            {
-                data=cleanOwncloudData(data);
-            }
-            account.pathActual=path;
-            account.parent=dirname(path);
-
-            setAccount(account);
-
-            manejarActualizacionTabla(data,account);
-
-            $("#ruta-p-explorer").html('Ruta: '+path);
+            cargarDatos(account,path,data);
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -91,9 +80,8 @@ function createDir(name,accountId)
             name: name,
             accountId: account.accountId
         },
-        success: function () {
-            // Actualiza dinámicamente el contenido en la página
-            loadData(account.accountId,account.pathActual);
+        success: function (data) {
+            cargarDatos(account,account.pathActual,data);
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -117,9 +105,8 @@ function createFile(name,accountId)
             name: name,
             accountId: account.accountId
         },
-        success: function () {
-            // Actualiza dinámicamente el contenido en la página
-            loadData(account.accountId,account.pathActual);
+        success: function (data) {
+            cargarDatos(account,account.pathActual,data);
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -139,11 +126,12 @@ function dlt(path,accountId)
         url: account.controller+"/drive/delete",
         method: 'DELETE',
         data: {
-            path: path,
+            path: dirname(path),
+            name: path.split('/').pop(),
             accountId: accountId
         },
-        success: function () {
-            loadData(accountId,account.pathActual);
+        success: function (data) {
+            cargarDatos(account,dirname(path),data);
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -171,11 +159,11 @@ function upload(accountId) {
             path: account.pathActual,
             accountId: accountId
         },
-        done: function () {
+        success: function (data) {
+            cargarDatos(account,account.pathActual,data);
             $('#loading-progress-bar').modal('hide');
-            loadData(accountId, account.pathActual);
         },
-        fail: function (e, data) {
+        error: function (e, data) {
             console.log('Error al cargar el archivo:', data.errorThrown);
             $('#loading-progress-bar').modal('hide');
         },
@@ -313,8 +301,8 @@ function guardarMetadata(path, accountId)
             accountId: accountId,
             metadata: formData,
         },
-        success: function () {
-            console.log('ok');
+        success: function (data) {
+            console.log(data);
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -377,5 +365,21 @@ function move(sourcePath,sourceAccountId,destinationAccountId)
             $('#loading-modal').modal('hide');
         }
     });
+}
+
+function cargarDatos(account,path,data)
+{
+    if(account.controller.indexOf("owncloud")!==-1 )
+    {
+        data=cleanOwncloudData(data);
+    }
+    account.pathActual=path;
+    account.parent=dirname(path);
+
+    setAccount(account);
+
+    manejarActualizacionTabla(data,account);
+
+    $("#ruta-p-explorer").html('Ruta: '+path);
 }
 

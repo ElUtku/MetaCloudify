@@ -3,19 +3,17 @@
 namespace UEMC\Core\Controller;
 
 use DateTime;
-use Doctrine\ORM\NonUniqueResultException;
+use Exception;
 use Doctrine\Persistence\ManagerRegistry;
 
-use Exception;
-use League\Flysystem\MountManager;
-use League\Flysystem\PathPrefixer;
-use League\Flysystem\WhitespacePathNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
+
+use League\Flysystem\WhitespacePathNormalizer;
 
 use UEMC\Core\Entity\Account;
 use UEMC\Core\Entity\Metadata;
@@ -71,7 +69,8 @@ class CoreController extends AbstractController
     private function retriveCore(SessionInterface $session, Request $request): void
     {
         $ruta=$request->attributes->get('_route');
-        $accountId = $request->query->get('accountId') ?? $request->request->get('accountId') ?? null;
+        $accountId = $request->get('accountId') ??
+                     $request->get('accountId1') ?? null;
 
         if($session->has('accounts') and $ruta !== 'login' and $ruta !== 'login_token' and $ruta !== 'loginWeb' )
         {
@@ -250,7 +249,7 @@ class CoreController extends AbstractController
             $this->createContext($cloud);
             $this->retriveCore($session,$request);
 
-            $path=$request->get('path');
+            $path=$request->get('path')??$request->get('destinationPath');
 
             $contentInDirectory=$this->core->listDirectory($path);
             $contentInDirectoryArray=$contentInDirectory->toArray();
@@ -289,7 +288,7 @@ class CoreController extends AbstractController
                 $account->getId().' | controller: '.$account->getCloud().
                 ' | user:' . $account->getUser());
 
-            return new JsonResponse($archivesWhitMetadata??$contentInDirectoryArray);
+            return new JsonResponse($archivesWhitMetadata??$contentInDirectoryArray,Response::HTTP_OK);
 
         }catch (CloudException $e)
         {
@@ -317,7 +316,7 @@ class CoreController extends AbstractController
                ' | controller: '.$this->account->getCloud().
                 ' | user:' . $this->account->getUser());
 
-            return $this->core->download($path,$name);
+            return $this->core->download($path,$name); // Tipo Resonse
         }catch (CloudException $e)
         {
             return new JsonResponse($e->getMessage(),$e->getStatusCode());
@@ -363,7 +362,8 @@ class CoreController extends AbstractController
                 ' | controller: '.$this->account->getCloud().
                 ' | user:' . $this->account->getUser());
 
-            return new JsonResponse('Directorio creado correctamente.',Response::HTTP_OK);
+            return $this->drive($doctrine,$session,$request,$cloud);
+
         }catch (CloudException $e)
         {
             return new JsonResponse($e->getMessage(),$e->getStatusCode());
@@ -407,7 +407,8 @@ class CoreController extends AbstractController
                 ' | controller: '.$this->account->getCloud().
                 ' | user:' . $this->account->getUser());
 
-            return new JsonResponse(null,Response::HTTP_OK);
+            return $this->drive($doctrine,$session,$request,$cloud);
+
         }catch (CloudException $e)
         {
             return new JsonResponse($e->getMessage(),$e->getStatusCode());
@@ -430,29 +431,33 @@ class CoreController extends AbstractController
             $this->retriveCore($session,$request);
 
             $path=$request->get('path');
+            $name=$request->get('name');
+
+            $fullPath=$path.'/'.$name;
 
             $account = $entityManager->getRepository(Account::class)->getAccount($this->account);
-            $archivo=$this->core->getArchivo(str_replace('\\', '/', ($path)));
+            $archivo=$this->core->getArchivo(str_replace('\\', '/', ($fullPath)));
 
             /* --- Se obtiene y configura los metadatadatos del archivo. Si no existen registros
                    previos se crean y si existen se modifican --- */
 
             $metadata = $this->core->getBasicMetadata($archivo,$account);
 
-            $metadata->setName(basename($path));
-            $metadata->setPath(dirname($path));
+            $metadata->setName(basename($fullPath));
+            $metadata->setPath(dirname($fullPath));
             $metadata->setStatus(FileStatus::DELETED->value);
 
             $entityManager->getRepository(Metadata::class)->store($metadata);
             $entityManager->getRepository(Metadata::class)->deleteDirectory($metadata);
 
-            $this->core->delete($path);
+            $this->core->delete($fullPath);
 
-            $this->core->logger->info('DELETE | '.' file: '.$path.
+            $this->core->logger->info('DELETE | '.' file: '.$fullPath.
                 ' | controller: '.$this->account->getCloud().
                 ' | user:' . $this->account->getUser());
 
-            return new JsonResponse();
+            return $this->drive($doctrine,$session,$request,$cloud);
+
         }catch (CloudException $e)
         {
             return new JsonResponse($e->getMessage(),$e->getStatusCode());
@@ -503,7 +508,7 @@ class CoreController extends AbstractController
                 ' | controller: '.$this->account->getCloud().
                 ' | user:' . $this->account->getUser());
 
-            return new JsonResponse(null,Response::HTTP_OK);
+            return $this->drive($doctrine,$session,$request,$cloud);
         }catch (CloudException $e)
         {
             return new JsonResponse($e->getMessage(),$e->getStatusCode());
@@ -541,7 +546,7 @@ class CoreController extends AbstractController
                 ' | controller: '.$this->account->getCloud().
                 ' | user:' . $this->account->getUser()); */
 
-            return new JsonResponse($file);
+            return new JsonResponse($file,Response::HTTP_OK);
         }catch (CloudException $e)
         {
             return new JsonResponse($e->getMessage(),$e->getStatusCode());
@@ -600,7 +605,7 @@ class CoreController extends AbstractController
                 ' | controller: '.$this->account->getCloud().
                 ' | user:' . $this->account->getUser());
 
-            return new JsonResponse(null,Response::HTTP_OK);
+            return new JsonResponse('Metadatos editados correctamente',Response::HTTP_OK);
         }catch (CloudException $e)
         {
             return new JsonResponse($e->getMessage(),$e->getStatusCode());
@@ -630,11 +635,10 @@ class CoreController extends AbstractController
 
             $this->core->logger->info('COPY | origen: '.$cloud.'::'.$sourceFullPath.' | destination: '.$destinationCloud.'::'.$destinationFullPath);
 
-            return new JsonResponse(null,Response::HTTP_OK);
+            return new JsonResponse('Ok',Response::HTTP_OK );
         }catch (CloudException $e)
         {
             return new JsonResponse($e->getMessage(), response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-
 }

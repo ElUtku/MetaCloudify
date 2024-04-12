@@ -156,13 +156,20 @@ function verModalMetadata(path, accountId) {
     let contenidoModalVerMetadatos = modalVerMetadatos.find('.modal-body');
     let metadata = getArchiveMetadata(accountId, path);
 
+    let author = metadata.extra_metadata.author ?? '-';
     let arrayExtra = [
-        `<li><b>Author</b>: ${metadata.extra_metadata.author}</li>`
+        `<li><b>Author</b>: ${author}</li>`
     ];
 
-    let extraObjeto = JSON.parse(metadata.extra_metadata.extra);
+
+    let extraObjeto = {};
+    if (metadata.extra_metadata.extra && metadata.extra_metadata.extra !== "null") {
+        extraObjeto = JSON.parse(metadata.extra_metadata.extra);
+    }
+
     Object.keys(extraObjeto).forEach(key => {
-        arrayExtra.push(`<li><b>${key}</b>: ${extraObjeto[key]}</li>`);
+        let value = extraObjeto[key] ?? '-';
+        arrayExtra.push(`<li><b>${key}</b>: ${value}</li>`);
     });
 
     contenidoModalVerMetadatos.html(
