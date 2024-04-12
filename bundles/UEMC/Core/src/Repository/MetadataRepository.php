@@ -47,6 +47,7 @@ class MetadataRepository extends EntityRepository
                 $fileStored->setLastModified($fileMetadata->getLastModified());
                 $fileStored->setVisibility($fileMetadata->getVisibility());
                 $fileStored->setStatus($fileMetadata->getStatus());
+                $fileStored->setExtra($fileMetadata->getExtra()??null);
             }
             $em->flush();
         }catch (Exception | NonUniqueResultException $e)

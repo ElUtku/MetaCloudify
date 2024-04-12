@@ -69,8 +69,7 @@ class CoreController extends AbstractController
     private function retriveCore(SessionInterface $session, Request $request): void
     {
         $ruta=$request->attributes->get('_route');
-        $accountId = $request->get('accountId') ??
-                     $request->get('accountId1') ?? null;
+        $accountId = $request->get('accountId') ?? null;
 
         if($session->has('accounts') and $ruta !== 'login' and $ruta !== 'login_token' and $ruta !== 'loginWeb' )
         {
