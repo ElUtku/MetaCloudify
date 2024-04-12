@@ -41,8 +41,19 @@ function crearTabla(data,account)
             className: 'btn btn-xs',
             action: function ()
             {
-                $('#newDirFileModal').modal('show');
-                $('#newNameButton').attr('onclick','createDir($(\'#newName\').val(),\''+account.accountId+'\')');
+                let accounts = getAccounts();
+                if (account.pathActual===account.root && Object.keys(accounts).length!==1)
+                {
+                    optionsSelectAccounId().then(function(accountId) {
+                        $('#newNameButton').attr('onclick', 'createDir($("#newName").val(), "' + accountId + '")');
+                        $('#newDirFileModal').modal('show');
+                    });
+
+                } else
+                {
+                    $('#newNameButton').attr('onclick', 'createDir($("#newName").val(), "' + account.accountId + '")');
+                    $('#newDirFileModal').modal('show');
+                }
             }
         }
     let buttonCrearFichero =
@@ -51,8 +62,19 @@ function crearTabla(data,account)
             className: 'btn btn-xs',
             action: function ()
             {
-                $('#newDirFileModal').modal('show');
-                $('#newNameButton').attr('onclick','createFile($(\'#newName\').val(),\''+account.accountId+'\')');
+                let accounts = getAccounts();
+                if (account.pathActual===account.root && Object.keys(accounts).length!==1)
+                {
+                    optionsSelectAccounId().then(function(accountId) {
+                        $('#newNameButton').attr('onclick', 'createFile($("#newName").val(), "' + accountId + '")');
+                        $('#newDirFileModal').modal('show');
+                    });
+
+                } else
+                {
+                    $('#newNameButton').attr('onclick', 'createFile($("#newName").val(), "' + account.accountId + '")');
+                    $('#newDirFileModal').modal('show');
+                }
             }
         }
     let buttonSubirArchivo =
@@ -113,15 +135,26 @@ function crearTabla(data,account)
                     if(filaSeleccionada)
                     {
                         copyStatus=true;
-                        archivoEnCopia = filaSeleccionada;
                         pegar = true;
+
+                        archivoEnCopia = filaSeleccionada;
 
                         activarBtnCopiar();
                     }
                 }else if (pegar===true) {
                     copyStatus=false;
-                    copy(archivoEnCopia.path, archivoEnCopia.accountId, account.accountId);
                     pegar = false;
+
+                    let accounts = getAccounts();
+                    if (account.pathActual===account.root && Object.keys(accounts).length!==1)
+                    {
+                        optionsSelectAccounId().then(function(accountId) {
+                            copy(archivoEnCopia.path, archivoEnCopia.accountId, accountId);
+                        });
+                    } else
+                    {
+                        copy(archivoEnCopia.path, archivoEnCopia.accountId, account.accountId);
+                    }
 
                     descativarBtnCopiar();
 
@@ -150,8 +183,18 @@ function crearTabla(data,account)
                 }else if (pegar===true) {
 
                     moveStatus=false;
-                    move(archivoEnCopia.path, archivoEnCopia.accountId, account.accountId);
                     pegar = false;
+
+                    let accounts = getAccounts();
+                    if (account.pathActual===account.root && Object.keys(accounts).length!==1)
+                    {
+                        optionsSelectAccounId().then(function(accountId) {
+                            move(archivoEnCopia.path, archivoEnCopia.accountId, accountId);
+                        });
+                    } else
+                    {
+                        move(archivoEnCopia.path, archivoEnCopia.accountId, account.accountId);
+                    }
 
                     descartivarBtnMover();
 

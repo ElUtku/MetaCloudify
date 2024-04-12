@@ -40,6 +40,10 @@ function dirname(path)// test/a/b/c -> [test],[a],[b],[c] -> [test],[a],[b] -> t
     return parent;
 }
 
+function basename(path)
+{
+    return path.split(/[\\/]/).pop();
+}
 // Función para formatear bytes a MB
 function formatBytes(bytes) {
     if (bytes === 0) return '0 Bytes';
@@ -55,9 +59,12 @@ let ultimaAccion = '';
 function manejarActualizacionTabla(data, account) {
     if (account.pathActual === '') {
         if (ultimaAccion === 'volverRaiz') {
+            refrescarTabla(data, account, true);
+        } else if (ultimaAccion === 'añadeCuentaRaiz'){
             // Actualiza el contenido de la tabla sin borrarla
             refrescarTabla(data, account, false);
-        } else {
+        } else
+        {
             // Borra y refresca la tabla completa
             refrescarTabla(data, account, true);
         }
@@ -67,7 +74,12 @@ function manejarActualizacionTabla(data, account) {
     }
 
     // Actualiza la última acción del usuario
-    if (account.pathActual === '') {
+    if (account.pathActual === '' && ultimaAccion === 'volverRaiz') {
+        ultimaAccion = 'añadeCuentaRaiz'
+    }else if(ultimaAccion === 'añadeCuentaRaiz')
+    {
+        ultimaAccion = 'añadeCuentaRaiz'
+    }else if(account.pathActual === ''){
         ultimaAccion = 'volverRaiz';
     } else {
         ultimaAccion = 'navegar';

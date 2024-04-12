@@ -178,5 +178,35 @@ function verModalMetadata(path, accountId) {
     modalVerMetadatos.modal('show');
 }
 
+function optionsSelectAccounId()
+{
+    let accounts = getAccounts();
+    let select = $('#accountSelect');
+    select.empty(); // Limpiar opciones anteriores
+
+
+    for (var accountId in accounts) {
+        if (accounts.hasOwnProperty(accountId)) {
+            var account = accounts[accountId];
+            select.append('<option value="' + account.accountId + '">' + account.user + ' - '+  account.controller +'</option>');
+        }
+    }
+
+
+    // Mostrar el modal y devolver una promesa
+    return new Promise(function(resolve, reject) {
+        $('#accountModal').modal('show');
+
+        // Resolver la promesa cuando el usuario confirme la selección
+        $('#confirmAccountBtn').on('click', function() {
+            $('#accountModal').modal('hide');
+            resolve(selectAccountId());
+        });
+    });
+}
+
+function selectAccountId() {
+    return $('#accountSelect').val();
+}
 
 

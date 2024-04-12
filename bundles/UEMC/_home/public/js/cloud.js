@@ -29,6 +29,7 @@ function mostrarOcultar(accountId)
 function recargasCuentas()
 {
     let accounts=getAccounts();
+    ultimaAccion = 'volverRaiz'
     for (let accountId in accounts) {
         if (accounts.hasOwnProperty(accountId)) {
             let account = accounts[accountId];
@@ -81,7 +82,13 @@ function createDir(name,accountId)
             accountId: account.accountId
         },
         success: function (data) {
-            cargarDatos(account,account.pathActual,data);
+            if(account.pathActual===account.root)
+            {
+                recargasCuentas();
+            } else
+            {
+                cargarDatos(account,account.pathActual,data);
+            }
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -106,7 +113,13 @@ function createFile(name,accountId)
             accountId: account.accountId
         },
         success: function (data) {
-            cargarDatos(account,account.pathActual,data);
+            if(account.pathActual===account.root)
+            {
+                recargasCuentas();
+            } else
+            {
+                cargarDatos(account,account.pathActual,data);
+            }
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -127,11 +140,17 @@ function dlt(path,accountId)
         method: 'DELETE',
         data: {
             path: dirname(path),
-            name: path.split('/').pop(),
+            name: basename(path),
             accountId: accountId
         },
         success: function (data) {
-            cargarDatos(account,dirname(path),data);
+            if(account.pathActual===account.root)
+            {
+                recargasCuentas();
+            } else
+            {
+                cargarDatos(account,dirname(path),data);
+            }
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -160,7 +179,13 @@ function upload(accountId) {
             accountId: accountId
         },
         success: function (data) {
-            cargarDatos(account,account.pathActual,data);
+            if(account.pathActual===account.root)
+            {
+                recargasCuentas();
+            } else
+            {
+                cargarDatos(account,account.pathActual,data);
+            }
             $('#loading-progress-bar').modal('hide');
         },
         error: function (e, data) {
@@ -328,7 +353,13 @@ function copy(sourcePath,sourceAccountId,destinationAccountId)
             destinationCloud: account2.controller
         },
         success: function () {
-            loadData(account2.accountId, account2.pathActual);
+            if(account2.pathActual===account2.root)
+            {
+                recargasCuentas();
+            } else
+            {
+                loadData(account2.accountId, account2.pathActual);
+            }
         },
         error: function (xhr, status, error) {
             console.error(error);
@@ -357,7 +388,13 @@ function move(sourcePath,sourceAccountId,destinationAccountId)
         },
         success: function () {
             dlt(sourcePath,sourceAccountId);
-            loadData(account2.accountId, account2.pathActual);
+            if(account2.pathActual===account2.root)
+            {
+                recargasCuentas();
+            } else
+            {
+                loadData(account2.accountId, account2.pathActual);
+            }
         },
         error: function (xhr, status, error) {
             console.error(error);
