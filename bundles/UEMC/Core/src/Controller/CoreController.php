@@ -76,7 +76,15 @@ class CoreController extends AbstractController
             $this->account = $this->core->arrayToObject($session->get('accounts')[$accountId]);
             $filesystem = $this->core->constructFilesystem($this->account);
             $this->core->setFilesystem($filesystem);
-            $this->core->testConection($this->account);
+            try {
+                $this->core->testConection($this->account);
+            }catch (CloudException $e){
+                if($e->getCode() === 401)
+                {
+                    $this->core->logout($session,$request);
+                }
+                throw $e;
+            }
         }
     }
 
@@ -150,11 +158,14 @@ class CoreController extends AbstractController
                 $accountExists->getId().' | controller: '.$account->getCloud().
                 ' | user:' . $account->getUser());
 
+            return $this->redirectToRoute('_home_index');
+
         }catch (CloudException $e)
         {
             $this->core->logger->warning('LOGGIN ERROR | '.$e->getMessage());
+
+            return new JsonResponse($e->getMessage(),$e->getCode());
         }
-        return $this->redirectToRoute('_home_index');
     }
 
     /**

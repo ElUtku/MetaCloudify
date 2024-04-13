@@ -33,24 +33,20 @@ class CloudService extends Core
      */
     public function login(SessionInterface $session, Request $request): Account
     {
-        try {
 
-            $account = new Account();
+        $account = new Account();
 
-            $account->setPassword($request->get('password'));
-            $account->setUser($request->get('userName'));
-            $account->setURL($request->get('URL'));
-            $account->setPort($request->get('port') ?? 443);
-            $account->setLastIp($request->getClientIp());
-            $account->setLastSession(new DateTime);
-            $account->setCloud(CloudTypes::OwnCloud->value);
+        $account->setPassword($request->get('password'));
+        $account->setUser($request->get('userName'));
+        $account->setURL($request->get('url'));
+        $account->setPort($request->get('port') ?? 443);
+        $account->setLastIp($request->getClientIp());
+        $account->setLastSession(new DateTime);
+        $account->setCloud(CloudTypes::OwnCloud->value);
 
-            return $account;
+        $this->testConection($account);
 
-        } catch (Exception $e) {
-            throw new CloudException(ErrorTypes::ERROR_INICIO_SESION->getErrorMessage().' - '.$e->getMessage(),
-                                     ErrorTypes::ERROR_INICIO_SESION->getErrorCode());
-        }
+        return $account;
     }
 
     /**

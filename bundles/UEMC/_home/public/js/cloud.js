@@ -272,7 +272,8 @@ function logout(accountId)
             location.reload();
         },
         error: function (xhr, status, error) {
-            console.error(error);
+            limpiarModalErrores();
+            mostrarModalErrores(xhr)
         }
     });
 }

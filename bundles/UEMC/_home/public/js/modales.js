@@ -217,6 +217,11 @@ function mostrarModalErrores(xhr)
     $('#errorModal').modal('show');
 }
 
+function limpiarModalErrores()
+{
+    $('#errorContent').html('');
+}
+
 function mostrarModalSuccess(data)
 {
     var successElement = $('<li>').text(data);
