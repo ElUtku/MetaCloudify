@@ -31,7 +31,7 @@ class Metadata
     private ?string $type;
     #[ORM\Column(type:Types::FLOAT, nullable:true)]
     private ?float $size;
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(length: 50, nullable: true)]
     private ?string $mime_type;
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?DateTimeInterface $lastModified;
@@ -45,7 +45,7 @@ class Metadata
     #[ORM\Column(length: 20, nullable: false)]
     private ?string $status;
 
-    #[ORM\Column(type: Types::JSON)]
+    #[ORM\Column(type: Types::JSON, nullable: true)]
     private ?string $extra;
 
     #[ORM\ManyToOne(cascade: ["persist"], inversedBy: 'metadata' )]

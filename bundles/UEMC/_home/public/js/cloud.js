@@ -93,6 +93,8 @@ function createDir(name,accountId)
         },
         error: function (xhr, status, error) {
             console.error(error);
+            limpiarModalErrores();
+            mostrarModalErrores(xhr);
         },
         complete: function () {
             $('#loading-modal').modal('hide');
@@ -124,6 +126,8 @@ function createFile(name,accountId)
         },
         error: function (xhr, status, error) {
             console.error(error);
+            limpiarModalErrores();
+            mostrarModalErrores(xhr);
         },
         complete: function () {
             $('#loading-modal').modal('hide');
@@ -155,6 +159,8 @@ function dlt(path,accountId)
         },
         error: function (xhr, status, error) {
             console.error(error);
+            limpiarModalErrores();
+            mostrarModalErrores(xhr);
         },
         complete: function () {
             $('#loading-modal').modal('hide');
@@ -189,8 +195,9 @@ function upload(accountId) {
             }
             $('#loading-progress-bar').modal('hide');
         },
-        error: function (e, data) {
-            console.log('Error al cargar el archivo:', data.errorThrown);
+        error: function (xhr, status, error) {
+            limpiarModalErrores();
+            mostrarModalErrores(xhr);
             $('#loading-progress-bar').modal('hide');
         },
         progressall: function (e, data) { //Este evento procesa muestra el modal y el porcentajee
@@ -249,6 +256,8 @@ function download(path, name, accountId) {
         },
         error: function (xhr, status, error) {
             console.error(error);
+            limpiarModalErrores();
+            mostrarModalErrores(xhr);
         },
         complete: function () {
             $('#loading-modal').modal('hide');
@@ -273,7 +282,7 @@ function logout(accountId)
         },
         error: function (xhr, status, error) {
             limpiarModalErrores();
-            mostrarModalErrores(xhr)
+            mostrarModalErrores(xhr);
         }
     });
 }
@@ -309,6 +318,8 @@ function getArchiveMetadata(accountId, path) {
         },
         error: function (xhr, status, error) {
             console.error(error);
+            limpiarModalErrores();
+            mostrarModalErrores(xhr);
             metadata = null;
         }
     });
@@ -366,6 +377,8 @@ function copy(sourcePath,sourceAccountId,destinationAccountId)
         },
         error: function (xhr, status, error) {
             console.error(error);
+            limpiarModalErrores();
+            mostrarModalErrores(xhr);
         },complete: function () {
             $('#loading-modal').modal('hide');
         }
@@ -401,6 +414,8 @@ function move(sourcePath,sourceAccountId,destinationAccountId)
         },
         error: function (xhr, status, error) {
             console.error(error);
+            limpiarModalErrores();
+            mostrarModalErrores(xhr);
         },complete: function () {
             $('#loading-modal').modal('hide');
         }

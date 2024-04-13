@@ -113,13 +113,29 @@ class CoreController extends AbstractController
             $this->createContext($cloud1);
             $account1 = $this->core->arrayToObject($session->get('accounts')[$accountId1]);
             $filesystem1 = $this->core->constructFilesystem($account1);
-            $this->core->testConection($account1);
+            try {
+                $this->core->testConection($account1);
+            }catch (CloudException $e){
+                if($e->getCode() === 401)
+                {
+                    $this->core->logout($session,$request);
+                }
+                throw $e;
+            }
 
             // ACCOUNT 2
             $this->createContext($cloud2);
             $account2 = $this->core->arrayToObject($session->get('accounts')[$accountId2]);
             $filesystem2 = $this->core->constructFilesystem($account2);
-            $this->core->testConection($account2);
+            try {
+                $this->core->testConection($account2);
+            }catch (CloudException $e){
+                if($e->getCode() === 401)
+                {
+                    $this->core->logout($session,$request);
+                }
+                throw $e;
+            }
 
             return [
                 'sourceFileSystem'=>$filesystem1,
@@ -263,13 +279,12 @@ class CoreController extends AbstractController
 
             $path=$request->get('path')??$request->get('destinationPath');
 
-            $contentInDirectory=$this->core->listDirectory($path);
-            $contentInDirectoryArray=$contentInDirectory->toArray();
+            $contentInDirectory=$this->core->listDirectory($path)->toArray();
 
             $account = $entityManager->getRepository(Account::class)->getAccount($this->account);
 
             // ------- Se añade a cada archivo sus metadatos (si los tiene) ------
-            foreach ($contentInDirectoryArray as $archive)
+            foreach ($contentInDirectory as $archive)
             {
                 $item=json_decode(json_encode($archive),true); //Se convierte a un objeto modificable
                 $path=$item['path'];
@@ -300,7 +315,7 @@ class CoreController extends AbstractController
                 $account->getId().' | controller: '.$account->getCloud().
                 ' | user:' . $account->getUser());
 
-            return new JsonResponse($archivesWhitMetadata??$contentInDirectoryArray,Response::HTTP_OK);
+            return new JsonResponse($archivesWhitMetadata??$contentInDirectory,Response::HTTP_OK);
 
         }catch (CloudException $e)
         {
