@@ -176,6 +176,22 @@ class CloudService extends Core
     }
 
     /**
+     * @param Account $account
+     * @return void
+     * @throws CloudException
+     */
+    public function testConection(Account $account): void
+    {
+        try {
+            $this->getUserInfo($account->getToken());
+        }catch (CloudException $e)
+        {
+            throw new CloudException(ErrorTypes::TOKEN_EXPIRED->getErrorMessage(),
+                ErrorTypes::TOKEN_EXPIRED->getErrorCode());
+        }
+    }
+
+    /**
      * Convierte un array al objeto de la clase
      *
      * @param $array | Array con los parametros de la cuenta (Existen dos verisones, si se invoca desde getUserInfo los

@@ -551,5 +551,12 @@ abstract class CloudService
      */
     public abstract function constructFilesystem(Account $account): Filesystem;
 
+    /**
+     * @param Account $account
+     * @return void
+     * @throws CloudException
+     */
+    public abstract function testConection(Account $account): void;
+
 
 }

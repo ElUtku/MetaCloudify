@@ -131,12 +131,44 @@ class CloudService extends Core
             ];
 
             $client = new Client($options);
+
             $adapter = new WebDAVAdapter($client);
 
             return new Filesystem($adapter);
         }catch (Exception $e) {
             throw new CloudException(ErrorTypes::ERROR_CONSTRUIR_FILESYSTEM->getErrorMessage().' - '.$e->getMessage(),
                                     ErrorTypes::ERROR_CONSTRUIR_FILESYSTEM->getErrorCode());
+        }
+    }
+
+    /**
+     * @param Account $account
+     * @return void
+     * @throws CloudException
+     */
+    public function testConection(Account $account): void
+    {
+        $options = [
+            'baseUri' => $account->getURL(),
+            'userName' => $account->getUser(),
+            'password' => $account->getPassword()
+        ];
+
+        $client = new Client($options);
+        try {
+            $response = $client->request('GET');
+
+            $httpCode = $response['statusCode'];
+
+            if ($httpCode != 200) {
+                throw new CloudException(ErrorTypes::ERROR_CREDENTIALS->getErrorMessage(),
+                    ErrorTypes::ERROR_CREDENTIALS->getErrorCode());
+            }
+        } catch (CloudException $e) {
+            throw $e;
+        } catch (Exception $e) {
+            throw new CloudException(ErrorTypes::URL_FAIL->getErrorMessage().' - '.$e->getMessage(),
+                ErrorTypes::URL_FAIL->getErrorCode());
         }
     }
 }

@@ -12,7 +12,7 @@ use League\Flysystem\Config;
 use League\Flysystem\Filesystem;
 use League\Flysystem\Visibility;
 use League\OAuth2\Client\Provider\Google;
-use League\OAuth2\Client\Token\AccessToken;
+use Google\Exception as GoogleException;
 use Masbug\Flysystem\GoogleDriveAdapter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -76,7 +76,8 @@ class CloudService extends Core
 
                 $account->setLastIp($request->getClientIp());
                 $account->setLastSession(new DateTime());
-                $account->setToken($token);
+
+                $account->setToken($token->jsonSerialize());
                 $account->setCloud(CloudTypes::GoogleDrive->value);
 
                 return $account;
@@ -135,7 +136,7 @@ class CloudService extends Core
 
                 $account->setLastIp($request->getClientIp());
                 $account->setLastSession(new DateTime());
-                $account->setToken($token);
+                $account->setToken($token->jsonSerialize());
                 $account->setCloud(CloudTypes::GoogleDrive->value);
 
                 return $account;
@@ -186,9 +187,7 @@ class CloudService extends Core
         try {
             $config = Yaml::parseFile(__DIR__.'\..\Resources\config\googledrive.yaml');
 
-            $client = new Google_Client();
-            $client->setClientId($config['clientId']);
-            $client->setClientSecret($config['clientSecret']);
+            $client = new Google_Client($config);
             $client->setAccessToken($account->getToken());
 
             $service = new Drive($client);
@@ -202,6 +201,23 @@ class CloudService extends Core
         catch (Exception)
         {
             throw new CloudException(ErrorTypes::ERROR_CONSTRUIR_FILESYSTEM->getErrorMessage(), ErrorTypes::ERROR_CONSTRUIR_FILESYSTEM->getErrorCode());
+        }
+    }
+
+    public function testConection(Account $account): void
+    {
+        try {
+            $config = Yaml::parseFile(__DIR__.'\..\Resources\config\googledrive.yaml');
+
+            $client = new Google_Client($config);
+            $client->setAccessToken($account->getToken());
+
+            $service = new Drive($client);
+            $service->about->get(['fields' => 'user']);
+        }catch (GoogleException $e)
+        {
+            throw new CloudException(ErrorTypes::TOKEN_EXPIRED->getErrorMessage(),
+                ErrorTypes::TOKEN_EXPIRED->getErrorCode());
         }
     }
 }

@@ -22,7 +22,7 @@ class CloudException extends Exception
     {
         parent::__construct($message, $code, $previous);
         $this->logger=new UemcLogger();
-        $this->logger->ERROR('Code: '.$code. ' - Message: '.$message);
+        $this->logger->ERROR('Code: '.$code. ' - Message: '.$message.' - Trace: '.$this->getTraceAsString());
     }
 
     /**

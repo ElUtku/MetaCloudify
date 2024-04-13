@@ -76,6 +76,7 @@ class CoreController extends AbstractController
             $this->account = $this->core->arrayToObject($session->get('accounts')[$accountId]);
             $filesystem = $this->core->constructFilesystem($this->account);
             $this->core->setFilesystem($filesystem);
+            $this->core->testConection($this->account);
         }
     }
 
@@ -103,11 +104,13 @@ class CoreController extends AbstractController
             $this->createContext($cloud1);
             $account1 = $this->core->arrayToObject($session->get('accounts')[$accountId1]);
             $filesystem1 = $this->core->constructFilesystem($account1);
+            $this->core->testConection($account1);
 
             // ACCOUNT 2
             $this->createContext($cloud2);
             $account2 = $this->core->arrayToObject($session->get('accounts')[$accountId2]);
             $filesystem2 = $this->core->constructFilesystem($account2);
+            $this->core->testConection($account2);
 
             return [
                 'sourceFileSystem'=>$filesystem1,

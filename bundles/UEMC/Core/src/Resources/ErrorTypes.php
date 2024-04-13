@@ -31,7 +31,9 @@ enum ErrorTypes: string
     case ERROR_GET_METADATA = 'Error al obtener los metadatos de la base de datos.';
     case ERROR_COPY = 'Error al copiar los archivos.';
     case ERROR_MOVE = 'Error al mover los archivos';
-
+    case TOKEN_EXPIRED = 'El token de la sesión actual ha caducado';
+    case URL_FAIL = 'La url no existe';
+    case ERROR_CREDENTIALS = 'Las credenciales introducidas no son correctas.';
     /**
      * @return int
      */
@@ -65,6 +67,9 @@ enum ErrorTypes: string
             ErrorTypes::ERROR_GET_METADATA => 647,
             ErrorTypes::ERROR_COPY => 650,
             ErrorTypes::ERROR_MOVE => 651,
+            ErrorTypes::TOKEN_EXPIRED => 660,
+            ErrorTypes::URL_FAIL => 661,
+            ErrorTypes::ERROR_CREDENTIALS => 662
         };
     }
 
@@ -101,6 +106,9 @@ enum ErrorTypes: string
             ErrorTypes::ERROR_GET_METADATA => 'Error al obtener los metadatos de la base de datos',
             ErrorTypes::ERROR_COPY => 'Error al copiar los archivos.',
             ErrorTypes::ERROR_MOVE => 'Error al mover los archivos.',
+            ErrorTypes::TOKEN_EXPIRED => 'El token de la sesión actual ha caducado.',
+            ErrorTypes::URL_FAIL => 'La url no existe.',
+            ErrorTypes::ERROR_CREDENTIALS => 'Las credenciales introducidas no son correctas.',
         };
     }
 }

@@ -6,8 +6,13 @@ namespace UEMC\Ftp\Service;
 use DateTime;
 use Exception;
 use League\Flysystem\Filesystem;
+use League\Flysystem\FilesystemException;
+use League\Flysystem\Ftp\ConnectivityChecker;
+use League\Flysystem\Ftp\FtpConnectionException;
 use League\Flysystem\Ftp\FtpConnectionOptions;
 use League\Flysystem\Ftp\FtpAdapter;
+use League\Flysystem\Ftp\FtpConnectionProvider;
+use League\Flysystem\Ftp\NoopCommandConnectivityChecker;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
@@ -95,5 +100,33 @@ class CloudService extends Core
                 ErrorTypes::ERROR_CONSTRUIR_FILESYSTEM->getErrorCode());
         }
 
+    }
+
+    public function testConection(Account $account): void
+    {
+        $options=[
+            'host' => $account->getUrl(), // required
+            'root' => '/', // required
+            'username' => $account->getUser(), // required
+            'password' => $account->getPassword(), // required
+            'port' => $account->getPort(),
+            'ssl' => false,
+            'timeout' => 90,
+            'utf8' => false,
+            'passive' => true,
+            'transferMode' => FTP_BINARY,
+            'systemType' => null, // 'windows' or 'unix'
+            'ignorePassiveAddress' => null, // true or false
+            'timestampsOnUnixListingsEnabled' => false, // true or false
+            'recurseManually' => true // true
+        ];
+
+        $provider = new FtpConnectionProvider();
+        try {
+            $provider->createConnection(FtpConnectionOptions::fromArray($options));
+        } catch (FtpConnectionException $e) {
+            throw new CloudException($e->getMessage(),
+                ErrorTypes::ERROR_INICIO_SESION->getErrorCode(),$e);
+        }
     }
 }
