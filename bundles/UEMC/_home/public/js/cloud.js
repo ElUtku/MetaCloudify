@@ -60,7 +60,8 @@ function loadData(accountId,path) {
             cargarDatos(account,path,data);
         },
         error: function (xhr, status, error) {
-            console.error(error);
+            console.error(xhr.status,xhr.responseJSON);
+            mostrarModalErrores(xhr);
         },
         complete: function () {
             $('#loading-modal').modal('hide');
@@ -328,6 +329,7 @@ function guardarMetadata(path, accountId)
         },
         success: function (data) {
             console.log(data);
+            mostrarModalSuccess(data);
         },
         error: function (xhr, status, error) {
             console.error(error);

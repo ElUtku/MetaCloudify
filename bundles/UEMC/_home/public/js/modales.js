@@ -209,4 +209,18 @@ function selectAccountId() {
     return $('#accountSelect').val();
 }
 
+function mostrarModalErrores(xhr)
+{
+    var errorMessage = xhr.responseJSON;
+    var errorElement = $('<li>').text(errorMessage);
+    errorElement.appendTo('#errorContent');
+    $('#errorModal').modal('show');
+}
+
+function mostrarModalSuccess(data)
+{
+    var successElement = $('<li>').text(data);
+    successElement.appendTo('#successContent');
+    $('#successModal').modal('show');
+}
 

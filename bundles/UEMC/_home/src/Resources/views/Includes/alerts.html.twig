@@ -1,50 +1,46 @@
 
 <!-- Alert Success -->
-{% if app.flashes('success') %}
-    <div class="modal fade" id="successModal">
-        <div class="modal-dialog">
-                <div class="modal-body alert alert-success d-flex align-items-center" role="alert">
-                    <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill"/></svg>
-                    <div>
-                        {% for message in app.flashes('success') %}
-                            {{ message }}
-                        {% endfor %}
+<div class="modal fade" id="successModal">
+    <div class="modal-dialog">
+        <div class="modal-body alert alert-success d-flex flex-column" role="alert">
+            <div class="d-flex d-row w-100 pb-2 border-bottom border-success">
+                <div class="row align-items-center">
+                    <div class="col-3">
+                        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#check-circle-fill"/></svg>
                     </div>
-                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
+                    <div class="col-3">
+                        <p class="m-0">Success</p>
+                    </div>
                 </div>
-        </div>
-    </div>
-    <script>
-        $(document).ready(function() {
-            $('#successModal').modal('show');
-        });
-    </script>
-{% endif %}
-
-{% if app.flashes('error')  %}
-    <div class="modal fade" id="errorModal">
-        <div class="modal-dialog">
-            <div class="modal-body alert alert-danger d-flex align-items-center" role="alert">
-                <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
-                {% if app.flashes('error') is not empty %}
-                    <div>
-                        {% for message in app.flashes('error') %}
-                            {{ message }}
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    <p>Ha ocurrido un error.</p>
-                {% endif %}
                 <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
+            </div>
+            <div id="successContent" class="row d-flex d-column justify-content-start mt-3">
             </div>
         </div>
     </div>
-    <script>
-        $(document).ready(function() {
-            $('#errorModal').modal('show');
-        });
-    </script>
-{% endif %}
+</div>
+
+<!-- Alert Error -->
+<div class="modal fade" id="errorModal">
+    <div class="modal-dialog">
+        <div class="modal-body alert alert-danger d-flex flex-column" role="alert">
+            <div class="d-flex d-row w-100 pb-2 border-bottom border-danger">
+                <div class="row align-items-center">
+                    <div class="col-3">
+                        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+                    </div>
+                    <div class="col-3">
+                        <p class="m-0">Error</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
+            </div>
+            <div id="errorContent" class="row d-flex d-column justify-content-start mt-3">
+            </div>
+        </div>
+    </div>
+</div>
+
 
 
 <!-- SVG -->

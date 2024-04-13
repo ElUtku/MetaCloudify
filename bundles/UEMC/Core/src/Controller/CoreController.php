@@ -152,8 +152,6 @@ class CoreController extends AbstractController
 
         }catch (CloudException $e)
         {
-            $this->addFlash('error','CODE: '.$e->getStatusCode(). ' - MESSAGE: '.$e->getMessage());
-
             $this->core->logger->warning('LOGGIN ERROR | '.$e->getMessage());
         }
         return $this->redirectToRoute('_home_index');
@@ -194,7 +192,7 @@ class CoreController extends AbstractController
 
         }catch (CloudException $e)
         {
-            return new JsonResponse($e->getMessage(),$e->getStatusCode());
+            return new JsonResponse($e->getMessage(),$e->getCode());
         }
     }
 
@@ -233,7 +231,7 @@ class CoreController extends AbstractController
             return new JsonResponse();
         }catch (CloudException $e)
         {
-            return new JsonResponse($e->getMessage(),$e->getStatusCode());
+            return new JsonResponse($e->getMessage(),$e->getCode());
         }
     }
 
@@ -294,7 +292,9 @@ class CoreController extends AbstractController
 
         }catch (CloudException $e)
         {
-            return new JsonResponse($e->getMessage(),$e->getStatusCode());
+            $this->addFlash('error','CODE: '.$e->getCode(). ' - MESSAGE: '.$e->getMessage());
+
+            return new JsonResponse($e->getMessage(),$e->getCode());
         }
 
     }
@@ -321,7 +321,7 @@ class CoreController extends AbstractController
             return $this->core->download($path,$name); // Tipo Resonse
         }catch (CloudException $e)
         {
-            return new JsonResponse($e->getMessage(),$e->getStatusCode());
+            return new JsonResponse($e->getMessage(),$e->getCode());
         }
     }
 
@@ -368,7 +368,7 @@ class CoreController extends AbstractController
 
         }catch (CloudException $e)
         {
-            return new JsonResponse($e->getMessage(),$e->getStatusCode());
+            return new JsonResponse($e->getMessage(),$e->getCode());
         }
     }
 
@@ -413,7 +413,7 @@ class CoreController extends AbstractController
 
         }catch (CloudException $e)
         {
-            return new JsonResponse($e->getMessage(),$e->getStatusCode());
+            return new JsonResponse($e->getMessage(),$e->getCode());
         }
     }
 
@@ -462,7 +462,7 @@ class CoreController extends AbstractController
 
         }catch (CloudException $e)
         {
-            return new JsonResponse($e->getMessage(),$e->getStatusCode());
+            return new JsonResponse($e->getMessage(),$e->getCode());
         }
     }
 
@@ -513,7 +513,7 @@ class CoreController extends AbstractController
             return $this->drive($doctrine,$session,$request,$cloud);
         }catch (CloudException $e)
         {
-            return new JsonResponse($e->getMessage(),$e->getStatusCode());
+            return new JsonResponse($e->getMessage(),$e->getCode());
         }
     }
 
@@ -551,7 +551,7 @@ class CoreController extends AbstractController
             return new JsonResponse($file,Response::HTTP_OK);
         }catch (CloudException $e)
         {
-            return new JsonResponse($e->getMessage(),$e->getStatusCode());
+            return new JsonResponse($e->getMessage(),$e->getCode());
         }
 
     }
@@ -610,7 +610,7 @@ class CoreController extends AbstractController
             return new JsonResponse('Metadatos editados correctamente',Response::HTTP_OK);
         }catch (CloudException $e)
         {
-            return new JsonResponse($e->getMessage(),$e->getStatusCode());
+            return new JsonResponse($e->getMessage(),$e->getCode());
         }
     }
 
