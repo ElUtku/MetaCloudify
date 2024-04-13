@@ -37,3 +37,8 @@ function setAccount(account)
     }
 }
 
+function resetAccounts()
+{
+    sessionStorage.removeItem("storedAccounts");
+}
+

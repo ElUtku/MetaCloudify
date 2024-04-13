@@ -83,11 +83,25 @@ function crearTabla(data,account)
             className: 'btn btn-xs',
             action: function ()
             {
-                //Off desvincula el boton cada vez que se recrea la tabla
-                $('#formFile-explorer').off('change').on('change', function() {
-                    upload(account.accountId);
-                });
-                $('#formFile-explorer').trigger('click');
+                let accounts = getAccounts();
+                if (account.pathActual===account.root && Object.keys(accounts).length!==1)
+                {
+                    optionsSelectAccounId().then(function(accountId) {
+                        //Off desvincula el boton cada vez que se recrea la tabla
+                        $('#formFile-explorer').off('change').on('change', function() {
+                            upload(accountId);
+                        });
+                        $('#formFile-explorer').trigger('click');
+                    });
+
+                } else
+                {
+                    //Off desvincula el boton cada vez que se recrea la tabla
+                    $('#formFile-explorer').off('change').on('change', function() {
+                        upload(account.accountId);
+                    });
+                    $('#formFile-explorer').trigger('click');
+                }
             }
         }
     let buttonVerMetadatos =

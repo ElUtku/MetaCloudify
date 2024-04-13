@@ -5,6 +5,10 @@
     </div>
     <ul class="list-unstyled ps-0">
 
+        <script>
+            resetAccounts();
+            $("script:last").remove(); //Elimina esto del html
+        </script>
 
         {% if app.session.has('accounts') %}
             {% for accountId, account in app.session.get('accounts') %}
@@ -12,7 +16,7 @@
                 {% if account.cloud == 'googledrive' %}
                 <script>
                     storeNewAccount('{{ accountId }}','{{ account.user }}','googledrive','');
-                    $("script:last").remove();
+                    $("script:last").remove(); //Elimina esto del html
                 </script>
 
                 <li class="mb-1">

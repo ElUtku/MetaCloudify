@@ -3,6 +3,7 @@
 namespace UEMC\Core\Controller;
 
 use DateTime;
+use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -644,8 +645,33 @@ class CoreController extends AbstractController
 //Obtenemos las cuentas y filesystem que vamos a usar
             $filesSystems=$this->retriveMultiFileSystem($session,$request,$cloud,$destinationCloud);
 
-            $this->core->copyWithMetadata($filesSystems,$entityManager,$sourceFullPath,$destinationDirectoryPath,$destinationFullPath);
+            $sourceFileSystem=$filesSystems['sourceFileSystem'];
+            $destinationFileSystem=$filesSystems['destinationFileSystem'];
+            $sourceAccount=$filesSystems['sourceAccount'];
+            $destinationAccount=$filesSystems['destinationAccount'];
 
+            try {
+                $sourceAccountBD = $entityManager->getRepository(Account::class)->getAccount($sourceAccount);
+                $destinationAccountBD=$entityManager->getRepository(Account::class)->getAccount($destinationAccount);
+            } catch (NonUniqueResultException $e) {
+                throw new CloudException(ErrorTypes::ERROR_OBTENER_USUARIO->getErrorMessage().' - '.$e->getMessage(),
+                    ErrorTypes::ERROR_OBTENER_USUARIO->getErrorCode());
+            }
+
+//Obtenemos los metadatos del archivo original
+            $this->core->setFilesystem($sourceFileSystem);
+            $originalFile=$this->core->getArchivo($sourceFullPath);
+            $originalMetadataFile=$this->core->getBasicMetadata($originalFile,$sourceAccountBD);
+            $originalCloudMetadataFile=$entityManager->getRepository(Metadata::class)->getCloudMetadata($originalMetadataFile);
+
+//Copiamos a la cuenta destino el archivo
+            $this->core->copy($sourceFileSystem,$destinationFileSystem,$sourceFullPath,$destinationDirectoryPath);
+
+//Copiamos los metadatos del archivo original al de destino
+            $this->core->setFilesystem($destinationFileSystem);
+            $destiantionFile=$this->core->getArchivo($destinationFullPath);
+            $destiantionMetadataFile=$this->core->getBasicMetadata($destiantionFile,$destinationAccountBD);
+            $entityManager->getRepository(Metadata::class)->copyMetadata($destiantionMetadataFile,$originalCloudMetadataFile);
             $this->core->logger->info('COPY | origen: '.$cloud.'::'.$sourceFullPath.' | destination: '.$destinationCloud.'::'.$destinationFullPath);
 
             return new JsonResponse('Ok',Response::HTTP_OK );

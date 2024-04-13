@@ -468,7 +468,7 @@ abstract class CloudService
      * @return void
      * @throws CloudException
      */
-    public function onlyCopy(Filesystem $source, Filesystem $destination, String $sourcePath, String $destinationPath): void
+    public function copy(Filesystem $source, Filesystem $destination, String $sourcePath, String $destinationPath): void
     {
         try {
             $this->setFilesystem($source);
@@ -499,33 +499,7 @@ abstract class CloudService
      */
     public function copyWithMetadata(array $filesSystems, ObjectManager $entityManager, String $sourceFullPath, String $destinationDirectoryPath, String $destinationFullPath): void
     {
-        $sourceFileSystem=$filesSystems['sourceFileSystem'];
-        $destinationFileSystem=$filesSystems['destinationFileSystem'];
-        $sourceAccount=$filesSystems['sourceAccount'];
-        $destinationAccount=$filesSystems['destinationAccount'];
 
-        try {
-            $sourceAccountBD = $entityManager->getRepository(Account::class)->getAccount($sourceAccount);
-            $destinationAccountBD=$entityManager->getRepository(Account::class)->getAccount($destinationAccount);
-        } catch (NonUniqueResultException $e) {
-            throw new CloudException(ErrorTypes::ERROR_OBTENER_USUARIO->getErrorMessage().' - '.$e->getMessage(),
-                ErrorTypes::ERROR_OBTENER_USUARIO->getErrorCode());
-        }
-
-//Obtenemos los metadatos del archivo original
-        $this->setFilesystem($sourceFileSystem);
-        $originalFile=$this->getArchivo($sourceFullPath);
-        $originalMetadataFile=$this->getBasicMetadata($originalFile,$sourceAccountBD);
-        $originalCloudMetadataFile=$entityManager->getRepository(Metadata::class)->getCloudMetadata($originalMetadataFile);
-
-//Copiamos a la cuenta destino el archivo
-        $this->onlyCopy($sourceFileSystem,$destinationFileSystem,$sourceFullPath,$destinationDirectoryPath);
-
-//Copiamos los metadatos del archivo original al de destino
-        $this->setFilesystem($destinationFileSystem);
-        $destiantionFile=$this->getArchivo($destinationFullPath);
-        $destiantionMetadataFile=$this->getBasicMetadata($destiantionFile,$destinationAccountBD);
-        $entityManager->getRepository(Metadata::class)->copyMetadata($destiantionMetadataFile,$originalCloudMetadataFile);
     }
 
     /**
