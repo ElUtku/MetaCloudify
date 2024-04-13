@@ -77,7 +77,7 @@ class CloudService extends Core
                 $account->setLastIp($request->getClientIp());
                 $account->setLastSession(new DateTime());
 
-                $account->setToken($token->jsonSerialize());
+                $account->setToken(json_encode($token));
                 $account->setCloud(CloudTypes::GoogleDrive->value);
 
                 return $account;
@@ -136,7 +136,7 @@ class CloudService extends Core
 
                 $account->setLastIp($request->getClientIp());
                 $account->setLastSession(new DateTime());
-                $account->setToken($token->jsonSerialize());
+                $account->setToken(json_encode($token));
                 $account->setCloud(CloudTypes::GoogleDrive->value);
 
                 return $account;
@@ -145,7 +145,6 @@ class CloudService extends Core
                 throw new CloudException(ErrorTypes::ERROR_INICIO_SESION->getErrorMessage().' - '.$e->getMessage(),
                     ErrorTypes::ERROR_INICIO_SESION->getErrorCode());
             }
-
         }
     }
 
