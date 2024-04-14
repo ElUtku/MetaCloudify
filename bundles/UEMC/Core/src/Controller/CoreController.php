@@ -70,7 +70,7 @@ class CoreController extends AbstractController
     private function retriveCore(SessionInterface $session, Request $request): void
     {
         $ruta=$request->attributes->get('_route');
-        $accountId = $request->get('accountId') ?? null;
+        $accountId = $request->get('accountId') ?? $request->get('accountId1') ?? null;
 
         if($session->has('accounts') and $ruta !== 'login' and $ruta !== 'login_token' and $ruta !== 'loginWeb' )
         {
@@ -104,8 +104,8 @@ class CoreController extends AbstractController
     private function retriveMultiFileSystem(SessionInterface $session, Request $request, String $cloud1, String $cloud2): array
     {
         $ruta=$request->attributes->get('_route');
-        $accountId1 = $request->query->get('accountId1') ?? $request->request->get('accountId1') ?? null;
-        $accountId2 = $request->query->get('accountId2') ?? $request->request->get('accountId2') ?? null;
+        $accountId1 = $request->get('accountId1') ?? null;
+        $accountId2 = $request->get('accountId2') ?? null;
 
         if($session->has('accounts') and $ruta !== 'login' and $ruta !== 'login_token' and $ruta !== 'loginWeb' )
         {
@@ -459,10 +459,10 @@ class CoreController extends AbstractController
             $this->createContext($cloud);
             $this->retriveCore($session,$request);
 
-            $path=$request->get('path');
+            $path=$request->get('path') ?? $request->get('sourcePath');
             $name=$request->get('name');
 
-            $fullPath=$path.'/'.$name;
+            $fullPath=rtrim($path.'/'.$name, '/');
 
             $account = $entityManager->getRepository(Account::class)->getAccount($this->account);
             $archivo=$this->core->getArchivo(str_replace('\\', '/', ($fullPath)));
@@ -693,6 +693,24 @@ class CoreController extends AbstractController
         }catch (CloudException $e)
         {
             return new JsonResponse($e->getMessage(), response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     *
+     * Mueve los ficheros de un filesystem a otro
+     *
+     * @Route("/{cloud}/move", name="move", methods={"PUT","PATCH"})
+     */
+    public function move(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
+    {
+        $responseCopy = $this->copy($doctrine,$session,$request,$cloud);
+        if($responseCopy->getStatusCode() === 200)
+        {
+            return $this->delete($doctrine,$session,$request,$cloud);
+        } else
+        {
+            return $responseCopy;
         }
     }
 }

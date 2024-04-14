@@ -484,25 +484,6 @@ abstract class CloudService
     }
 
     /**
-     *
-     * Copia un archivo y sus metadatos de la aplicaicon.
-     * Es necesario porporcionar un array con los Filesystem destino y origen asi como sus cuantas asociadas
-     * Es necesario porporiconar las rutas de origen y destino
-     *
-     * @param array $filesSystems
-     * @param ObjectManager $entityManager
-     * @param String $sourceFullPath
-     * @param String $destinationDirectoryPath
-     * @param String $destinationFullPath
-     * @return void
-     * @throws CloudException
-     */
-    public function copyWithMetadata(array $filesSystems, ObjectManager $entityManager, String $sourceFullPath, String $destinationDirectoryPath, String $destinationFullPath): void
-    {
-
-    }
-
-    /**
      * @param $path
      * @return string
      */

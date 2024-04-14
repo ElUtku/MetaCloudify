@@ -393,8 +393,8 @@ function move(sourcePath,sourceAccountId,destinationAccountId)
     $('#loading-modal').modal('show');
 
     $.ajax({
-        url: account1.controller+'/copy',
-        method: 'POST',
+        url: account1.controller+'/move',
+        method: 'PUT',
         data: {
             sourcePath: sourcePath,
             destinationPath: account2.pathActual,
@@ -402,14 +402,14 @@ function move(sourcePath,sourceAccountId,destinationAccountId)
             accountId2: destinationAccountId,
             destinationCloud: account2.controller
         },
-        success: function () {
-            dlt(sourcePath,sourceAccountId);
+        success: function (data) {
+            //dlt(sourcePath,sourceAccountId);
             if(account2.pathActual===account2.root)
             {
                 recargasCuentas();
             } else
             {
-                loadData(account2.accountId, account2.pathActual);
+                cargarDatos(account2.accountId, account2.pathActual,data);
             }
         },
         error: function (xhr, status, error) {
@@ -424,7 +424,7 @@ function move(sourcePath,sourceAccountId,destinationAccountId)
 
 function cargarDatos(account,path,data)
 {
-    if(account.controller.indexOf("owncloud")!==-1 )
+    if(account.controller === 'owncloud' )
     {
         data=cleanOwncloudData(data);
     }
