@@ -215,7 +215,7 @@ class CloudService extends Core
             $service->about->get(['fields' => 'user']);
         }catch (GoogleException $e)
         {
-            throw new CloudException(ErrorTypes::TOKEN_EXPIRED->getErrorMessage(),
+            throw new CloudException($account->getUser().' - '.ErrorTypes::TOKEN_EXPIRED->getErrorMessage(),
                 ErrorTypes::TOKEN_EXPIRED->getErrorCode());
         }
     }

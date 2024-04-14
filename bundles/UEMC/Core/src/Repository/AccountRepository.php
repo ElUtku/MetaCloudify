@@ -26,7 +26,7 @@ class AccountRepository extends EntityRepository
      * @return Account|null
      * @throws CloudException
      */
-    public function loggin(Account $account): ?Account
+    public function login(Account $account): ?Account
     {
         try {
             $accountExists=$this->getAccount($account);

@@ -3,13 +3,16 @@
 namespace UEMC\Core\Controller;
 
 use DateTime;
+
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
-use Exception;
 use Doctrine\Persistence\ManagerRegistry;
 
+use League\Flysystem\Filesystem;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -34,9 +37,32 @@ class CoreController extends AbstractController
 
     private Account $account;
     private Core $core;
+    private SessionInterface $session;
+    private Request $request;
+    private EntityManagerInterface $em;
+    private String $ruta;
+    private String $path;
+    private String $name;
+    private String $accountId;
+    private bool $isMove;
+    
 
+    public function __construct(RequestStack $requestStack, ManagerRegistry $doctrine)
+    {
+        $request = $requestStack->getCurrentRequest();
+        $session = $requestStack->getSession();
+        $this->ruta=$request->attributes->get('_route') ?? '';
+        $this->session=$session;
+        $this->request=$request;
+        $this->em = $doctrine->getManager();
+        $this->accountId = $request->get('accountId') ?? '';
+        $this->path=$request->get('path') ?? '';
+        $this->name=$request->get('name') ?? '';
+        $this->isMove=false;
+    }
+    
     /**
-     *
+     * 1º
      * Se escoge un tipo de core.
      *
      * @param string $cloud
@@ -58,93 +84,46 @@ class CoreController extends AbstractController
         $this->account=new Account();
     }
 
+
     /**
+     * 2º
+     * Recuperar cuenta guardada en sesion
      *
-     * Se recupera el filesystem si ya existe en sesión
-     *
-     * @param SessionInterface $session
-     * @param Request $request
-     * @return void
+     * @param String $accountId
+     * @return Account
      * @throws CloudException
      */
-    private function retriveCore(SessionInterface $session, Request $request): void
+    private function retriveAccount(String $accountId): Account
     {
-        $ruta=$request->attributes->get('_route');
-        $accountId = $request->get('accountId') ?? $request->get('accountId1') ?? null;
-
-        if($session->has('accounts') and $ruta !== 'login' and $ruta !== 'login_token' and $ruta !== 'loginWeb' )
+        if($this->session->has('accounts'))
         {
-            $this->account = $this->core->arrayToObject($session->get('accounts')[$accountId]);
-            $filesystem = $this->core->constructFilesystem($this->account);
-            $this->core->setFilesystem($filesystem);
-            try {
-                $this->core->testConection($this->account);
-            }catch (CloudException $e){
-                if($e->getCode() === 401)
-                {
-                    $this->core->logout($session,$request);
-                }
-                throw $e;
-            }
+            $account=$this->core->arrayToObject($this->session->get('accounts')[$accountId]);
+            $this->core->testConection($account);
+            return $account;
+        }else
+        {
+            throw new CloudException(ErrorTypes::ERROR_OBTENER_USUARIO->getErrorMessage(),
+                ErrorTypes::ERROR_OBTENER_USUARIO->getErrorCode());
         }
     }
-
-
+    
     /**
+     * 3º
+     * Se recupera el filesystem si ya existe en sesión
      *
-     *  Se recupera las dos cuentas y se devuelven junto a su flysystem
-     *
-     * @param SessionInterface $session
-     * @param Request $request
-     * @param String $cloud1
-     * @param String $cloud2
-     * @return array
+     * @param Account $account
+     * @return Filesystem
      * @throws CloudException
      */
-    private function retriveMultiFileSystem(SessionInterface $session, Request $request, String $cloud1, String $cloud2): array
+    private function retriveCore(Account $account): Filesystem
     {
-        $ruta=$request->attributes->get('_route');
-        $accountId1 = $request->get('accountId1') ?? null;
-        $accountId2 = $request->get('accountId2') ?? null;
 
-        if($session->has('accounts') and $ruta !== 'login' and $ruta !== 'login_token' and $ruta !== 'loginWeb' )
+        if($this->ruta !== 'login' and $this->ruta !== 'login_token' and $this->ruta !== 'loginWeb' )
         {
-            // ACCOUNT 1
-            $this->createContext($cloud1);
-            $account1 = $this->core->arrayToObject($session->get('accounts')[$accountId1]);
-            $filesystem1 = $this->core->constructFilesystem($account1);
-            try {
-                $this->core->testConection($account1);
-            }catch (CloudException $e){
-                if($e->getCode() === 401)
-                {
-                    $this->core->logout($session,$request);
-                }
-                throw $e;
-            }
-
-            // ACCOUNT 2
-            $this->createContext($cloud2);
-            $account2 = $this->core->arrayToObject($session->get('accounts')[$accountId2]);
-            $filesystem2 = $this->core->constructFilesystem($account2);
-            try {
-                $this->core->testConection($account2);
-            }catch (CloudException $e){
-                if($e->getCode() === 401)
-                {
-                    $this->core->logout($session,$request);
-                }
-                throw $e;
-            }
-
-            return [
-                'sourceFileSystem'=>$filesystem1,
-                'sourceAccount'=>$account1,
-                'destinationFileSystem'=>$filesystem2,
-                'destinationAccount'=>$account2];
-        } else
-        {
-            throw new Exception();
+            return $this->core->constructFilesystem($account);
+        } else{
+            throw new CloudException(ErrorTypes::ERROR_CONSTRUIR_FILESYSTEM->getErrorMessage(),
+                ErrorTypes::ERROR_CONSTRUIR_FILESYSTEM->getErrorCode());
         }
     }
 
@@ -154,22 +133,19 @@ class CoreController extends AbstractController
      *
      * @Route("/{cloud}/login", name="login", methods={"GET","POST"}) //GET es usado para solicitar la url OAUTH el resto de peticiones van por POST
      */
-    public function login(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
+    public function login(String $cloud): Response
     {
-
         try {
-            $entityManager = $doctrine->getManager();
 
             $this->createContext($cloud);
-            $this->retriveCore($session,$request);
 
-            $account=$this->core->login($session,$request);
+            $account=$this->core->login($this->session,$this->request);
 
-            $accountExists = $entityManager->getRepository(Account::class)->loggin($account);
+            $accountExists = $this->em->getRepository(Account::class)->login($account);
 
             $account->setId($accountExists->getId());
 
-            $accountId=$this->core->setSession($session,$account);
+            $accountId=$this->core->setSession($this->session,$account);
 
             $this->core->logger->info('LOGGIN | '.'AccountId:'.$accountId.' | id: '.
                 $accountExists->getId().' | controller: '.$account->getCloud().
@@ -191,22 +167,20 @@ class CoreController extends AbstractController
      *
      * @Route("/{cloud}/login/token", name="login_token", methods={"GET","POST"})
      */
-    public function loginPost(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
+    public function loginPost(String $cloud): Response
     {
         try {
-            $entityManager = $doctrine->getManager();
 
             $this->createContext($cloud);
-            $this->retriveCore($session,$request);
 
-            $result=$this->core->loginPost($session,$request);
+            $result=$this->core->loginPost($this->session,$this->request);
 
             if($result instanceof Account)
             {
-                $accountExists=$entityManager->getRepository(Account::class)->loggin($result);
+                $accountExists=$this->em->getRepository(Account::class)->login($result);
 
                 $result->setId($accountExists->getId());
-                $accountId=$this->core->setSession($session,$result);
+                $accountId=$this->core->setSession($this->session,$result);
 
                 $this->core->logger->info('LOGGIN | '.'AccountId:'.$accountId.' | id: '.
                     $accountExists->getId().' | controller: '.$result->getCloud().
@@ -246,12 +220,12 @@ class CoreController extends AbstractController
      *
      * @Route("/{cloud}/logout", name="logout", methods={"GET"})
      */
-    public function logout(SessionInterface $session, Request $request, string $cloud): Response
+    public function logout(String $cloud): Response
     {
         try {
             $this->createContext($cloud);
-            $this->retriveCore($session,$request);
-            $this->core->logout($session,$request);
+
+            $this->core->logout($this->session,$this->request);
 
             $this->core->logger->info('LOGOUT | '.' | id: '.
                 $this->account->getCloud().
@@ -269,19 +243,18 @@ class CoreController extends AbstractController
      *
      * @Route("/{cloud}/drive", name="drive", methods={"GET"})
      */
-    public function drive(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
+    public function drive(String $cloud): Response
     {
         try {
-            $entityManager = $doctrine->getManager();
 
             $this->createContext($cloud);
-            $this->retriveCore($session,$request);
+            $this->account=$this->retriveAccount($this->accountId);
+            $this->core->setFilesystem($this->retriveCore($this->account));
 
-            $path=$request->get('path')??$request->get('destinationPath');
 
-            $contentInDirectory=$this->core->listDirectory($path)->toArray();
+            $contentInDirectory=$this->core->listDirectory($this->path)->toArray();
 
-            $account = $entityManager->getRepository(Account::class)->getAccount($this->account);
+            $account = $this->em->getRepository(Account::class)->getAccount($this->account);
 
             // ------- Se añade a cada archivo sus metadatos (si los tiene) ------
             foreach ($contentInDirectory as $archive)
@@ -290,13 +263,13 @@ class CoreController extends AbstractController
                 $path=$item['path'];
 
                 // ---- Si el archivo no esta registrado en nuestra base de datos, se ignora
-                if ($entityManager->getRepository(Metadata::class)->findByExactPathAndAccountNull($account,dirname($path),basename($path)))
+                if ($this->em->getRepository(Metadata::class)->findByExactPathAndAccountNull($account,dirname($path),basename($path)))
                 {
 
                     $archivoTipado=$this->core->getTypeOfArchive($archive); //Se define si es carpeta o fichero
                     $metadata = $this->core->getBasicMetadata($archivoTipado,$account);
 
-                    $extraMetadata=$entityManager->getRepository(Metadata::class)->getCloudMetadata($metadata);
+                    $extraMetadata=$this->em->getRepository(Metadata::class)->getCloudMetadata($metadata);
 
                     $item['extra_metadata'] = [
                         'virtual_name' => $extraMetadata->getVirtualName(),
@@ -332,20 +305,20 @@ class CoreController extends AbstractController
      *
      * @Route("/{cloud}/drive/download", name="download", methods={"GET"})
      */
-    public function download(SessionInterface $session, Request $request, string $cloud): Response
+    public function download(String $cloud): Response
     {
         try {
+            
             $this->createContext($cloud);
-            $this->retriveCore($session,$request);
+            $this->account=$this->retriveAccount($this->accountId);
+            $this->core->setFilesystem($this->retriveCore($this->account));
 
-            $path=$request->get('path');
-            $name=$request->get('name');
 
-            $this->core->logger->info('DOWNLOAD | '.' file: '.$path.'\\'.$name.
+            $this->core->logger->info('DOWNLOAD | '.' file: '.$this->path.'\\'.$this->name.
                ' | controller: '.$this->account->getCloud().
                 ' | user:' . $this->account->getUser());
 
-            return $this->core->download($path,$name); // Tipo Resonse
+            return $this->core->download($this->path,$this->name); // Tipo Resonse
         }catch (CloudException $e)
         {
             return new JsonResponse($e->getMessage(),$e->getCode());
@@ -358,23 +331,21 @@ class CoreController extends AbstractController
      *
      * @Route("/{cloud}/drive/createDir", name="createDir", methods={"POST"})
      */
-    public function createDir(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
+    public function createDir(String $cloud): Response
     {
         try {
-            $entityManager = $doctrine->getManager();
-
-            $name=$request->get('name');
-            $path=$request->get('path');
 
             $this->createContext($cloud);
-            $this->retriveCore($session,$request);
-            $this->core->createDir($path,$name);
+            $this->account=$this->retriveAccount($this->accountId);
+            $this->core->setFilesystem($this->retriveCore($this->account));
+            
+            $this->core->createDir($this->path,$this->name);
 
-            $entityManager->getRepository(Metadata::class)->store(
+            $this->em->getRepository(Metadata::class)->store(
                 new Metadata(
-                    $name,
+                    $this->name,
                     null,
-                    $path,
+                    $this->path,
                     null,
                     'dir',
                     null,
@@ -384,14 +355,14 @@ class CoreController extends AbstractController
                     null,
                     FileStatus::NEW->value,
                     null,
-                    $entityManager->getRepository(Account::class)->getAccount($this->account)
+                    $this->em->getRepository(Account::class)->getAccount($this->account)
                 ));
 
-            $this->core->logger->info('CREATE_DIR | '.' dir: '.$path.'\\'.$name.
+            $this->core->logger->info('CREATE_DIR | '.' dir: '.$this->path.'\\'.$this->name.
                 ' | controller: '.$this->account->getCloud().
                 ' | user:' . $this->account->getUser());
 
-            return $this->drive($doctrine,$session,$request,$cloud);
+            return $this->drive($cloud);
 
         }catch (CloudException $e)
         {
@@ -405,38 +376,36 @@ class CoreController extends AbstractController
      *
      * @Route("/{cloud}/drive/createFile", name="createFile", methods={"POST"})
      */
-    public function createFile(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
+    public function createFile(String $cloud): Response
     {
         try{
-            $entityManager = $doctrine->getManager();
-
-            $name=$request->get('name');
-            $path=$request->get('path');
 
             $this->createContext($cloud);
-            $this->retriveCore($session,$request);
-            $this->core->createFile($path,$name);
+            $this->account=$this->retriveAccount($this->accountId);
+            $this->core->setFilesystem($this->retriveCore($this->account));
+            
+            $this->core->createFile($this->path,$this->name);
 
-            $entityManager->getRepository(Metadata::class)->store(
-                new Metadata($name,
+            $this->em->getRepository(Metadata::class)->store(
+                new Metadata($this->name,
                     null,
-                    $path,
+                    $this->path,
                     null,
                     'file',
                     0,
-                    pathinfo($name, PATHINFO_EXTENSION),
+                    pathinfo($this->name, PATHINFO_EXTENSION),
                     new DateTime(),
                     null,
                     null,
                     FileStatus::NEW->value,
-                    null,$entityManager->getRepository(Account::class)->getAccount($this->account)
+                    null,$this->em->getRepository(Account::class)->getAccount($this->account)
                 ));
 
-            $this->core->logger->info('CREATE_FILE | '.' file: '.$path.'\\'.$name.
+            $this->core->logger->info('CREATE_FILE | '.' file: '.$this->path.'\\'.$this->name.
                 ' | controller: '.$this->account->getCloud().
                 ' | user:' . $this->account->getUser());
 
-            return $this->drive($doctrine,$session,$request,$cloud);
+            return $this->drive($cloud);
 
         }catch (CloudException $e)
         {
@@ -450,34 +419,30 @@ class CoreController extends AbstractController
      *
      * @Route("/{cloud}/drive/delete", name="delete", methods={"DELETE"})
      */
-    public function delete(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
+    public function delete(String $cloud): Response
     {
         try {
 
-            $entityManager = $doctrine->getManager();
-
             $this->createContext($cloud);
-            $this->retriveCore($session,$request);
+            $this->account=$this->retriveAccount($this->accountId);
+            $this->core->setFilesystem($this->retriveCore($this->account));
+            
+            $fullPath=rtrim($this->path.'/'.$this->name, '/');
 
-            $path=$request->get('path') ?? $request->get('sourcePath');
-            $name=$request->get('name');
-
-            $fullPath=rtrim($path.'/'.$name, '/');
-
-            $account = $entityManager->getRepository(Account::class)->getAccount($this->account);
+            $accountBD = $this->em->getRepository(Account::class)->getAccount($this->account);
             $archivo=$this->core->getArchivo(str_replace('\\', '/', ($fullPath)));
 
             /* --- Se obtiene y configura los metadatadatos del archivo. Si no existen registros
                    previos se crean y si existen se modifican --- */
 
-            $metadata = $this->core->getBasicMetadata($archivo,$account);
+            $metadata = $this->core->getBasicMetadata($archivo,$accountBD);
 
             $metadata->setName(basename($fullPath));
             $metadata->setPath(dirname($fullPath));
             $metadata->setStatus(FileStatus::DELETED->value);
 
-            $entityManager->getRepository(Metadata::class)->store($metadata);
-            $entityManager->getRepository(Metadata::class)->deleteDirectory($metadata);
+            $this->em->getRepository(Metadata::class)->store($metadata);
+            $this->em->getRepository(Metadata::class)->deleteDirectory($metadata);
 
             $this->core->delete($fullPath);
 
@@ -485,7 +450,13 @@ class CoreController extends AbstractController
                 ' | controller: '.$this->account->getCloud().
                 ' | user:' . $this->account->getUser());
 
-            return $this->drive($doctrine,$session,$request,$cloud);
+            if($this->isMove)
+            {
+                return new JsonResponse('',Response::HTTP_OK);
+            }else
+            {
+                return $this->drive($cloud);
+            }
 
         }catch (CloudException $e)
         {
@@ -499,20 +470,22 @@ class CoreController extends AbstractController
      *
      * @Route("/{cloud}/drive/upload", name="upload", methods={"POST"})
      */
-    public function upload(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
+    public function upload(String $cloud): Response
     {
         try {
-            $entityManager = $doctrine->getManager();
 
+            $accountId = $this->request->get('accountId') ?? null;
+            
             $this->createContext($cloud);
-            $this->retriveCore($session,$request);
+            $this->account=$this->retriveAccount($this->accountId);
+            $this->core->setFilesystem($this->retriveCore($this->account));
 
-// Se obtiene el contenido del fichero en forma UploadedFile
-            $content=$this->core->getUploadedFile($request->files->get('content'));
+            // Se obtiene el contenido del fichero en forma UploadedFile
+            $content=$this->core->getUploadedFile($this->request->files->get('content'));
 
             $sourcePath=$content->getPathname();
-            $destinationPath=$request->get('path');
-
+            $destinationPath=$this->request->get('path');
+            
             $this->core->upload($destinationPath,$content);
 
 // Se distingue entre colocar el archivo en root o en un directorio
@@ -525,19 +498,19 @@ class CoreController extends AbstractController
 
             $archivo=$this->core->getArchivo(str_replace('\\', '/', ($uploadPath)));
 
-            $metadata = $this->core->getBasicMetadata($archivo,$entityManager->getRepository(Account::class)->getAccount($this->account));
+            $metadata = $this->core->getBasicMetadata($archivo,$this->em->getRepository(Account::class)->getAccount($this->account));
 
             $metadata->setName($content->getClientOriginalName());
             $metadata->setPath($destinationPath);
             $metadata->setStatus(FileStatus::NEW->value);
 
-            $entityManager->getRepository(Metadata::class)->store($metadata);
+            $this->em->getRepository(Metadata::class)->store($metadata);
 
             $this->core->logger->info('UPLOAD | '.' file: '.$destinationPath.'\\'.$content->getClientOriginalName().
                 ' | controller: '.$this->account->getCloud().
                 ' | user:' . $this->account->getUser());
 
-            return $this->drive($doctrine,$session,$request,$cloud);
+            return $this->drive($cloud);
         }catch (CloudException $e)
         {
             return new JsonResponse($e->getMessage(),$e->getCode());
@@ -550,20 +523,21 @@ class CoreController extends AbstractController
      *
      * @Route("/{cloud}/drive/getArchive", name="getArchive", methods={"GET"})
      */
-    public function getArchive(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
+    public function getArchive(String $cloud): Response
     {
         try {
-            $entityManager = $doctrine->getManager();
+
+
 
             $this->createContext($cloud);
-            $this->retriveCore($session,$request);
-            $path=$request->get('path');
+            $this->account=$this->retriveAccount($this->accountId);
+            $this->core->setFilesystem($this->retriveCore($this->account));
 
-            $account = $entityManager->getRepository(Account::class)->getAccount($this->account);
+            $account = $this->em->getRepository(Account::class)->getAccount($this->account);
 
-            $fileMetadata=$entityManager->getRepository(Metadata::class)->findByExactPathAndAccountNull($account,dirname($path),basename($path));
+            $fileMetadata=$this->em->getRepository(Metadata::class)->findByExactPathAndAccountNull($account,dirname($this->path),basename($this->path));
 
-            $file=$this->core->getAnArchive($path);
+            $file=$this->core->getAnArchive($this->path);
             if ($fileMetadata)
             {
                 $file['visibility'] = $fileMetadata->getVisibility()??$file['visibility'];
@@ -571,7 +545,7 @@ class CoreController extends AbstractController
                 $file['extra_metadata']['extra'] = $fileMetadata->getExtra();
             }
 
-           /* $this->core->logger->info('GET_ARCHIVE | '.' archive: '.$path.
+           /* $this->core->logger->info('GET_ARCHIVE | '.' archive: '.$this->path.
                 ' | controller: '.$this->account->getCloud().
                 ' | user:' . $this->account->getUser()); */
 
@@ -589,20 +563,19 @@ class CoreController extends AbstractController
      *
      * @Route("/{cloud}/drive/editMetadata", name="editMetadata", methods={"PUT","PATCH"})
      */
-    public function editMetadata(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
+    public function editMetadata(String $cloud): Response
     {
         try {
-            $entityManager = $doctrine->getManager();
 
             $this->createContext($cloud);
-            $this->retriveCore($session,$request);
-            $path=$request->get('path');
+            $this->account=$this->retriveAccount($this->accountId);
+            $this->core->setFilesystem($this->retriveCore($this->account));
 
-            $account = $entityManager->getRepository(Account::class)->getAccount($this->account);
+            $account = $this->em->getRepository(Account::class)->getAccount($this->account);
 
-            $metadata=json_decode($request->get('metadata'),true);
+            $metadata=json_decode($this->request->get('metadata'),true);
 
-            $file=$entityManager->getRepository(Metadata::class)->findByExactPathAndAccountNull($account,dirname($path),basename($path));
+            $file=$this->em->getRepository(Metadata::class)->findByExactPathAndAccountNull($account,dirname($this->path),basename($this->path));
             if($file)
             {
                 $file->setAuthor($metadata['author']);
@@ -611,7 +584,7 @@ class CoreController extends AbstractController
                 $file->setStatus(FileStatus::MODIFIED->value);
             } else //Si $file no existe es probable que sea una primera modificación de un fichero no indexado
             {
-                $fileMetadata=$this->core->getAnArchive($path);
+                $fileMetadata=$this->core->getAnArchive($this->path);
                 $file = new Metadata(
                     basename($fileMetadata['path']),
                     $fileMetadata['extra_metadata']['id']??null,
@@ -628,9 +601,9 @@ class CoreController extends AbstractController
                     $account);
             }
 
-            $entityManager->getRepository(Metadata::class)->store($file);
+            $this->em->getRepository(Metadata::class)->store($file);
 
-            $this->core->logger->info('EDIT_METADATA | '.' archive: '.$path.
+            $this->core->logger->info('EDIT_METADATA | '.' archive: '.$this->path.
                 ' | controller: '.$this->account->getCloud().
                 ' | user:' . $this->account->getUser());
 
@@ -647,49 +620,64 @@ class CoreController extends AbstractController
      *
      * @Route("/{cloud}/copy", name="copy", methods={"POST"})
      */
-    public function copy(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
+    public function copy(String $cloud): Response
     {
         try {
-            $entityManager = $doctrine->getManager();
 
-            $sourceFullPath=$request->get('sourcePath'); // aa/a.txt
-            $destinationDirectoryPath=$request->get('destinationPath'); // algun lugar/aa/
+//Configuramos todos los parametros que vamos a necesitar
+            $accountId1 = $this->request->get('accountId1') ?? null;
+            $accountId2 = $this->request->get('accountId2') ?? null;
+            
+            $sourceFullPath=$this->request->get('sourcePath'); // aa/a.txt
+            $destinationDirectoryPath=$this->request->get('destinationPath'); // algun lugar/aa/
             $destinationFullPath=$destinationDirectoryPath.'/'.basename($sourceFullPath); // algun lugar/aa/a.txt
-            $destinationCloud=$request->get('destinationCloud');
+            $destinationCloud=$this->request->get('destinationCloud');
 
-//Obtenemos las cuentas y filesystem que vamos a usar
-            $filesSystems=$this->retriveMultiFileSystem($session,$request,$cloud,$destinationCloud);
+            $this->createContext($cloud);
+            $sourceAccount=$this->retriveAccount($accountId1);
+            $sourceFileSystem=$this->retriveCore($sourceAccount);
 
-            $sourceFileSystem=$filesSystems['sourceFileSystem'];
-            $destinationFileSystem=$filesSystems['destinationFileSystem'];
-            $sourceAccount=$filesSystems['sourceAccount'];
-            $destinationAccount=$filesSystems['destinationAccount'];
+            $this->createContext($destinationCloud);
+            $destinationAccount=$this->retriveAccount($accountId2);
+            $destinationFileSystem=$this->retriveCore($destinationAccount);
 
             try {
-                $sourceAccountBD = $entityManager->getRepository(Account::class)->getAccount($sourceAccount);
-                $destinationAccountBD=$entityManager->getRepository(Account::class)->getAccount($destinationAccount);
+                $sourceAccountBD = $this->em->getRepository(Account::class)->getAccount($sourceAccount);
+                $destinationAccountBD=$this->em->getRepository(Account::class)->getAccount($destinationAccount);
             } catch (NonUniqueResultException $e) {
                 throw new CloudException(ErrorTypes::ERROR_OBTENER_USUARIO->getErrorMessage().' - '.$e->getMessage(),
                     ErrorTypes::ERROR_OBTENER_USUARIO->getErrorCode());
             }
 
 //Obtenemos los metadatos del archivo original
+            $this->createContext($cloud);
             $this->core->setFilesystem($sourceFileSystem);
             $originalFile=$this->core->getArchivo($sourceFullPath);
             $originalMetadataFile=$this->core->getBasicMetadata($originalFile,$sourceAccountBD);
-            $originalCloudMetadataFile=$entityManager->getRepository(Metadata::class)->getCloudMetadata($originalMetadataFile);
+            $originalCloudMetadataFile=$this->em->getRepository(Metadata::class)->getCloudMetadata($originalMetadataFile);
 
 //Copiamos a la cuenta destino el archivo
             $this->core->copy($sourceFileSystem,$destinationFileSystem,$sourceFullPath,$destinationDirectoryPath);
 
 //Copiamos los metadatos del archivo original al de destino
+            $this->createContext($destinationCloud);
             $this->core->setFilesystem($destinationFileSystem);
             $destiantionFile=$this->core->getArchivo($destinationFullPath);
             $destiantionMetadataFile=$this->core->getBasicMetadata($destiantionFile,$destinationAccountBD);
-            $entityManager->getRepository(Metadata::class)->copyMetadata($destiantionMetadataFile,$originalCloudMetadataFile);
+            $this->em->getRepository(Metadata::class)->copyMetadata($destiantionMetadataFile,$originalCloudMetadataFile);
+
             $this->core->logger->info('COPY | origen: '.$cloud.'::'.$sourceFullPath.' | destination: '.$destinationCloud.'::'.$destinationFullPath);
 
-            return new JsonResponse('Ok',Response::HTTP_OK );
+            if($this->isMove)
+            {
+                return new JsonResponse('', response::HTTP_OK);
+            }else
+            {
+                $this->accountId = $accountId2;
+                $this->path = $destinationDirectoryPath;
+                return $this->drive($destinationCloud);
+            }
+
         }catch (CloudException $e)
         {
             return new JsonResponse($e->getMessage(), response::HTTP_INTERNAL_SERVER_ERROR);
@@ -702,15 +690,45 @@ class CoreController extends AbstractController
      *
      * @Route("/{cloud}/move", name="move", methods={"PUT","PATCH"})
      */
-    public function move(ManagerRegistry $doctrine, SessionInterface $session, Request $request, string $cloud): Response
+    public function move(String $cloud): Response
     {
-        $responseCopy = $this->copy($doctrine,$session,$request,$cloud);
-        if($responseCopy->getStatusCode() === 200)
-        {
-            return $this->delete($doctrine,$session,$request,$cloud);
-        } else
-        {
-            return $responseCopy;
+        try {
+            $this->isMove=true;
+
+            $responseCopy = $this->copy($cloud);
+
+            if ($responseCopy->getStatusCode() === 200) {
+
+                $accountId1 = $this->request->get('accountId1') ?? null;
+
+                $sourceFullPath = $this->request->get('sourcePath'); // aa/a.txt
+
+                $this->accountId = $accountId1;
+                $this->path = dirname($sourceFullPath);
+                $this->name = basename($sourceFullPath);
+
+                $responseDelete = $this->delete($cloud);
+
+                if ($responseDelete->getStatusCode() === 200) {
+
+                    $accountId2 = $this->request->get('accountId2') ?? null;
+                    $destinationCloud = $this->request->get('destinationCloud');
+                    $destinationDirectoryPath = $this->request->get('destinationPath'); // algun lugar/aa/
+
+                    $this->accountId = $accountId2;
+                    $this->path = $destinationDirectoryPath;
+                    return $this->drive($destinationCloud);
+
+                } else {
+                    return $responseDelete;
+                }
+
+            } else {
+                return $responseCopy;
+            }
+
+        }catch(CloudException $e){
+            return new JsonResponse($e->getMessage(), response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

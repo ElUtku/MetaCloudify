@@ -33,11 +33,28 @@ function setAccount(account)
         sessionStorage.setItem('storedAccounts', JSON.stringify(storedAccounts));
     }catch (e)
     {
-        console.log(e);
+        mostrarModalErrores(e);
     }
 }
 
-function resetAccounts()
+function deleteSessionAccount(accountId)
+{
+    let storedAccounts = getAccounts();
+
+    if (storedAccounts) {
+        delete storedAccounts.accountId;
+        if(Object.keys(storedAccounts).length === 0)
+        {
+            sessionStorage.removeItem("storedAccounts");
+        }else
+        {
+            sessionStorage.setItem("storedAccounts", JSON.stringify(storedAccounts));
+        }
+    } else {
+        mostrarModalErrores("No hay cuentas almacenadas o el valor no es un array.");
+    }
+}
+function cleanSessionAccounts()
 {
     sessionStorage.removeItem("storedAccounts");
 }

@@ -114,7 +114,6 @@ function crearTabla(data,account)
 
                 if (filaSeleccionada) {
                     verModalMetadata(filaSeleccionada.path,filaSeleccionada.accountId);
-                    console.log('Fila seleccionada:', filaSeleccionada);
                 } else {
                     // Manejo para cuando no se ha seleccionado ninguna fila
                     console.log('No se ha seleccionado ninguna fila');
@@ -131,7 +130,6 @@ function crearTabla(data,account)
 
                 if (filaSeleccionada) {
                     dlt(filaSeleccionada.path,filaSeleccionada.accountId);
-                    console.log('Fila seleccionada:', filaSeleccionada);
                 } else {
                     // Manejo para cuando no se ha seleccionado ninguna fila
                     console.log('No se ha seleccionado ninguna fila');
@@ -269,7 +267,7 @@ function crearTabla(data,account)
         info: false,
         ordering: true,
         select: true,
-        order: [[4, 'desc']],
+        order: [[2, 'desc']],
         paging: false,
         data: data,
         columns: [

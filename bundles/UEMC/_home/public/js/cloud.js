@@ -277,7 +277,7 @@ function logout(accountId)
             accountId: accountId
         },
         success: function () {
-            sessionStorage.removeItem('storedAccounts');
+            deleteSessionAccount(accountId);
             location.reload();
         },
         error: function (xhr, status, error) {
@@ -341,6 +341,7 @@ function guardarMetadata(path, accountId)
         },
         success: function (data) {
             console.log(data);
+            limpiarModalErrores();
             mostrarModalSuccess(data);
         },
         error: function (xhr, status, error) {
@@ -366,13 +367,13 @@ function copy(sourcePath,sourceAccountId,destinationAccountId)
             accountId2: destinationAccountId,
             destinationCloud: account2.controller
         },
-        success: function () {
+        success: function (data) {
             if(account2.pathActual===account2.root)
             {
                 recargasCuentas();
             } else
             {
-                loadData(account2.accountId, account2.pathActual);
+                cargarDatos(account2, account2.pathActual,data);
             }
         },
         error: function (xhr, status, error) {
@@ -403,13 +404,12 @@ function move(sourcePath,sourceAccountId,destinationAccountId)
             destinationCloud: account2.controller
         },
         success: function (data) {
-            //dlt(sourcePath,sourceAccountId);
             if(account2.pathActual===account2.root)
             {
                 recargasCuentas();
             } else
             {
-                cargarDatos(account2.accountId, account2.pathActual,data);
+                cargarDatos(account2, account2.pathActual,data);
             }
         },
         error: function (xhr, status, error) {
