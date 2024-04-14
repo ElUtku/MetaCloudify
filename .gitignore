@@ -18,3 +18,5 @@
 ###> JetBrains/phpStorm ###
 /.idea
 ###< JetBrains/phpStorm ###
+/composer.phar
+/bundles/UEMC/Core/uemc.log
