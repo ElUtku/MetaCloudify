@@ -3,8 +3,7 @@
 namespace UEMC\Core\Service;
 
 use DateTime;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\Persistence\ObjectManager;
+
 use League\Flysystem\DirectoryAttributes;
 use League\Flysystem\DirectoryListing;
 use League\Flysystem\FileAttributes;
@@ -271,7 +270,7 @@ abstract class CloudService
             $accounts = $session->get('accounts');
 
             $id = $request->get('accountId');
-            if (array_key_exists($id, $accounts)) {
+            if ($accounts && array_key_exists($id, $accounts)) {
 // Eliminar el elemento del array
                 unset($accounts[$id]);
                 if (empty($accounts) || !is_array($accounts)) {
@@ -280,6 +279,10 @@ abstract class CloudService
                 }else{
                     $session->set('accounts', $accounts);
                 }
+            } else
+            {
+                throw new CloudException(ErrorTypes::ERROR_LOGOUT->getErrorMessage(),
+                    ErrorTypes::ERROR_LOGOUT->getErrorCode());
             }
         }catch (Exception $e){
             throw new CloudException(ErrorTypes::ERROR_LOGOUT->getErrorMessage().' - '.$e->getMessage(),

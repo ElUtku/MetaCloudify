@@ -127,6 +127,16 @@ class CoreController extends AbstractController
         }
     }
 
+    public function notFound(): Response
+    {
+        return new JsonResponse('La url solicitada no existe', Response::HTTP_NOT_FOUND);
+    }
+
+    public function frameworkError(): Response
+    {
+        return new JsonResponse('Error al procesar la solicitud', Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
+
     /**
      *
      *  Login generico para autenticarse via web.
@@ -230,7 +240,7 @@ class CoreController extends AbstractController
             $this->core->logger->info('LOGOUT | '.' | id: '.
                 $this->account->getCloud().
                 ' | user:' . $this->account->getUser());
-            return new JsonResponse();
+            return new JsonResponse($this->accountId.' - Sesion cerrada satisfactoriamente',Response::HTTP_OK);
         }catch (CloudException $e)
         {
             return new JsonResponse($e->getMessage(),$e->getCode());

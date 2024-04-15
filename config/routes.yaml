@@ -1,3 +1,15 @@
 #index:
 #    path: /
 #    controller: App\Controller\DefaultController::index
+
+
+# DESCOMENTAR PARA PROD
+#not_found:
+#  path: /{catchall}
+#  controller: UEMC\Core\Controller\CoreController::notFound
+#  requirements:
+#    catchall: .*
+
+#error_handler:
+#   path: /error-handler
+#   controller: UEMC\Core\Controller\CoreController::frameworkError
