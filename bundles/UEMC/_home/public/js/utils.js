@@ -1,3 +1,7 @@
+$(document).ready(function() {
+    $("#newName, #nuevoValorCampo, #nuevoCampoNombre").on('input', sanitizeInput);
+});
+
 function formatDate(timestamp)
 {
     let fecha = new Date();
@@ -84,4 +88,34 @@ function manejarActualizacionTabla(data, account) {
     } else {
         ultimaAccion = 'navegar';
     }
+}
+
+function entradaSanitizada(text) {
+
+// Se eliminan caracteres especiales excepto letras, números, guion bajo, punto, coma y guion
+    var sanitizedText = text.replace(/[^a-zA-Z0-9_.,\-]/g, '');
+
+// Si no se condigue escapar se codifican caracteres especiales para evitar XSS
+    sanitizedText = encodeURIComponent(sanitizedText);
+
+//Se valida la longitud máxima estableicdad por la BD
+    if (sanitizedText.length > 255) {
+        sanitizedText = sanitizedText.slice(0, 255); // Cortar el texto si excede la longitud máxima
+    }
+
+    return sanitizedText;
+}
+
+function sanitizeInput(event) {
+    let input = $(this);
+    let text = input.val();
+
+// Se elimina caracteres no permitidos
+    let sanitizedText = text.replace(/[^a-zA-Z0-9_.,\-]/g, '');
+
+// Se actualiza el valor del input con el texto sanitizado
+    input.val(sanitizedText);
+
+    /*limpiarModalErrores();
+    mostrarModalErrores("No se permite introducir caracteres especiales");*/
 }

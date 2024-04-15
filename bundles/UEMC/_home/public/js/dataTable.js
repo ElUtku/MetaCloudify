@@ -45,14 +45,19 @@ function crearTabla(data,account)
                 if (account.pathActual===account.root && Object.keys(accounts).length!==1)
                 {
                     optionsSelectAccounId().then(function(accountId) {
-                        $('#newNameButton').attr('onclick', 'createDir($("#newName").val(), "' + accountId + '")');
+                        $('#newNameButton').on('click', function() {
+                            let newName = entradaSanitizada($("#newName").val()); // Sanitizar el valor del input
+                            createDir(newName, accountId);
+                        });
                         $('#newDirFileModal').modal('show');
                     });
 
                 } else
                 {
-                    $('#newNameButton').attr('onclick', 'createDir($("#newName").val(), "' + account.accountId + '")');
-                    $('#newDirFileModal').modal('show');
+                    $('#newNameButton').on('click', function() {
+                        let newName = entradaSanitizada($("#newName").val())
+                        createDir(newName, account.accountId);
+                    });                    $('#newDirFileModal').modal('show');
                 }
             }
         }
@@ -66,13 +71,19 @@ function crearTabla(data,account)
                 if (account.pathActual===account.root && Object.keys(accounts).length!==1)
                 {
                     optionsSelectAccounId().then(function(accountId) {
-                        $('#newNameButton').attr('onclick', 'createFile($("#newName").val(), "' + accountId + '")');
+                        $('#newNameButton').on('click', function() {
+                            let newName = entradaSanitizada($("#newName").val());
+                            createFile(newName, accountId);
+                        });
                         $('#newDirFileModal').modal('show');
                     });
 
                 } else
                 {
-                    $('#newNameButton').attr('onclick', 'createFile($("#newName").val(), "' + account.accountId + '")');
+                    $('#newNameButton').on('click', function() {
+                        let newName = entradaSanitizada($("#newName").val());
+                        createFile(newName, account.accountId);
+                    });
                     $('#newDirFileModal').modal('show');
                 }
             }
