@@ -706,7 +706,7 @@ class CoreController extends AbstractController
             $this->isMove=true;
 
             $responseCopy = $this->copy($cloud);
-
+//Si la copia es correcta se procede a eliminar el archivo de origen
             if ($responseCopy->getStatusCode() === 200) {
 
                 $accountId1 = $this->request->get('accountId1') ?? null;
@@ -720,7 +720,7 @@ class CoreController extends AbstractController
                 $responseDelete = $this->delete($cloud);
 
                 if ($responseDelete->getStatusCode() === 200) {
-
+//Si la eliminacion es correcta se procede a listar los arvhivos de la ruta actual
                     $accountId2 = $this->request->get('accountId2') ?? null;
                     $destinationCloud = $this->request->get('destinationCloud');
                     $destinationDirectoryPath = $this->request->get('destinationPath'); // algun lugar/aa/

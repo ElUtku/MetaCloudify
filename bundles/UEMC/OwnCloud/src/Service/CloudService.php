@@ -36,8 +36,8 @@ class CloudService extends Core
 
         $account = new Account();
 
-        $account->setPassword($request->get('password'));
-        $account->setUser($request->get('userName'));
+        $account->setPassword($request->getPassword());
+        $account->setUser($request->getUser());
         $account->setURL($request->get('url'));
         $account->setPort($request->get('port') ?? 443);
         $account->setLastIp($request->getClientIp());

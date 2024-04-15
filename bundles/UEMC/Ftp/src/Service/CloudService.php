@@ -34,8 +34,8 @@ class CloudService extends Core
     public function login(SessionInterface $session, Request $request): Account
     {
         $account = new Account();
-        $account->setPassword($request->get('password'));
-        $account->setUser($request->get('userName'));
+        $account->setPassword($request->getPassword());
+        $account->setUser($request->getUser());
         $account->setURL($request->get('url'));
         $account->setPort($request->get('port') ?? 21);
         $account->setLastIp($request->getClientIp());

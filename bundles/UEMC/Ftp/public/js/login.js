@@ -7,16 +7,15 @@ $(document).ready(function() {
         var url = $('#floatingURL').val();
         var rememberMe = $('#flexCheckDefault').prop('checked');
 
-        var formData = {
-            userName: userName,
-            password: password,
-            url: url,
-        };
-
         $.ajax({
             type: 'POST',
             url: '../login',
-            data: formData,
+            data: {
+                url: url,
+            },
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader('Authorization', 'Basic ' + btoa(userName + ':' + password));
+            },
             success: function(response) {
                 window.location.href = '../../_home';
             },

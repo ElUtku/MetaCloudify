@@ -42,7 +42,7 @@ function deleteSessionAccount(accountId)
     let storedAccounts = getAccounts();
 
     if (storedAccounts) {
-        delete storedAccounts.accountId;
+        delete storedAccounts[accountId];
         if(Object.keys(storedAccounts).length === 0)
         {
             sessionStorage.removeItem("storedAccounts");
