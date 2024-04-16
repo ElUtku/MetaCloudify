@@ -1,0 +1,50 @@
+{% extends '@UEMC_homeBundle/base.html.twig' %}
+
+{% block title %}About MetaCloudify{% endblock %}
+
+        {% block stylesheets %}
+            <link rel="stylesheet" href="{{ asset('bundles/uemc_home/css/sidebar.css') }}">
+            <link rel="stylesheet" href="{{ asset('bundles/uemc_home/css/_home.css') }}">
+        {% endblock %}
+
+        {% block javascripts %}
+
+        {% endblock %}
+
+{% block body %}
+
+    <!-- HEADER -->
+    {% include '@UEMC_homeBundle/Includes/header.html.twig' %}
+
+    <!-- MAIN -->
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h1 class="display-4 text-center mt-5 mb-4">Bienvenido a MetaCloudify</h1>
+                <p class="lead">La solución definitiva para gestionar tus archivos en la nube de manera eficiente y
+                    segura.
+                </p>
+                <p>Con nuestra plataforma, podrás acceder y administrar tus archivos almacenados en varios servicios
+                    en la nube, todo desde un único lugar.
+                </p>
+                <p>Imagina tener el control total sobre tus archivos en OneDrive, Google Drive, FTP, WebDAV/ownCloud,
+                    y más, ¡todo desde una sola interfaz! Nuestro innovador enfoque te permite explorar tus archivos
+                    y carpetas de manera integrada, simplificando tu experiencia de gestión de archivos.
+                </p>
+                <p>Pero eso no es todo. En MetaCloudify, nos destacamos por ofrecer características avanzadas que van
+                    más allá de la simple gestión de archivos. ¿Quieres mantener tus archivos organizados con metadatos
+                    personalizados? ¡Lo tenemos cubierto! Nuestra plataforma te permite asociar metadatos privados a
+                    cada archivo, desde el nombre del autor hasta cualquier otro detalle que desees añadir.
+                </p>
+                <p>Además, con funciones de copiar, mover, subir y eliminar archivos, tendrás el control total sobre
+                    tus datos en la nube, sin importar dónde estén almacenados.
+                </p>
+                <p>Únete a nuestra comunidad de usuarios satisfechos y descubre una nueva forma de gestionar tus
+                    archivos en la nube. ¡Simplifica tu vida digital con MetaCloudify hoy mismo!
+                </p>
+            </div>
+        </div>
+    </div>
+    <!-- FOOTER -->
+    {{ include('@UEMC_homeBundle/Includes/footer.html.twig') }}
+{% endblock %}
