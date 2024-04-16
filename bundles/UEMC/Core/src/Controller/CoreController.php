@@ -5,10 +5,9 @@ namespace UEMC\Core\Controller;
 use DateTime;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
-use League\Flysystem\Filesystem;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,6 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
+use League\Flysystem\Filesystem;
 use League\Flysystem\WhitespacePathNormalizer;
 
 use UEMC\Core\Entity\Account;
@@ -81,6 +81,7 @@ class CoreController extends AbstractController
         };
         $this->core->setLogger(new UemcLogger());
         $this->core->setPathNormalizer(new WhitespacePathNormalizer());
+        $this->path=$this->core->getPathNormalizer()->normalizePath($this->path??'');
         $this->account=new Account();
     }
 
@@ -127,11 +128,23 @@ class CoreController extends AbstractController
         }
     }
 
+    /**
+     *
+     * Proporciona una respuesta generica cuando se solicta una ruta que no existe.
+     *
+     * @return Response
+     */
     public function notFound(): Response
     {
         return new JsonResponse('La url solicitada no existe', Response::HTTP_NOT_FOUND);
     }
 
+    /**
+     *
+     * Proporciona una respuesta generica ante error no capturados.
+     *
+     * @return Response
+     */
     public function frameworkError(): Response
     {
         return new JsonResponse('Error al procesar la solicitud', Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -185,6 +198,7 @@ class CoreController extends AbstractController
 
             $result=$this->core->loginPost($this->session,$this->request);
 
+            //Si el resultado no es una cuenta es porque no se ha autenticado y se devuleve la url de autenticacion como String
             if($result instanceof Account)
             {
                 $accountExists=$this->em->getRepository(Account::class)->login($result);
@@ -484,8 +498,6 @@ class CoreController extends AbstractController
     {
         try {
 
-            $accountId = $this->request->get('accountId') ?? null;
-            
             $this->createContext($cloud);
             $this->account=$this->retriveAccount($this->accountId);
             $this->core->setFilesystem($this->retriveCore($this->account));
@@ -536,8 +548,6 @@ class CoreController extends AbstractController
     public function getArchive(String $cloud): Response
     {
         try {
-
-
 
             $this->createContext($cloud);
             $this->account=$this->retriveAccount($this->accountId);
@@ -654,7 +664,7 @@ class CoreController extends AbstractController
             try {
                 $sourceAccountBD = $this->em->getRepository(Account::class)->getAccount($sourceAccount);
                 $destinationAccountBD=$this->em->getRepository(Account::class)->getAccount($destinationAccount);
-            } catch (NonUniqueResultException $e) {
+            } catch (Exception $e) {
                 throw new CloudException(ErrorTypes::ERROR_OBTENER_USUARIO->getErrorMessage().' - '.$e->getMessage(),
                     ErrorTypes::ERROR_OBTENER_USUARIO->getErrorCode());
             }
@@ -702,43 +712,41 @@ class CoreController extends AbstractController
      */
     public function move(String $cloud): Response
     {
-        try {
-            $this->isMove=true;
+        $this->isMove=true;
 
-            $responseCopy = $this->copy($cloud);
+        $responseCopy = $this->copy($cloud);
 //Si la copia es correcta se procede a eliminar el archivo de origen
-            if ($responseCopy->getStatusCode() === 200) {
+        if ($responseCopy->getStatusCode() === 200) {
 
-                $accountId1 = $this->request->get('accountId1') ?? null;
+            $accountId1 = $this->request->get('accountId1') ?? null;
+            $sourceFullPath = $this->request->get('sourcePath'); // aa/a.txt
 
-                $sourceFullPath = $this->request->get('sourcePath'); // aa/a.txt
+            $this->accountId = $accountId1;
+            $this->path = dirname($sourceFullPath);
+            $this->name = basename($sourceFullPath);
 
-                $this->accountId = $accountId1;
-                $this->path = dirname($sourceFullPath);
-                $this->name = basename($sourceFullPath);
-
-                $responseDelete = $this->delete($cloud);
-
-                if ($responseDelete->getStatusCode() === 200) {
+            $responseDelete = $this->delete($cloud);
 //Si la eliminacion es correcta se procede a listar los arvhivos de la ruta actual
-                    $accountId2 = $this->request->get('accountId2') ?? null;
-                    $destinationCloud = $this->request->get('destinationCloud');
-                    $destinationDirectoryPath = $this->request->get('destinationPath'); // algun lugar/aa/
+            if ($responseDelete->getStatusCode() === 200) {
 
-                    $this->accountId = $accountId2;
-                    $this->path = $destinationDirectoryPath;
-                    return $this->drive($destinationCloud);
+                $accountId2 = $this->request->get('accountId2') ?? null;
+                $destinationCloud = $this->request->get('destinationCloud');
+                $destinationDirectoryPath = $this->request->get('destinationPath'); // algun lugar/aa/
 
-                } else {
-                    return $responseDelete;
-                }
+                $this->accountId = $accountId2;
+                $this->path = $destinationDirectoryPath;
+//Se devuelven los contendios de la ruta donde se encuntren el usuairo.
+                return $this->drive($destinationCloud);
 
             } else {
-                return $responseCopy;
+//Si se produce un error durante la eliminacion se devuelve el error original.
+                return $responseDelete;
             }
 
-        }catch(CloudException $e){
-            return new JsonResponse($e->getMessage(), response::HTTP_INTERNAL_SERVER_ERROR);
+        } else {
+//Si se produce un error durante la copia se devuelve el error original.
+            return $responseCopy;
         }
+
     }
 }

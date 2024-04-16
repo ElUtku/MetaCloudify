@@ -124,7 +124,7 @@ function extraerMetadatosModal(){
 // Iterar sobre los elementos del formulario en el modal (se seleccionan los inputs y el select)
     $('#modalEditarMetadatos .modal-body input, #modalEditarMetadatos .modal-body select').each(function() {
         let fieldName = $(this).attr('name');
-        let fieldValue = entradaSanitizada($(this).val());
+        let fieldValue = entradaSanitizada($(this).val()??'');
 
         if (fieldName === 'author' || fieldName === 'visibility') {
             formData[fieldName] = fieldValue;
@@ -234,4 +234,7 @@ function mostrarModalSuccess(data)
     successElement.appendTo('#successContent');
     $('#successModal').modal('show');
 }
-
+function limpiarModalSuccess()
+{
+    $('#successContent').html('');
+}

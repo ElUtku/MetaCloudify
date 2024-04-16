@@ -253,6 +253,27 @@ function crearTabla(data,account)
     tabla.addClass('tabla-creada');
     tabla.DataTable().destroy();
     tabla.DataTable({
+        "language": {
+            "emptyTable":     "No hay datos disponibles en la tabla",
+            "info":           "Mostrando _START_ a _END_ de _TOTAL_ entradas",
+            "infoEmpty":      "Mostrando 0 a 0 de 0 entradas",
+            "infoFiltered":   "(filtrado de _MAX_ entradas totales)",
+            "lengthMenu":     "Mostrar _MENU_ entradas",
+            "loadingRecords": "Cargando...",
+            "processing":     "Procesando...",
+            "search":         "Buscar:",
+            "zeroRecords":    "No se encontraron registros coincidentes",
+            "paginate": {
+                "first":      "Primero",
+                "last":       "Último",
+                "next":       "Siguiente",
+                "previous":   "Anterior"
+            },
+            "aria": {
+                "sortAscending":  ": activar para ordenar la columna en orden ascendente",
+                "sortDescending": ": activar para ordenar la columna en orden descendente"
+            }
+        },
         dom: "<'row'<'col-sm-12'B>>" +
             "<'row mt-2'<'col-sm-6 ruta-explorer'><'col-sm-6'f>>"+
             "<'row'<'col-sm-12'tr>>" +
@@ -278,11 +299,10 @@ function crearTabla(data,account)
         info: false,
         ordering: true,
         select: true,
-        order: [[2, 'desc']],
+        order: [[4, 'desc']],
         paging: false,
         data: data,
         columns: [
-
             { title: '', //Simbolo carpeta o fichero
                 data: 'type',
                 visible: true,
@@ -325,6 +345,15 @@ function crearTabla(data,account)
             { title: 'Metadata',
                 data: 'extra_metadata',
                 visible: false,
+            },
+            { title: 'Tamaño',
+                data: 'file_size',
+                visible: true,
+                width: '5%',
+                className: 'align-middle',
+                render: function(data) {
+                    return data ? formatBytes(data) : '-'; // Si data es null o undefined, devuelve '-', de lo contrario devuelve el tamaño
+                }
             },
             { title: 'Propietario',
                 visible: true,

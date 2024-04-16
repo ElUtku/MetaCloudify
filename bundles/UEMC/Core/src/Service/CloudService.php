@@ -2,8 +2,6 @@
 
 namespace UEMC\Core\Service;
 
-use DateTime;
-
 use League\Flysystem\DirectoryAttributes;
 use League\Flysystem\DirectoryListing;
 use League\Flysystem\FileAttributes;
@@ -15,6 +13,8 @@ use League\Flysystem\UnableToDeleteDirectory;
 use League\Flysystem\UnableToDeleteFile;
 use League\Flysystem\UnableToWriteFile;
 use League\Flysystem\PathNormalizer;
+
+use DateTime;
 use PHPUnit\Util\Exception;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -86,7 +86,8 @@ abstract class CloudService
 
 
     /**
-     *  Devuelve todos los elementos que se encuentren en la ruta seleccionada.
+     *
+     *  Devuelve todos los elementos que se encuentren en la ruta proporcionada.
      *
      * @param String $path
      * @return DirectoryListing
@@ -105,6 +106,7 @@ abstract class CloudService
     }
 
     /**
+     *
      *  Crea un directorio.
      *
      * @param String $path
@@ -146,7 +148,7 @@ abstract class CloudService
         $filesystem=$this->getFilesystem();
 
         try {
-            if($filesystem->directoryExists($path)) //Comprobamos si existe el directorio
+            if($filesystem->directoryExists($path))
             {
                 if($filesystem->fileExists($path . '/' . $name))
                 {
@@ -424,12 +426,13 @@ abstract class CloudService
         try {
             $filesystem=$this->getFilesystem();
 
+            $ruta=$this->pathNormalizer->normalizePath($ruta);
+
             $contents=$filesystem->listContents(dirname($ruta),false)->toArray();
 
             foreach ($contents as $item) {
                 if ($item['path']==$ruta ||
-                    str_replace('\\', '/',$item['path']) == $ruta ||
-                    $this->cleanOwncloudPath($item['path']) == $ruta) // remote.php/webdav/usuario/a/b/c.txt == /a/b/c.txt
+                    $this->cleanOwncloudPath($item['path']) === $ruta) // remote.php/webdav/usuario/a/b/c.txt == /a/b/c.txt
                 {
                     return json_decode(json_encode($item),true); //El objeto se convierte a un array
                 }
@@ -491,7 +494,10 @@ abstract class CloudService
      * @return string
      */
     function cleanOwncloudPath($path):string {
-        return preg_replace('/.*\/remote\.php\/dav\/files\/\w+\//', '', $path);
+        $path = preg_replace('/^.*?remote\.php\/dav\/files\//', '', $path);
+        $path = strstr($path, '/');
+        $path=ltrim($path, '/');
+        return $path;
     }
 
     /**

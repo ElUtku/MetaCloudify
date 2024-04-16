@@ -16,4 +16,12 @@ class _homeController extends AbstractController
     {
         return $this->render('@UEMC_homeBundle/index.html.twig');
     }
+
+    /**
+     * @Route("/_home/about", name="_home_about")
+     */
+    public function about(CloudService $cloud): Response
+    {
+        return $this->render('@UEMC_homeBundle/about.html.twig');
+    }
 }

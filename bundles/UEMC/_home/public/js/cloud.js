@@ -43,7 +43,6 @@ function loadData(accountId,path) {
     $('#loading-modal').modal('show');
 
     path = (typeof path !== 'undefined') ? path : '';
-    path=path.replace(/\//g, '\\');
 
     let account = getAccount(accountId);
 
@@ -341,7 +340,7 @@ function guardarMetadata(path, accountId)
         },
         success: function (data) {
             console.log(data);
-            limpiarModalErrores();
+            limpiarModalSuccess();
             mostrarModalSuccess(data);
         },
         error: function (xhr, status, error) {

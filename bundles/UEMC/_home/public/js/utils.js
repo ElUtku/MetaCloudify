@@ -24,9 +24,18 @@ function formatDate(timestamp)
 function cleanOwncloudData(data)
 {
     return data.map(function (elemento) {
-        elemento.path = elemento.path.replace(/.*\/remote\.php\/dav\/files\/\w+\//g, '');
+        elemento.path = cleanOwncloudPath(elemento.path);
         return elemento;
     });
+}
+
+function cleanOwncloudPath(path)
+{
+    //Limpiamos la ruta si es de owncloud
+    path = path.substring(path.indexOf("remote.php/dav/files/") + "remote.php/dav/files/".length);
+
+    path=path.replace(/^.*?\//, "");
+    return path;
 }
 
 function dirname(path)// test/a/b/c -> [test],[a],[b],[c] -> [test],[a],[b] -> test/a/b
