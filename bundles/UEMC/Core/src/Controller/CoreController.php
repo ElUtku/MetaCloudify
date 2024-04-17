@@ -310,7 +310,7 @@ class CoreController extends AbstractController
 
             $this->core->logger->info('DRIVE | '.' | id: '.
                 $account->getId().' | controller: '.$account->getCloud().
-                ' | user:' . $account->getUser());
+                ' | user:' . $account->getUser().' | path:' . $this->path);
 
             return new JsonResponse($archivesWhitMetadata??$contentInDirectory,Response::HTTP_OK);
 
@@ -340,7 +340,9 @@ class CoreController extends AbstractController
 
             $this->core->logger->info('DOWNLOAD | '.' file: '.$this->path.'\\'.$this->name.
                ' | controller: '.$this->account->getCloud().
-                ' | user:' . $this->account->getUser());
+                ' | user:' . $this->account->getUser().
+                ' | path:' . $this->path.
+                ' | name:' . $this->name);
 
             return $this->core->download($this->path,$this->name); // Tipo Resonse
         }catch (CloudException $e)
@@ -384,7 +386,9 @@ class CoreController extends AbstractController
 
             $this->core->logger->info('CREATE_DIR | '.' dir: '.$this->path.'\\'.$this->name.
                 ' | controller: '.$this->account->getCloud().
-                ' | user:' . $this->account->getUser());
+                ' | user:' . $this->account->getUser().
+                ' | path:' . $this->path.
+                ' | name:' . $this->name);
 
             return $this->drive($cloud);
 
@@ -427,7 +431,9 @@ class CoreController extends AbstractController
 
             $this->core->logger->info('CREATE_FILE | '.' file: '.$this->path.'\\'.$this->name.
                 ' | controller: '.$this->account->getCloud().
-                ' | user:' . $this->account->getUser());
+                ' | user:' . $this->account->getUser().
+                ' | path:' . $this->path.
+                ' | name:' . $this->name);
 
             return $this->drive($cloud);
 
@@ -472,7 +478,9 @@ class CoreController extends AbstractController
 
             $this->core->logger->info('DELETE | '.' file: '.$fullPath.
                 ' | controller: '.$this->account->getCloud().
-                ' | user:' . $this->account->getUser());
+                ' | user:' . $this->account->getUser().
+                ' | path:' . $this->path.
+                ' | name:' . $this->name);
 
             if($this->isMove)
             {
@@ -530,7 +538,9 @@ class CoreController extends AbstractController
 
             $this->core->logger->info('UPLOAD | '.' file: '.$destinationPath.'\\'.$content->getClientOriginalName().
                 ' | controller: '.$this->account->getCloud().
-                ' | user:' . $this->account->getUser());
+                ' | user:' . $this->account->getUser().
+                ' | path:' . $this->path.
+                ' | name:' . $this->name);
 
             return $this->drive($cloud);
         }catch (CloudException $e)
@@ -625,7 +635,9 @@ class CoreController extends AbstractController
 
             $this->core->logger->info('EDIT_METADATA | '.' archive: '.$this->path.
                 ' | controller: '.$this->account->getCloud().
-                ' | user:' . $this->account->getUser());
+                ' | user:' . $this->account->getUser().
+                ' | path:' . $this->path.
+                ' | name:' . $this->name);
 
             return new JsonResponse('Metadatos editados correctamente',Response::HTTP_OK);
         }catch (CloudException $e)
@@ -686,7 +698,10 @@ class CoreController extends AbstractController
             $destiantionMetadataFile=$this->core->getBasicMetadata($destiantionFile,$destinationAccountBD);
             $this->em->getRepository(Metadata::class)->copyMetadata($destiantionMetadataFile,$originalCloudMetadataFile);
 
-            $this->core->logger->info('COPY | origen: '.$cloud.'::'.$sourceFullPath.' | destination: '.$destinationCloud.'::'.$destinationFullPath);
+            $this->core->logger->info('COPY | origen: '.$cloud.'::'.$sourceFullPath.
+                ' | destination: '.$destinationCloud.'::'.$destinationFullPath.
+                ' | path:' . $this->path.
+                ' | name:' . $this->name);
 
             if($this->isMove)
             {
@@ -737,7 +752,6 @@ class CoreController extends AbstractController
                 $this->path = $destinationDirectoryPath;
 //Se devuelven los contendios de la ruta donde se encuntren el usuairo.
                 return $this->drive($destinationCloud);
-
             } else {
 //Si se produce un error durante la eliminacion se devuelve el error original.
                 return $responseDelete;
