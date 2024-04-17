@@ -1,13 +1,16 @@
-<div class="container">
-    <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
-        <ul class="nav col-12 justify-content-center mb-md-0">
-            <li>
-                <div>
-                    <i class="bi bi-globe2 nav-link"></i>
-                </div>
-            </li>
-            <li><a href="{{ path('_home_index') }}" class="nav-link px-2 link-secondary">Home</a></li>
+<div class="container-fluid pl-lg-3 mt-sm-2">
+    <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-2 mb-4 border-bottom">
+        <a href="{{ path('_home_index') }}" class="d-flex align-items-center col-md-3 mb-2 mb-md-0 text-dark text-decoration-none">
+            <img class="img-fluid" src="{{ asset('bundles/uemc_home/images/logoHorizontalBlanco.png') }}" alt="Logo MetaCloudify" style="height: 24px;">
+        </a>
+
+        <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+           <li><a href="{{ path('_home_index') }}" class="nav-link px-2 link-secondary">Home</a></li>
             <li><a href="{{ path('_home_about') }}" class="nav-link px-2">About</a></li>
         </ul>
+
+        <div class="col-md-3 text-end">
+        </div>
+
     </header>
 </div>

@@ -31,32 +31,35 @@
     {% include '@UEMC_homeBundle/Includes/header.html.twig' %}
 
     <!-- MAIN -->
-    <div class="container-fluid d-flex flex-wrap">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- SIDEBAR -->
+            {{ include('@UEMC_homeBundle/Includes/sidebar.html.twig') }}
 
-        <!-- SIDEBAR -->
-        {{ include('@UEMC_homeBundle/Includes/sidebar.html.twig') }}
+            <!-- MAIN BLOCK -->
+            <div id="mainContent" class="col-md-10 col-sm-8">
+                <div class="d-sm-block d-md-none border-top my-3"></div>
+                <div class="container mx-0 border-left">
+                        <h1>Bienvenido</h1>
+                        <p>MetaCloudify es una aplicación web que permite gestionar ficheros y metadatos de distintas nubes.</p>
+                    </div>
 
-        <!-- MAIN BLOCK -->
-        <div id="mainContent" class="min-vh-auto col-md-10 d-flex flex-column flex-wrap align-items-start justify-content-start border-start"  style="width: 69.5%;">
-                <div class="container col-md-12">
-                    <h1>Bienvenido</h1>
-                    <p>MetaCloudify es una aplicación web que permite gestionar ficheros y metadatos de distintas nubes.</p>
-                </div>
+                    <div class="container mx-0 pt-2">
+                        <table id="explorer" class="table table-striped">
 
-                <div class="container d-flex flex-column col-md-12 mt-2 mb-4 pt-2">
-                    <table id="explorer" class="table table-striped" style="width: 100%">
-                        <thead>
-                            <tr>
-                            </tr>
-                        </thead>
-                    </table>
-                    <form class="d-none" id="fileupload-explorer" method="POST" enctype="multipart/form-data" style="display: none;">
-                        <input class="form-control form-control-sm me-2" id="formFile-explorer" type="file" name="content">
-                    </form>
-                </div>
+                        </table>
+                        <form class="d-none" id="fileupload-explorer" method="POST" enctype="multipart/form-data" style="display: none;">
+                            <input class="form-control form-control-sm me-2" id="formFile-explorer" type="file" name="content">
+                        </form>
+                    </div>
+            </div>
         </div>
-
     </div>
+
+    <!-- FOOTER -->
+    {{ include('@UEMC_homeBundle/Includes/footer.html.twig') }}
+
+
 
     <!-- ALERTS -->
     {{ include('@UEMC_homeBundle/Includes/alerts.html.twig') }}
@@ -85,6 +88,4 @@
     <!-- Elemento para la pantalla de carga -->
     {{ include('@UEMC_homeBundle/Includes/modalPantallaCarga.html.twig') }}
 
-    <!-- FOOTER -->
-    {{ include('@UEMC_homeBundle/Includes/footer.html.twig') }}
 {% endblock %}

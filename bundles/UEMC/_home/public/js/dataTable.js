@@ -34,7 +34,7 @@ function crearTabla(data,account)
                 tabla.DataTable().rows( { selected: true } ).deselect()
                 back(account);
             }
-        }
+        };
     let buttonCrearCarpeta =
         {
             text: '<i class="bi bi-folder-fill me-2"></i>Crear carpeta',
@@ -60,7 +60,7 @@ function crearTabla(data,account)
                     });                    $('#newDirFileModal').modal('show');
                 }
             }
-        }
+        };
     let buttonCrearFichero =
         {
             text: '<i class="bi bi-file-text-fill me-2"></i>Crear fichero',
@@ -87,7 +87,7 @@ function crearTabla(data,account)
                     $('#newDirFileModal').modal('show');
                 }
             }
-        }
+        };
     let buttonSubirArchivo =
         {
             text: '<i class="bi bi-upload me-2"></i>Subir archivo',
@@ -114,7 +114,7 @@ function crearTabla(data,account)
                     $('#formFile-explorer').trigger('click');
                 }
             }
-        }
+        };
     let buttonVerMetadatos =
         {
             text: '<i class="bi bi-search me-2"></i>Ver Metadatos',
@@ -130,7 +130,7 @@ function crearTabla(data,account)
                     console.log('No se ha seleccionado ninguna fila');
                 }
             }
-        }
+        };
     let buttonEliminarArchivo =
         {
             text: '<i class="bi bi-trash me-2"></i>Elimiar archivo',
@@ -146,7 +146,7 @@ function crearTabla(data,account)
                     console.log('No se ha seleccionado ninguna fila');
                 }
             }
-        }
+        };
     let buttonCopiarArchivo =
         {
             text: '<i class="bi bi-clipboard me-2"></i>Copiar archivo',
@@ -186,7 +186,7 @@ function crearTabla(data,account)
                 }
                 tabla.DataTable().rows( { selected: true } ).deselect()
             }
-        }
+        };
     let buttonMoverArchivo =
         {
             text: '<i class="bi bi-arrows-move me-2"></i>Mover archivo',
@@ -227,7 +227,7 @@ function crearTabla(data,account)
 
                 tabla.DataTable().rows( { selected: true } ).deselect()
             }
-        }
+        };
     let buttonCancelPaste =
         {
             text: '<i class="bi bi-x-circle me-2"></i>Cancelar',
@@ -248,32 +248,35 @@ function crearTabla(data,account)
 
                 tabla.DataTable().rows( { selected: true } ).deselect()
             }
-        }
+        };
+    let definiciones=
+        {
+            "emptyTable": "No hay datos disponibles en la tabla",
+            "info": "Mostrando _START_ a _END_ de _TOTAL_ entradas",
+            "infoEmpty": "Mostrando 0 a 0 de 0 entradas",
+            "infoFiltered": "(filtrado de _MAX_ entradas totales)",
+            "lengthMenu": "Mostrar _MENU_ entradas",
+            "loadingRecords": "Cargando...",
+            "processing": "Procesando...",
+            "search": "Buscar:",
+            "zeroRecords": "No se encontraron registros coincidentes",
+            "paginate": {
+                "first": "Primero",
+                "last": "Último",
+                "next": "Siguiente",
+                "previous": "Anterior"
+            },
+            "aria": {
+                "sortAscending": ": activar para ordenar la columna en orden ascendente",
+                "sortDescending": ": activar para ordenar la columna en orden descendente"
+            }
+        };
 
     tabla.addClass('tabla-creada');
     tabla.DataTable().destroy();
     tabla.DataTable({
-        "language": {
-            "emptyTable":     "No hay datos disponibles en la tabla",
-            "info":           "Mostrando _START_ a _END_ de _TOTAL_ entradas",
-            "infoEmpty":      "Mostrando 0 a 0 de 0 entradas",
-            "infoFiltered":   "(filtrado de _MAX_ entradas totales)",
-            "lengthMenu":     "Mostrar _MENU_ entradas",
-            "loadingRecords": "Cargando...",
-            "processing":     "Procesando...",
-            "search":         "Buscar:",
-            "zeroRecords":    "No se encontraron registros coincidentes",
-            "paginate": {
-                "first":      "Primero",
-                "last":       "Último",
-                "next":       "Siguiente",
-                "previous":   "Anterior"
-            },
-            "aria": {
-                "sortAscending":  ": activar para ordenar la columna en orden ascendente",
-                "sortDescending": ": activar para ordenar la columna en orden descendente"
-            }
-        },
+        "language": definiciones,
+        responsive: true,
         dom: "<'row'<'col-sm-12'B>>" +
             "<'row mt-2'<'col-sm-6 ruta-explorer'><'col-sm-6'f>>"+
             "<'row'<'col-sm-12'tr>>" +
@@ -305,6 +308,7 @@ function crearTabla(data,account)
         columns: [
             { title: '', //Simbolo carpeta o fichero
                 data: 'type',
+                defaultContent: '-',
                 visible: true,
                 width: '0.1%',
                 className: 'dt-body-right align-middle',
@@ -320,6 +324,7 @@ function crearTabla(data,account)
             },
             { title: 'Nombre',
                 data: 'path',
+                defaultContent: '-',
                 className: 'dt-body-left align-middle',
                 visible: true,
                 render: function (data) {
@@ -331,11 +336,13 @@ function crearTabla(data,account)
             },
             { title: 'Visibility',
                 data: 'visibility',
+                defaultContent: '-',
                 visible: false,
             },
             { title: 'Fecha',
                 data: 'last_modified',
                 className: 'align-middle',
+                defaultContent: '-',
                 visible: true,
                 render:function (data)
                 {
@@ -344,10 +351,12 @@ function crearTabla(data,account)
             },
             { title: 'Metadata',
                 data: 'extra_metadata',
+                defaultContent: '-',
                 visible: false,
             },
             { title: 'Tamaño',
                 data: 'file_size',
+                defaultContent: '-',
                 visible: true,
                 width: '5%',
                 className: 'align-middle',
@@ -357,6 +366,7 @@ function crearTabla(data,account)
             },
             { title: 'Propietario',
                 visible: true,
+                defaultContent: '-',
                 class: 'align-middle',
                 render:function ()
                 {
@@ -372,7 +382,7 @@ function crearTabla(data,account)
                         case 'owncloud':
                             return '<i class="bi bi-clouds me-2"></i>'+account.user;
                         default:
-                            return '--';
+                            return '-';
                     }
                 },
             }

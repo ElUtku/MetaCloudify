@@ -1,9 +1,11 @@
-<div class="flex-shrink-0 p-3" style="width: 280px;">
-    <div class="d-flex align-items-baseline justify-content-start">
+<div class="col-md-auto col-sm-4">
+    <div class="d-flex align-items-baseline justify-content-md-start justify-content-center">
         <i class="bi-lg bi-person-fill mx-2 fs-4"></i>
-        <h4>Accounts</h4>
+        <h4 id="accountText" class="collapse collapse-horizontal show">Accounts</h4>
+        <button type="button" class="d-sm-block d-md-none btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed text-end"
+                data-bs-toggle="collapse" data-bs-target="#sidebar, #accountText" aria-expanded="true" ></button>
     </div>
-    <ul class="list-unstyled ps-0">
+    <ul id="sidebar" class="list-unstyled ps-0 collapse show">
 
         <script>
             //resetAccounts(); Descativado por el momento
@@ -89,8 +91,9 @@
             {% endfor %}
         {% endif %}
 
-        <li class="border-top my-3"></li>
-        <li class="mb-1">
+        <li class="d-block d-md-none border-top my-3"></li>
+        <li class="d-none d-md-block border-top my-3"></li>
+        <li class="mt-sm-3">
             {% if not ( app.session.has('accounts')) %}
                 <p>Por favor, inicia sesión en algún servicio para poder continuar.</p>
             {% endif %}
