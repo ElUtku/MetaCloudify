@@ -20,3 +20,4 @@
 ###< JetBrains/phpStorm ###
 /composer.phar
 /bundles/MetaCloudify/Core/metacloudify.log
+/migrations/Version20240417183249.php

@@ -22,3 +22,7 @@
 #errorModal {
     z-index: 99999;
 }
+
+.filter-invert {
+    filter: invert(100%);
+}

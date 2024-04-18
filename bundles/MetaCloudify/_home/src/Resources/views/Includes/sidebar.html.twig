@@ -91,8 +91,8 @@
             {% endfor %}
         {% endif %}
 
-        <li class="d-sm-none d-md-block border-top my-3"></li>
-        <li class="mt-sm-3">
+        <li class="d-none d-md-block border-top my-3"></li>
+        <li class="mt-3 mt-md-0">
             {% if not ( app.session.has('accounts')) %}
                 <p>Por favor, inicia sesión en algún servicio para poder continuar.</p>
             {% endif %}
