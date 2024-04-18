@@ -1,0 +1,19 @@
+<div class="container-fluid pl-lg-3 mt-sm-2">
+    <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-2 mb-4 border-bottom">
+        <a href="{{ path('_home_index') }}" class="d-flex align-items-center col-md-3 mb-2 mb-md-0 text-dark text-decoration-none">
+            <img class="img-fluid" src="{{ asset('bundles/metacloudify_home/images/logoHorizontalBlanco.png') }}" alt="Logo MetaCloudify" style="height: 24px;">
+        </a>
+
+        <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+           <li><a href="{{ path('_home_index') }}" class="nav-link px-2 link-secondary">Home</a></li>
+            <li><a href="{{ path('_home_about') }}" class="nav-link px-2">About</a></li>
+        </ul>
+
+        <div class="col-md-3 text-end">
+            <button class="btn border-0 bg-transparent" type="button" id="cambiarTema">
+                <i class="bi bi-sun"></i>
+            </button>
+        </div>
+
+    </header>
+</div>

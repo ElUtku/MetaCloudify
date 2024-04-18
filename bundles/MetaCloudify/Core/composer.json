@@ -1,0 +1,16 @@
+{
+  "name": "metacloudify/core",
+  "description": "Operations for clouds services",
+  "require": {
+    "php": ">=8.2.4",
+    "league/flysystem": "^3.23.0",
+    "symfony/monolog-bundle": "^v3.10.0"
+  },
+  "autoload": {
+    "psr-4": {"MetaCloudify\\Core\\": "src/"}
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "license": "Test"
+}

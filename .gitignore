@@ -19,4 +19,4 @@
 /.idea
 ###< JetBrains/phpStorm ###
 /composer.phar
-/bundles/UEMC/Core/uemc.log
+/bundles/MetaCloudify/Core/metacloudify.log

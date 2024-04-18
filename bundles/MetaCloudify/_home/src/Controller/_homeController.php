@@ -1,0 +1,27 @@
+<?php
+
+namespace MetaCloudify\_home\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+use MetaCloudify\_home\Service\CloudService;
+
+class _homeController extends AbstractController
+{
+    /**
+     * @Route("/_home", name="_home_index")
+     */
+    public function index(CloudService $cloud): Response
+    {
+        return $this->render('@MetaCloudify_homeBundle/index.html.twig');
+    }
+
+    /**
+     * @Route("/_home/about", name="_home_about")
+     */
+    public function about(CloudService $cloud): Response
+    {
+        return $this->render('@MetaCloudify_homeBundle/about.html.twig');
+    }
+}

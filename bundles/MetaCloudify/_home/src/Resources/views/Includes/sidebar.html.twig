@@ -1,0 +1,102 @@
+<div class="col-md-2 col-sm-4">
+    <div class="d-flex align-items-baseline justify-content-md-start justify-content-center">
+        <i class="bi-lg bi-person-fill mx-2 fs-4"></i>
+        <h4 id="accountText" class="collapse collapse-horizontal show">Accounts</h4>
+        <button type="button" class="d-sm-block d-md-none btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed text-end"
+                data-bs-toggle="collapse" data-bs-target="#sidebar, #accountText" aria-expanded="true" ></button>
+    </div>
+    <ul id="sidebar" class="list-unstyled ps-0 collapse show">
+
+        <script>
+            //resetAccounts(); Descativado por el momento
+            $("script:last").remove(); //Elimina esto del html
+        </script>
+
+        {% if app.session.has('accounts') %}
+            {% for accountId, account in app.session.get('accounts') %}
+
+                {% if account.cloud == 'googledrive' %}
+                <script>
+                    storeNewAccount('{{ accountId }}','{{ account.user }}','googledrive','');
+                    $("script:last").remove(); //Elimina esto del html
+                </script>
+
+                <li class="mb-1">
+                    <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed text-start" data-bs-toggle="collapse" data-bs-target="#googledrive{{ accountId }}-collapse" aria-expanded="false">
+                        GoogleDrive - {{ account.user }}
+                    </button>
+                    <div class="collapse" id="googledrive{{ accountId }}-collapse">
+                        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                            <li><a onclick="mostrarOcultar('{{ accountId }}');" class="btn link-body-emphasis d-inline-flex text-decoration-none rounded" >Mostrar/Ocultar</a></li>
+                            <li><a onclick="logout('{{ accountId }}');" class="btn link-body-emphasis d-inline-flex text-decoration-none rounded">LogOut</a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                {% elseif account.cloud=='onedrive' %}
+                <script>
+                    storeNewAccount('{{ accountId }}','{{ account.user }}','onedrive','');
+                    $("script:last").remove();
+                </script>
+
+                <li class="mb-1">
+                    <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed text-start" data-bs-toggle="collapse" data-bs-target="#onedrive{{ accountId }}-collapse" aria-expanded="false">
+                        OneDrive - {{ account.user }}
+                    </button>
+                    <div class="collapse" id="onedrive{{ accountId }}-collapse">
+                        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                            <li><a onclick="mostrarOcultar('{{ accountId }}');" class="btn link-body-emphasis d-inline-flex text-decoration-none rounded" >Mostrar/Ocultar</a></li>
+                            <li><a onclick="logout('{{ accountId }}');" class="btn link-body-emphasis d-inline-flex text-decoration-none rounded">LogOut</a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                {% elseif account.cloud=='owncloud' %}
+                <script>
+                    storeNewAccount('{{ accountId }}','{{ account.user }}','owncloud','');
+                    $("script:last").remove();
+                </script>
+
+                <li class="mb-1">
+                    <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed text-start" data-bs-toggle="collapse" data-bs-target="#owncloud{{ accountId }}-collapse" aria-expanded="false">
+                        OwnCloud - {{ account.user }}
+                    </button>
+                    <div class="collapse" id="owncloud{{ accountId }}-collapse">
+                        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                            <li><a onclick="mostrarOcultar('{{ accountId }}');" class="btn link-body-emphasis d-inline-flex text-decoration-none rounded">Mostrar/Ocultar</a></li>
+                            <li><a onclick="logout('{{ accountId }}');" class="btn link-body-emphasis d-inline-flex text-decoration-none rounded">LogOut</a></li>
+                        </ul>
+                    </div>
+                </li>
+
+                {% elseif account.cloud=='ftp' %}
+                <script>
+                    storeNewAccount('{{ accountId }}','{{ account.user }}','ftp','');
+                    $("script:last").remove();
+                </script>
+
+                <li class="mb-1">
+                    <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed text-start" data-bs-toggle="collapse" data-bs-target="#ftp{{ accountId }}-collapse" aria-expanded="false">
+                        FTP - {{ account.user }}
+                    </button>
+                    <div class="collapse" id="ftp{{ accountId }}-collapse">
+                        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                            <li><a onclick="mostrarOcultar('{{ accountId }}');" class="btn link-body-emphasis d-inline-flex text-decoration-none rounded">Mostrar/Ocultar</a></li>
+                            <li><a onclick="logout('{{ accountId }}');" class="btn link-body-emphasis d-inline-flex text-decoration-none rounded">LogOut</a></li>
+                        </ul>
+                    </div>
+                </li>
+                {% endif %}
+
+            {% endfor %}
+        {% endif %}
+
+        <li class="d-sm-none d-md-block border-top my-3"></li>
+        <li class="mt-sm-3">
+            {% if not ( app.session.has('accounts')) %}
+                <p>Por favor, inicia sesión en algún servicio para poder continuar.</p>
+            {% endif %}
+            <button id="btLogin" class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#modalSignin">Login</button>
+        </li>
+    </ul>
+</div>

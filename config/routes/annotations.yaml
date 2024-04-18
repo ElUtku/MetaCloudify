@@ -6,26 +6,26 @@ kernel:
     resource: ../../src/Kernel.php
     type: annotation
 
-uemc_core:
+metacloudify_core:
     # loads routes from the given routing file stored in some bundle
-    resource: '@UEMCCoreBundle/src/Resources/config/routing.yaml'
+    resource: '@MetaCloudifyCoreBundle/src/Resources/config/routing.yaml'
 
-uemc_onedrive:
+metacloudify_onedrive:
     # loads routes from the given routing file stored in some bundle
-    resource: '@UEMCOneDriveBundle/src/Resources/config/routing.yaml'
+    resource: '@MetaCloudifyOneDriveBundle/src/Resources/config/routing.yaml'
 
-uemc_owncloud:
+metacloudify_owncloud:
     # loads routes from the given routing file stored in some bundle
-    resource: '@UEMCOwnCloudBundle/src/Resources/config/routing.yaml'
+    resource: '@MetaCloudifyOwnCloudBundle/src/Resources/config/routing.yaml'
 
-uemc_googledrive:
+metacloudify_googledrive:
     # loads routes from the given routing file stored in some bundle
-    resource: '@UEMCGoogleDriveBundle/src/Resources/config/routing.yaml'
+    resource: '@MetaCloudifyGoogleDriveBundle/src/Resources/config/routing.yaml'
 
-uemc_ftp:
+metacloudify_ftp:
     # loads routes from the given routing file stored in some bundle
-    resource: '@UEMCFtpBundle/src/Resources/config/routing.yaml'
+    resource: '@MetaCloudifyFtpBundle/src/Resources/config/routing.yaml'
 
-uemc__home:
+metacloudify__home:
     # loads routes from the given routing file stored in some bundle
-    resource: '@UEMC_homeBundle/src/Resources/config/routing.yaml'
+    resource: '@MetaCloudify_homeBundle/src/Resources/config/routing.yaml'

@@ -1,9 +1,9 @@
 twig:
     default_path: '%kernel.project_dir%/templates'
     paths:
-        '%kernel.project_dir%/bundles/UEMC/OwnCloud/src/Resources/views': UEMCOwnCloudBundle
-        '%kernel.project_dir%/bundles/UEMC/Ftp/src/Resources/views': UEMCFtpBundle
-        '%kernel.project_dir%/bundles/UEMC/_home/src/Resources/views': UEMC_homeBundle
+        '%kernel.project_dir%/bundles/MetaCloudify/OwnCloud/src/Resources/views': MetaCloudifyOwnCloudBundle
+        '%kernel.project_dir%/bundles/MetaCloudify/Ftp/src/Resources/views': MetaCloudifyFtpBundle
+        '%kernel.project_dir%/bundles/MetaCloudify/_home/src/Resources/views': MetaCloudify_homeBundle
 
 when@test:
     twig:

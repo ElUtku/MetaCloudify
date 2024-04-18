@@ -1,0 +1,13 @@
+clientId: '7847f0ba-e3f3-42c9-8add-52513b073fdc'
+clientSecret: 'EuG8Q~Uhdz.~pnsaXC0GoEH-W_sOyFfXIw6KWcwJ'
+redirectUriLogin: 'http://localhost/MetaCloudify/public/index.php/onedrive/login'
+redirectUriLoginToken: 'http://localhost/MetaCloudify/public/index.php/onedrive/login/token'
+urlAuthorize: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize'
+urlAccessToken: 'https://login.microsoftonline.com/common/oauth2/v2.0/token'
+urlResourceOwnerDetails: 'https://outlook.office.com/api/v2.0/me'
+scopes:
+  - 'User.Read'
+  - 'openid'
+  - 'Files.ReadWrite.All'
+  - 'offline_access'
+  - 'Mail.Read'

@@ -79,12 +79,12 @@
     "autoload": {
         "psr-4": {
             "App\\": "src/",
-            "UEMC\\Core\\": "bundles/UEMC/Core/src",
-            "UEMC\\OneDrive\\": "bundles/UEMC/OneDrive/src/",
-            "UEMC\\OwnCloud\\": "bundles/UEMC/OwnCloud/src/",
-            "UEMC\\GoogleDrive\\": "bundles/UEMC/GoogleDrive/src/",
-            "UEMC\\Ftp\\": "bundles/UEMC/Ftp/src/",
-            "UEMC\\_home\\": "bundles/UEMC/_home/src/"
+            "MetaCloudify\\Core\\": "bundles/MetaCloudify/Core/src",
+            "MetaCloudify\\OneDrive\\": "bundles/MetaCloudify/OneDrive/src/",
+            "MetaCloudify\\OwnCloud\\": "bundles/MetaCloudify/OwnCloud/src/",
+            "MetaCloudify\\GoogleDrive\\": "bundles/MetaCloudify/GoogleDrive/src/",
+            "MetaCloudify\\Ftp\\": "bundles/MetaCloudify/Ftp/src/",
+            "MetaCloudify\\_home\\": "bundles/MetaCloudify/_home/src/"
         }
     },
     "autoload-dev": {

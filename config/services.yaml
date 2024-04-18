@@ -18,46 +18,46 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
-    UEMC\Core\:
-        resource: '../bundles/UEMC/Core/src/'
+    MetaCloudify\Core\:
+        resource: '../bundles/MetaCloudify/Core/src/'
 
-    UEMC\OneDrive\:
-        resource: '../bundles/UEMC/OneDrive/src/'
+    MetaCloudify\OneDrive\:
+        resource: '../bundles/MetaCloudify/OneDrive/src/'
 
-    UEMC\OwnCloud\:
-        resource: '../bundles/UEMC/OwnCloud/src/'
+    MetaCloudify\OwnCloud\:
+        resource: '../bundles/MetaCloudify/OwnCloud/src/'
 
-    UEMC\GoogleDrive\:
-        resource: '../bundles/UEMC/GoogleDrive/src/'
+    MetaCloudify\GoogleDrive\:
+        resource: '../bundles/MetaCloudify/GoogleDrive/src/'
 
-    UEMC\Ftp\:
-        resource: '../bundles/UEMC/Ftp/src/'
+    MetaCloudify\Ftp\:
+        resource: '../bundles/MetaCloudify/Ftp/src/'
 
-    UEMC\_home\:
-        resource: '../bundles/UEMC/_home/src/'
+    MetaCloudify\_home\:
+        resource: '../bundles/MetaCloudify/_home/src/'
 
     #  service definitions
 
-    UEMC\Core\Service\CloudService:
+    MetaCloudify\Core\Service\CloudService:
         public: true
         autowire: true
 
-    UEMC\OneDrive\Service\CloudService:
+    MetaCloudify\OneDrive\Service\CloudService:
         public: true
         autowire: true
 
-    UEMC\OwnCloud\Service\CloudService:
+    MetaCloudify\OwnCloud\Service\CloudService:
         public: true
         autowire: true
 
-    UEMC\GoogleDrive\Service\CloudService:
+    MetaCloudify\GoogleDrive\Service\CloudService:
         public: true
         autowire: true
 
-    UEMC\Ftp\Service\CloudService:
+    MetaCloudify\Ftp\Service\CloudService:
         public: true
         autowire: true
 
-    UEMC\_home\Service\CloudService:
+    MetaCloudify\_home\Service\CloudService:
         public: true
         autowire: true

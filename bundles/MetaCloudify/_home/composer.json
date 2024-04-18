@@ -1,0 +1,14 @@
+{
+  "name": "metacloudify/home",
+  "description": "Kit de aplicacion web",
+  "require": {
+    "php": ">=8.2.4",
+    "metacloudify/core": ">=1.0.0"
+  },
+  "version": "v1.0.0",
+  "autoload": {
+    "psr-4": {
+      "MetaCloudify\\_home\\": "src/"
+    }
+  }
+}

@@ -1,9 +1,0 @@
-{
-  "name": "uemc/onedrive",
-  "version": "v1.0.0",
-  "autoload": {
-    "psr-4": {
-      "UEMC\\OneDrive\\": "src/"
-    }
-  }
-}
