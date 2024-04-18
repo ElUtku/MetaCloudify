@@ -24,4 +24,12 @@ class _homeController extends AbstractController
     {
         return $this->render('@MetaCloudify_homeBundle/about.html.twig');
     }
+
+    /**
+     * @Route("/_home/provacidadCondiciones", name="_home_provacidad_condiciones")
+     */
+    public function provacidadCondiciones(CloudService $cloud): Response
+    {
+        return $this->render('@MetaCloudify_homeBundle/service_termines_privacity.html.twig');
+    }
 }
