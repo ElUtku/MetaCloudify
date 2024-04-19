@@ -1,10 +1,10 @@
-{% extends '@MetaCloudify_homeBundle/base.html.twig' %}
+{% extends '@MetaCloudifyHomeBundle/base.html.twig' %}
 
 {% block title %}MetaCloudify{% endblock %}
 
         {% block stylesheets %}
-            <link rel="stylesheet" href="{{ asset('bundles/metacloudify_home/css/sidebar.css') }}">
-            <link rel="stylesheet" href="{{ asset('bundles/metacloudify_home/css/_home.css') }}">
+            <link rel="stylesheet" href="{{ asset('bundles/metacloudifyHome/css/sidebar.css') }}">
+            <link rel="stylesheet" href="{{ asset('bundles/metacloudifyHome/css/home.css') }}">
 
             <link rel="stylesheet" href="https://cdn.datatables.net/v/bs5/dt-2.0.3/b-3.0.1/b-colvis-3.0.1/cr-2.0.0/date-1.5.2/fc-5.0.0/fh-4.0.1/kt-2.12.0/r-3.0.0/rg-1.5.0/rr-1.5.0/sc-2.4.1/sb-1.7.0/sp-2.3.0/sl-2.0.0/sr-1.4.0/datatables.min.css">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/10.7.0/css/jquery.fileupload.min.css">
@@ -13,11 +13,11 @@
         {% block javascripts %}
 
             <!-- Manejo de directorios y ficheros -->
-            <script src="{{ asset('bundles/metacloudify_home/js/cloud.js') }}"></script>
-            <script src="{{ asset('bundles/metacloudify_home/js/dataTable.js') }}"></script>
-            <script src="{{ asset('bundles/metacloudify_home/js/modales.js') }}"></script>
-            <script src="{{ asset('bundles/metacloudify_home/js/sessionStore.js') }}"></script>
-            <script src="{{ asset('bundles/metacloudify_home/js/utils.js') }}"></script>
+            <script src="{{ asset('bundles/metacloudifyHome/js/cloud.js') }}"></script>
+            <script src="{{ asset('bundles/metacloudifyHome/js/dataTable.js') }}"></script>
+            <script src="{{ asset('bundles/metacloudifyHome/js/modales.js') }}"></script>
+            <script src="{{ asset('bundles/metacloudifyHome/js/sessionStore.js') }}"></script>
+            <script src="{{ asset('bundles/metacloudifyHome/js/utils.js') }}"></script>
 
             <script src="https://cdn.datatables.net/v/bs5/dt-2.0.3/b-3.0.1/b-colvis-3.0.1/cr-2.0.0/date-1.5.2/fc-5.0.0/fh-4.0.1/kt-2.12.0/r-3.0.0/rg-1.5.0/rr-1.5.0/sc-2.4.1/sb-1.7.0/sp-2.3.0/sl-2.0.0/sr-1.4.0/datatables.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/10.7.0/js/vendor/jquery.ui.widget.min.js"></script>
@@ -28,13 +28,13 @@
 {% block body %}
 
     <!-- HEADER -->
-    {% include '@MetaCloudify_homeBundle/Includes/header.html.twig' %}
+    {% include '@MetaCloudifyHomeBundle/Includes/header.html.twig' %}
 
     <!-- MAIN -->
     <div class="container-fluid">
         <div class="row">
             <!-- SIDEBAR -->
-            {{ include('@MetaCloudify_homeBundle/Includes/sidebar.html.twig') }}
+            {{ include('@MetaCloudifyHomeBundle/Includes/sidebar.html.twig') }}
 
             <!-- MAIN BLOCK -->
             <div id="mainContent" class="col-md-10 col-sm-8 mb-2">
@@ -57,35 +57,35 @@
     </div>
 
     <!-- FOOTER -->
-    {{ include('@MetaCloudify_homeBundle/Includes/footer.html.twig') }}
+    {{ include('@MetaCloudifyHomeBundle/Includes/footer.html.twig') }}
 
 
 
     <!-- ALERTS -->
-    {{ include('@MetaCloudify_homeBundle/Includes/alerts.html.twig') }}
+    {{ include('@MetaCloudifyHomeBundle/Includes/alerts.html.twig') }}
 
     <!-- MODAL SIGN IN -->
-    {{ include('@MetaCloudify_homeBundle/Includes/modalSignIn.html.twig') }}
+    {{ include('@MetaCloudifyHomeBundle/Includes/modalSignIn.html.twig') }}
 
     <!-- Modal file/directoy name -->
-    {{ include('@MetaCloudify_homeBundle/Includes/modalDirFileName.html.twig') }}
+    {{ include('@MetaCloudifyHomeBundle/Includes/modalDirFileName.html.twig') }}
 
     <!-- Context Menu Mouse -->
-    {{ include('@MetaCloudify_homeBundle/Includes/contextMenu.html.twig') }}
+    {{ include('@MetaCloudifyHomeBundle/Includes/contextMenu.html.twig') }}
 
     <!-- Modal de edicion de metadatos -->
-    {{ include('@MetaCloudify_homeBundle/Includes/modalEditarMetadatos.html.twig') }}
+    {{ include('@MetaCloudifyHomeBundle/Includes/modalEditarMetadatos.html.twig') }}
 
     <!-- Modal de visualizar de metadatos -->
-    {{ include('@MetaCloudify_homeBundle/Includes/modalVerMetadatos.html.twig') }}
+    {{ include('@MetaCloudifyHomeBundle/Includes/modalVerMetadatos.html.twig') }}
 
     <!-- Modal de seleccionar cuenta -->
-    {{ include('@MetaCloudify_homeBundle/Includes/modalSelectAccount.html.twig') }}
+    {{ include('@MetaCloudifyHomeBundle/Includes/modalSelectAccount.html.twig') }}
 
     <!-- Elemento para la pantalla de upload -->
-    {{ include('@MetaCloudify_homeBundle/Includes/progressBarUpload.html.twig') }}
+    {{ include('@MetaCloudifyHomeBundle/Includes/progressBarUpload.html.twig') }}
 
     <!-- Elemento para la pantalla de carga -->
-    {{ include('@MetaCloudify_homeBundle/Includes/modalPantallaCarga.html.twig') }}
+    {{ include('@MetaCloudifyHomeBundle/Includes/modalPantallaCarga.html.twig') }}
 
 {% endblock %}

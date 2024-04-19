@@ -1,6 +1,6 @@
 <?php
 
-namespace MetaCloudify\_home\Service;
+namespace MetaCloudify\Home\Service;
 
 
 class CloudService 

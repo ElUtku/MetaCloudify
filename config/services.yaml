@@ -24,4 +24,4 @@ imports:
     - { resource: '../bundles/MetaCloudify/GoogleDrive/src/Resources/config/services.yaml' }
     - { resource: '../bundles/MetaCloudify/OneDrive/src/Resources/config/services.yaml' }
     - { resource: '../bundles/MetaCloudify/Ftp/src/Resources/config/services.yaml' }
-    - { resource: '../bundles/MetaCloudify/_home/src/Resources/config/services.yaml' }
+    - { resource: '../bundles/MetaCloudify/Home/src/Resources/config/services.yaml' }

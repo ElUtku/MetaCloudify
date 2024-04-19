@@ -1,9 +1,9 @@
 <?php
-namespace MetaCloudify\_home;
+namespace MetaCloudify\Home;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-class MetaCloudify_homeBundle extends Bundle
+class MetaCloudifyHomeBundle extends Bundle
 {
     public function getPath(): string
     {

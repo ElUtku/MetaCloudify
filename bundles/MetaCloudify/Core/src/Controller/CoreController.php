@@ -174,7 +174,7 @@ class CoreController extends AbstractController
                 $accountExists->getId().' | controller: '.$account->getCloud().
                 ' | user:' . $account->getUser());
 
-            return $this->redirectToRoute('_home_index');
+            return $this->redirectToRoute('Home_index');
 
         }catch (CloudException $e)
         {

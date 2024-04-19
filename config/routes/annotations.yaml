@@ -26,6 +26,6 @@ metacloudify_ftp:
     # loads routes from the given routing file stored in some bundle
     resource: '@MetaCloudifyFtpBundle/src/Resources/config/routing.yaml'
 
-metacloudify__home:
+metacloudify_Home:
     # loads routes from the given routing file stored in some bundle
-    resource: '@MetaCloudify_homeBundle/src/Resources/config/routing.yaml'
+    resource: '@MetaCloudifyHomeBundle/src/Resources/config/routing.yaml'

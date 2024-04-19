@@ -1,3 +1,3 @@
-metacloudify__home:
+metacloudifyHome:
     resource: ../../Controller/
     type: annotation

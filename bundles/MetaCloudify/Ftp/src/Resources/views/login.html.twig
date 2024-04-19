@@ -1,4 +1,4 @@
-{% extends '@MetaCloudify_homeBundle/base.html.twig' %}
+{% extends '@MetaCloudifyHomeBundle/base.html.twig' %}
 
 {% block title %}Login Ftp{% endblock %}
 
@@ -38,9 +38,9 @@
 {% endblock %}
 
 {% block javascripts %}
-    <script src="{{ asset('bundles/metacloudify_home/js/modales.js') }}"></script>
+    <script src="{{ asset('bundles/metacloudifyHome/js/modales.js') }}"></script>
     <script src="{{ asset('bundles/metacloudifyftp/js/login.js') }}"></script>
-    <script src="{{ asset('bundles/metacloudify_home/js/localStore.js') }}"></script>
+    <script src="{{ asset('bundles/metacloudifyHome/js/localStore.js') }}"></script>
 {% endblock %}
 
 {% block body %}
@@ -111,5 +111,5 @@
 
 
     <!-- ALERTS -->
-    {{ include('@MetaCloudify_homeBundle/Includes/alerts.html.twig') }}
+    {{ include('@MetaCloudifyHomeBundle/Includes/alerts.html.twig') }}
 {% endblock %}

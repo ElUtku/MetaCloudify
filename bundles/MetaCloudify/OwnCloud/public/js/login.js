@@ -46,7 +46,7 @@ $(document).ready(function() {
                 {
                     storeBiblo('owncloud',sotreData)
                 }
-                window.location.href = '../../_home';
+                window.location.href = '../../Home';
             },
             error: function(xhr, status, error) {
                 limpiarModalErrores();

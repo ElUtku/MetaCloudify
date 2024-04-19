@@ -1,0 +1,8 @@
+services:
+  MetaCloudify\Home\Service\CloudService:
+    public: true
+    autowire: true
+
+  MetaCloudify\Home\Controller\HomeController:
+    public: true
+    autowire: true

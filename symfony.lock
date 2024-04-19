@@ -47,9 +47,6 @@
             "ref": "07a97ec434d43b7903c78069a04c92adb6442e52"
         }
     },
-    "metacloudify/core": {
-        "version": "dev-main"
-    },
     "phpunit/phpunit": {
         "version": "9.6",
         "recipe": {

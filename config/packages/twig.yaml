@@ -3,7 +3,7 @@ twig:
     paths:
         '%kernel.project_dir%/bundles/MetaCloudify/OwnCloud/src/Resources/views': MetaCloudifyOwnCloudBundle
         '%kernel.project_dir%/bundles/MetaCloudify/Ftp/src/Resources/views': MetaCloudifyFtpBundle
-        '%kernel.project_dir%/bundles/MetaCloudify/_home/src/Resources/views': MetaCloudify_homeBundle
+        '%kernel.project_dir%/bundles/MetaCloudify/Home/src/Resources/views': MetaCloudifyHomeBundle
 
 when@test:
     twig:

@@ -11,11 +11,11 @@ return [
     Symfony\Bundle\SecurityBundle\SecurityBundle::class => ['all' => true],
     Symfony\Bundle\MonologBundle\MonologBundle::class => ['all' => true],
     Symfony\Bundle\MakerBundle\MakerBundle::class => ['dev' => true],
-    MetaCloudify\Core\MetaCloudifyCoreBundle::class => ['all' => true],
     MetaCloudify\OneDrive\MetaCloudifyOneDriveBundle::class => ['all' => true],
     MetaCloudify\OwnCloud\MetaCloudifyOwnCloudBundle::class => ['all' => true],
     MetaCloudify\GoogleDrive\MetaCloudifyGoogleDriveBundle::class => ['all' => true],
     MetaCloudify\Ftp\MetaCloudifyFtpBundle::class => ['all' => true],
-    MetaCloudify\_home\MetaCloudify_homeBundle::class => ['all' => true],
+    MetaCloudify\Home\MetaCloudifyHomeBundle::class => ['all' => true],
+    MetaCloudify\Core\MetaCloudifyCoreBundle::class => ['all' => true],
     Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle::class => ['all' => true],
 ];

@@ -1,20 +1,20 @@
-{% extends '@MetaCloudify_homeBundle/base.html.twig' %}
+{% extends '@MetaCloudifyHomeBundle/base.html.twig' %}
 
 {% block title %}About{% endblock %}
 
         {% block stylesheets %}
-            <link rel="stylesheet" href="{{ asset('bundles/metacloudify_home/css/sidebar.css') }}">
-            <link rel="stylesheet" href="{{ asset('bundles/metacloudify_home/css/_home.css') }}">
+            <link rel="stylesheet" href="{{ asset('bundles/metacloudifyHome/css/sidebar.css') }}">
+            <link rel="stylesheet" href="{{ asset('bundles/metacloudifyHome/css/home.css') }}">
         {% endblock %}
 
         {% block javascripts %}
-            <script src="{{ asset('bundles/metacloudify_home/js/utils.js') }}"></script>
+            <script src="{{ asset('bundles/metacloudifyHome/js/utils.js') }}"></script>
         {% endblock %}
 
 {% block body %}
 
     <!-- HEADER -->
-    {% include '@MetaCloudify_homeBundle/Includes/header.html.twig' %}
+    {% include '@MetaCloudifyHomeBundle/Includes/header.html.twig' %}
 
     <!-- MAIN -->
     <div class="container">
@@ -46,5 +46,5 @@
         </div>
     </div>
     <!-- FOOTER -->
-    {{ include('@MetaCloudify_homeBundle/Includes/footer.html.twig') }}
+    {{ include('@MetaCloudifyHomeBundle/Includes/footer.html.twig') }}
 {% endblock %}
