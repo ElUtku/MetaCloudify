@@ -1,0 +1,4 @@
+services:
+  MetaCloudify\GoogleDrive\Service\CloudService:
+    public: true
+    autowire: true

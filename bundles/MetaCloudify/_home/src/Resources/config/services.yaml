@@ -1,19 +1,8 @@
-# src/MetaCloudify/_home/Resources/config/services.yaml
-
 services:
-  _defaults:
+  MetaCloudify\_home\Service\CloudService:
+    public: true
     autowire: true
-    autoconfigure: true
-    public: false
 
-  MetaCloudify\_home\:
-    resource: '../../'
-
-  MetaCloudify\_home\Controller\:
-    resource: '../../Controller/'
+  MetaCloudify\_home\Controller\_homeController:
     public: true
-
-  # Configura la carpeta de los public (vistas, CSS, JS, imágenes, etc.)
-  MetaCloudify\_home\Resources\:
-    resource: '../'
-    public: true
+    autowire: true

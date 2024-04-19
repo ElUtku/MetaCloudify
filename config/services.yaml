@@ -18,46 +18,10 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
-    MetaCloudify\Core\:
-        resource: '../bundles/MetaCloudify/Core/src/'
-
-    MetaCloudify\OneDrive\:
-        resource: '../bundles/MetaCloudify/OneDrive/src/'
-
-    MetaCloudify\OwnCloud\:
-        resource: '../bundles/MetaCloudify/OwnCloud/src/'
-
-    MetaCloudify\GoogleDrive\:
-        resource: '../bundles/MetaCloudify/GoogleDrive/src/'
-
-    MetaCloudify\Ftp\:
-        resource: '../bundles/MetaCloudify/Ftp/src/'
-
-    MetaCloudify\_home\:
-        resource: '../bundles/MetaCloudify/_home/src/'
-
-    #  service definitions
-
-    MetaCloudify\Core\Service\CloudService:
-        public: true
-        autowire: true
-
-    MetaCloudify\OneDrive\Service\CloudService:
-        public: true
-        autowire: true
-
-    MetaCloudify\OwnCloud\Service\CloudService:
-        public: true
-        autowire: true
-
-    MetaCloudify\GoogleDrive\Service\CloudService:
-        public: true
-        autowire: true
-
-    MetaCloudify\Ftp\Service\CloudService:
-        public: true
-        autowire: true
-
-    MetaCloudify\_home\Service\CloudService:
-        public: true
-        autowire: true
+imports:
+    - { resource: '../bundles/MetaCloudify/Core/src/Resources/config/services.yaml' }
+    - { resource: '../bundles/MetaCloudify/OwnCloud/src/Resources/config/services.yaml' }
+    - { resource: '../bundles/MetaCloudify/GoogleDrive/src/Resources/config/services.yaml' }
+    - { resource: '../bundles/MetaCloudify/OneDrive/src/Resources/config/services.yaml' }
+    - { resource: '../bundles/MetaCloudify/Ftp/src/Resources/config/services.yaml' }
+    - { resource: '../bundles/MetaCloudify/_home/src/Resources/config/services.yaml' }

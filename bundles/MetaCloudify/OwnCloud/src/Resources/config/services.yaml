@@ -1,0 +1,4 @@
+services:
+  MetaCloudify\OwnCloud\Service\CloudService:
+    public: true
+    autowire: true

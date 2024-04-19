@@ -1,0 +1,8 @@
+services:
+  MetaCloudify\Core\Service\CloudService:
+    public: true
+    autowire: true
+
+  MetaCloudify\Core\Controller\CoreController:
+    public: true
+    autowire: true

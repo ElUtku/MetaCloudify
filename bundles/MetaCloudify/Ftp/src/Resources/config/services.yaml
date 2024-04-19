@@ -1,0 +1,4 @@
+services:
+  MetaCloudify\Ftp\Service\CloudService:
+    public: true
+    autowire: true
