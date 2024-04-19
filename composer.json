@@ -127,12 +127,5 @@
         "symfony/phpunit-bridge": "^6.3",
         "symfony/stopwatch": "5.4.*",
         "symfony/web-profiler-bundle": "5.4.*"
-    },
-    "repositories": {
-        "packagist.org": false,
-        "private-packagist": {
-            "type": "composer",
-            "url": "https://repo.packagist.com/elutku/"
-        }
     }
 }
