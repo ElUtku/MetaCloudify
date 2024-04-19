@@ -9,6 +9,8 @@
       "homepage": "https://github.com/ElUtku"
     }
   ],
+  "minimum-stability": "stable",
+  "prefer-stable": true,
   "keywords": [
     "cloud",
     "metadata",
@@ -38,5 +40,11 @@
   "conflict": {
     "php": "8.4.2"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "repositories": {
+    "private-packagist": {
+      "type": "composer",
+      "url": "https://repo.packagist.com/elutku/"
+    }
+  }
 }

@@ -1,13 +1,36 @@
 {
   "name": "metacloudify/owncloud",
-  "type": "library",
+  "description": "Servicio OwnCloud para metacloudify",
+  "type": "symfony-bundle",
+  "keywords": [
+    "OwnCloud",
+    "service",
+    "metacloudify"
+  ],
+  "authors": [
+    {
+      "name": "ElUtku",
+      "email": "masandres2000@gmail.com",
+      "homepage": "https://github.com/ElUtku"
+    }
+  ],
+  "minimum-stability": "stable",
+  "prefer-stable": true,
   "require": {
-    "php": "^8.2.4"
+    "metacloudify/core": "^1.0.0",
+    "league/flysystem-webdav": "^3.0",
+    "sabre/dav": ">=4.6.0"
   },
-  "version": "v1.0.0",
   "autoload": {
     "psr-4": {
       "MetaCloudify\\OwnCloud\\": "src/"
+    }
+  },
+  "license": "MIT",
+  "repositories": {
+    "private-packagist": {
+      "type": "composer",
+      "url": "https://repo.packagist.com/elutku/"
     }
   }
 }

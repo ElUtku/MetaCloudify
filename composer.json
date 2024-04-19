@@ -7,8 +7,11 @@
         "php": ">=8.2.11",
         "ext-ctype": "*",
         "ext-curl": "*",
+        "ext-dom": "*",
         "ext-ftp": "*",
         "ext-iconv": "*",
+        "ext-libxml": "*",
+        "ext-xmlreader": "*",
         "doctrine/annotations": "^2.0",
         "doctrine/dbal": "^3",
         "doctrine/doctrine-bundle": "^2.10",
@@ -21,13 +24,14 @@
         "league/flysystem-ftp": "3.0",
         "league/flysystem-sftp-v3": "3.0",
         "league/flysystem-webdav": "^3.0",
-        "sabre/dav": ">=4.6.0",
         "league/oauth2-client": "^2.7",
         "league/oauth2-google": "^4.0",
         "masbug/flysystem-google-drive-ext": "v2.2.2",
+        "metacloudify/core": "dev-main",
         "microsoft/microsoft-graph": "^1.110.0",
         "phpdocumentor/reflection-docblock": "^5.3",
         "phpstan/phpdoc-parser": "^1.24",
+        "sabre/dav": ">=4.6.0",
         "sensio/framework-extra-bundle": "^6.2",
         "shitware-ltd/flysystem-msgraph": "^1.2.0",
         "stevenmaguire/oauth2-microsoft": "^2.2",
@@ -58,10 +62,7 @@
         "symfony/yaml": "5.4.*",
         "twig/extra-bundle": "^2.12|^3.0",
         "twig/twig": "^2.12|^3.0",
-        "vlucas/phpdotenv": "^5.6",
-        "ext-dom": "*",
-        "ext-libxml": "*",
-        "ext-xmlreader": "*"
+        "vlucas/phpdotenv": "^5.6"
     },
     "config": {
         "allow-plugins": {
@@ -127,5 +128,12 @@
         "symfony/phpunit-bridge": "^6.3",
         "symfony/stopwatch": "5.4.*",
         "symfony/web-profiler-bundle": "5.4.*"
+    },
+    "repositories": {
+        "packagist.org": false,
+        "private-packagist": {
+            "type": "composer",
+            "url": "https://repo.packagist.com/elutku/"
+        }
     }
 }

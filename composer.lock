@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "794ab5690860cbec8d799f561374fa4c",
+    "content-hash": "8f017190463b0bfef81db1c8583dfcf4",
     "packages": [
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -3058,6 +3058,44 @@
                 "source": "https://github.com/masbug/flysystem-google-drive-ext/tree/v2.2.2"
             },
             "time": "2022-06-24T06:43:42+00:00"
+        },
+        {
+            "name": "metacloudify/core",
+            "version": "dev-main",
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ElUtku/TFG_Capa_de_Abstraccion_en_la_Nube/zipball/f8c0d083bbd6fc2ec6aa1411ac175276d9021d7b",
+                "reference": "f8c0d083bbd6fc2ec6aa1411ac175276d9021d7b",
+                "shasum": "",
+                "mirrors": [
+                    {
+                        "url": "https://repo.packagist.com/elutku/dists/%package%/%version%/r%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
+            },
+            "require": {
+                "league/flysystem": "^3.23.0",
+                "php": ">=8.2.4",
+                "symfony/monolog-bundle": "^v3.10.0"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "MetaCloudify\\Core\\": "src/"
+                }
+            },
+            "notification-url": "https://repo.packagist.com/elutku/downloads/",
+            "license": [
+                "Test"
+            ],
+            "description": "Operations for clouds services",
+            "support": {
+                "source": "https://github.com/ElUtku/TFG_Capa_de_Abstraccion_en_la_Nube/tree/main",
+                "issues": "https://github.com/ElUtku/TFG_Capa_de_Abstraccion_en_la_Nube/issues"
+            },
+            "time": "2024-04-19T10:18:58+00:00"
         },
         {
             "name": "microsoft/microsoft-graph",
@@ -13047,16 +13085,18 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "metacloudify/core": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": ">=8.2.11",
         "ext-ctype": "*",
         "ext-curl": "*",
+        "ext-dom": "*",
         "ext-ftp": "*",
         "ext-iconv": "*",
-        "ext-dom": "*",
         "ext-libxml": "*",
         "ext-xmlreader": "*"
     },

@@ -1,14 +1,37 @@
 {
   "name": "metacloudify/ftp",
-  "type": "library",
+  "description": "Servicio FTP para metacloudify",
+  "type": "symfony-bundle",
+  "keywords": [
+    "ftp",
+    "service",
+    "metacloudify"
+  ],
+  "minimum-stability": "stable",
+  "prefer-stable": true,
+  "authors": [
+    {
+      "name": "ElUtku",
+      "email": "masandres2000@gmail.com",
+      "homepage": "https://github.com/ElUtku"
+    }
+  ],
   "require": {
-    "php": ">=8.2.4",
-    "../../../vendor/symfony/framework-bundle": "^5.4"
+    "metacloudify/core": "^1.0.0",
+    "league/flysystem-ftp": "3.0",
+    "league/flysystem-sftp-v3": "3.0",
+    "ext-ftp": "*"
   },
-  "version": "v1.0.0",
   "autoload": {
     "psr-4": {
-      "MetaCloudify\\Ftp\\": "src"
+        "MetaCloudify\\Ftp\\": "src"
+    }
+  },
+  "license": "MIT",
+  "repositories": {
+    "private-packagist": {
+      "type": "composer",
+      "url": "https://repo.packagist.com/elutku/"
     }
   }
 }

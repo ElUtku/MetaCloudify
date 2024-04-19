@@ -6,13 +6,10 @@ namespace MetaCloudify\Ftp\Service;
 use DateTime;
 use Exception;
 use League\Flysystem\Filesystem;
-use League\Flysystem\FilesystemException;
-use League\Flysystem\Ftp\ConnectivityChecker;
 use League\Flysystem\Ftp\FtpConnectionException;
 use League\Flysystem\Ftp\FtpConnectionOptions;
 use League\Flysystem\Ftp\FtpAdapter;
 use League\Flysystem\Ftp\FtpConnectionProvider;
-use League\Flysystem\Ftp\NoopCommandConnectivityChecker;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 

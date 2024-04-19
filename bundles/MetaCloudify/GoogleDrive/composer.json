@@ -1,14 +1,37 @@
 {
   "name": "metacloudify/googledrive",
-  "type": "library",
+  "description": "Servicio GoogleDrive para metacloudify",
+  "type": "symfony-bundle",
+  "keywords": [
+    "GoogleDrive",
+    "service",
+    "metacloudify"
+  ],
+  "minimum-stability": "stable",
+  "prefer-stable": true,
+  "authors": [
+    {
+      "name": "ElUtku",
+      "email": "masandres2000@gmail.com",
+      "homepage": "https://github.com/ElUtku"
+    }
+  ],
   "require": {
-    "php": ">=8.2.4",
-    "../../../vendor/symfony/framework-bundle": "^5.4"
+    "metacloudify/core": "^1.0.0",
+    "google/apiclient": "^2.15",
+    "league/oauth2-google": "^4.0",
+    "masbug/flysystem-google-drive-ext": "v2.2.2"
   },
-  "version": "v1.0.0",
   "autoload": {
     "psr-4": {
-      "MetaCloudify\\GoogleDrive\\": "src"
+        "MetaCloudify\\GoogleDrive\\": "src"
+    }
+  },
+  "license": "MIT",
+  "repositories": {
+    "private-packagist": {
+      "type": "composer",
+      "url": "https://repo.packagist.com/elutku/"
     }
   }
 }
