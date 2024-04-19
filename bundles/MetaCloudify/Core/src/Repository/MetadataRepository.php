@@ -91,7 +91,7 @@ class MetadataRepository extends EntityRepository
         $destiantionMetadataFile->setStatus(FileStatus::NEW->value);
         $destiantionMetadataFile->setExtra($originalCloudMetadataFile->getExtra());
         $destiantionMetadataFile->setAuthor($originalCloudMetadataFile->getAuthor());
-
+        $destiantionMetadataFile->setPath($destiantionMetadataFile->getPath()==='.' || $destiantionMetadataFile->getPath() ==='' ? '/' : $destiantionMetadataFile->getPath());
         $this->store($destiantionMetadataFile);
     }
 
@@ -173,7 +173,7 @@ class MetadataRepository extends EntityRepository
      */
     public function findByExactPathAndAccountNull(Account $account, String $path, String $name): Metadata|null
     {
-        $path=($path === '.') ? '' : $path; // Si el directorio es '' dirname suiele devolver '.' y hay que limpiarlo
+        $path=$path === '.' || $path === '' ? '/' : $path; // Si el directorio es '' dirname suiele devolver '.' y hay que limpiarlo
 
         $qb = $this->createQueryBuilder('m');
         $qb->where('m.path = :path')

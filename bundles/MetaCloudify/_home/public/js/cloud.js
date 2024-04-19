@@ -12,7 +12,6 @@ function Account(accountId,controller,user,root,pathActual,parent)
 $(document).ready(function() {
     recargasCuentas();
     $('#fileupload-explorer').removeClass('d-none');
-
 });
 
 function mostrarOcultar(accountId)
@@ -42,7 +41,7 @@ function recargasCuentas()
 function loadData(accountId,path) {
     $('#loading-modal').modal('show');
 
-    path = (typeof path !== 'undefined') ? path : '';
+    path = cleanPath(typeof path !== 'undefined' ? path : '');
 
     let account = getAccount(accountId);
 
@@ -137,6 +136,8 @@ function createFile(name,accountId)
 function dlt(path,accountId)
 {
     $('#loading-modal').modal('show');
+
+    path=cleanPath(path);
 
     let account = getAccount(accountId);
     $.ajax({
@@ -233,6 +234,8 @@ function upload(accountId) {
 function download(path, name, accountId) {
     $('#loading-modal').modal('show');
 
+    path=cleanPath(path);
+
     let account = getAccount(accountId);
 
     $.ajax({
@@ -302,6 +305,9 @@ function back(account)
 
 let lastMetadataArchive = null;
 function getArchiveMetadata(accountId, path) {
+
+    path=cleanPath(path);
+
     let account = getAccount(accountId);
 
     $.ajax({
@@ -328,6 +334,8 @@ function getArchiveMetadata(accountId, path) {
 
 function guardarMetadata(path, accountId)
 {
+    path=cleanPath(path);
+
     let account = getAccount(accountId);
     let formData = extraerMetadatosModal();
     $.ajax({
@@ -351,6 +359,8 @@ function guardarMetadata(path, accountId)
 
 function copy(sourcePath,sourceAccountId,destinationAccountId)
 {
+    sourcePath=cleanPath(sourcePath);
+
     let account1 = getAccount(sourceAccountId);
     let account2= getAccount(destinationAccountId);
 
@@ -387,6 +397,8 @@ function copy(sourcePath,sourceAccountId,destinationAccountId)
 
 function move(sourcePath,sourceAccountId,destinationAccountId)
 {
+    sourcePath=cleanPath(sourcePath);
+
     let account1 = getAccount(sourceAccountId);
     let account2= getAccount(destinationAccountId);
 
@@ -423,9 +435,10 @@ function move(sourcePath,sourceAccountId,destinationAccountId)
 
 function cargarDatos(account,path,data)
 {
+    path=cleanPath(path)
     if(account.controller === 'owncloud' )
     {
-        data=cleanOwncloudData(data);
+        data=cleanDataPaths(data);
     }
     account.pathActual=path;
     account.parent=dirname(path);

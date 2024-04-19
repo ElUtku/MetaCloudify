@@ -54,9 +54,10 @@ function crearTabla(data,account)
                 let accounts = getAccounts();
                 if (account.pathActual===account.root && Object.keys(accounts).length!==1)
                 {
+                    $('#newNameButton').off('click');
                     optionsSelectAccounId().then(function(accountId) {
                         $('#newNameButton').on('click', function() {
-                            let newName = entradaSanitizada($("#newName").val()); // Sanitizar el valor del input
+                            let newName = sanitizeText($("#newName").val()); // Sanitizar el valor del input
                             createDir(newName, accountId);
                         });
                         $('#newDirFileModal').modal('show');
@@ -64,8 +65,9 @@ function crearTabla(data,account)
 
                 } else
                 {
+                    $('#newNameButton').off('click');
                     $('#newNameButton').on('click', function() {
-                        let newName = entradaSanitizada($("#newName").val())
+                        let newName = sanitizeText($("#newName").val())
                         createDir(newName, account.accountId);
                     });                    $('#newDirFileModal').modal('show');
                 }
@@ -81,8 +83,9 @@ function crearTabla(data,account)
                 if (account.pathActual===account.root && Object.keys(accounts).length!==1)
                 {
                     optionsSelectAccounId().then(function(accountId) {
+                        $('#newNameButton').off('click');
                         $('#newNameButton').on('click', function() {
-                            let newName = entradaSanitizada($("#newName").val());
+                            let newName = sanitizeText($("#newName").val());
                             createFile(newName, accountId);
                         });
                         $('#newDirFileModal').modal('show');
@@ -90,8 +93,9 @@ function crearTabla(data,account)
 
                 } else
                 {
+                    $('#newNameButton').off('click');
                     $('#newNameButton').on('click', function() {
-                        let newName = entradaSanitizada($("#newName").val());
+                        let newName = sanitizeText($("#newName").val());
                         createFile(newName, account.accountId);
                     });
                     $('#newDirFileModal').modal('show');
@@ -370,7 +374,7 @@ function crearTabla(data,account)
                 defaultContent: '-',
                 visible: true,
                 width: '5%',
-                className: 'align-middle',
+                className: 'text-start align-middle',
                 render: function(data) {
                     return data ? formatBytes(data) : '-'; // Si data es null o undefined, devuelve '-', de lo contrario devuelve el tamaño
                 }

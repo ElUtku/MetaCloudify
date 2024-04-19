@@ -79,8 +79,8 @@ function agregarNuevoCampo() {
     let nuevoValorCampo=$('#nuevoValorCampo');
 
 // Se obtiene el nombre y el valor del nuevo campo del modal
-    let nombreCampo = entradaSanitizada(nuevoCampoNombre.val());
-    let valorCampo = entradaSanitizada(nuevoValorCampo.val());
+    let nombreCampo = sanitizeText(nuevoCampoNombre.val());
+    let valorCampo = sanitizeText(nuevoValorCampo.val());
 
 // Se crea el campo input para el nuevo campo y agregarlo al modal de metadatos
     let newFormGroup = $('<div class="form-group"></div>');
@@ -124,7 +124,7 @@ function extraerMetadatosModal(){
 // Iterar sobre los elementos del formulario en el modal (se seleccionan los inputs y el select)
     $('#modalEditarMetadatos .modal-body input, #modalEditarMetadatos .modal-body select').each(function() {
         let fieldName = $(this).attr('name');
-        let fieldValue = entradaSanitizada($(this).val()??'');
+        let fieldValue = sanitizeText($(this).val()??'');
 
         if (fieldName === 'author' || fieldName === 'visibility') {
             formData[fieldName] = fieldValue;
@@ -206,7 +206,7 @@ function optionsSelectAccounId()
 }
 
 function selectAccountId() {
-    return entradaSanitizada($('#accountSelect').val());
+    return sanitizeText($('#accountSelect').val());
 }
 
 function mostrarModalErrores(xhr)

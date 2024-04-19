@@ -1,5 +1,7 @@
 $(document).ready(function() {
-    $("#newName, #nuevoValorCampo, #nuevoCampoNombre").on('input', sanitizeInput);
+    $("#newName, #nuevoValorCampo, #nuevoCampoNombre, #author").on('input', function() {
+        sanitizeInput($(this));
+    });
 
     $('#cambiarTema').click(function(){
         let htmlElement = $('html');
@@ -40,21 +42,28 @@ function formatDate(timestamp)
     return  format.format(fecha);
 }
 
-//Se debe eliminar remote.php/dav/files/{user} para poder navegar por los directorios
-function cleanOwncloudData(data)
+/*
+ * Elimina el prefix de webdav y coloca las barras invertidas en varios elementos.
+ */
+function cleanDataPaths(data)
 {
     return data.map(function (elemento) {
-        elemento.path = cleanOwncloudPath(elemento.path);
+        elemento.path = cleanPath(elemento.path);
         return elemento;
     });
 }
 
-function cleanOwncloudPath(path)
+/*
+ * Elimina el prefix de webdav y coloca las barras invertidas.
+ */
+function cleanPath(path)
 {
-    //Limpiamos la ruta si es de owncloud
-    path = path.substring(path.indexOf("remote.php/dav/files/") + "remote.php/dav/files/".length);
+    path=path.replace(/\\/g, '/');
 
-    path=path.replace(/^.*?\//, "");
+    let expresionRegular = /(.*?\/remote\.php\/dav\/files\/\w+\/)/g;
+
+    path=path.replace(expresionRegular,'');
+
     return path;
 }
 
@@ -119,7 +128,7 @@ function manejarActualizacionTabla(data, account) {
     }
 }
 
-function entradaSanitizada(text) {
+function sanitizeText(text) {
 
 // Se eliminan caracteres especiales excepto letras, números, guion bajo, punto, coma y guion
     var sanitizedText = text.replace(/[^a-zA-Z0-9_.,\-]/g, '');
@@ -135,16 +144,14 @@ function entradaSanitizada(text) {
     return sanitizedText;
 }
 
-function sanitizeInput(event) {
-    let input = $(this);
+function sanitizeInput(input) {
     let text = input.val();
 
-// Se elimina caracteres no permitidos
-    let sanitizedText = text.replace(/[^a-zA-Z0-9_.,\-]/g, '');
+    let sanitizedText = sanitizeText(text);
 
-// Se actualiza el valor del input con el texto sanitizado
-    input.val(sanitizedText);
-
-    /*limpiarModalErrores();
-    mostrarModalErrores("No se permite introducir caracteres especiales");*/
+// Si el texto se ha sanitizado y ha cambiado, se ejecuta el popover
+    if (sanitizedText !== text) {
+        input.val(sanitizedText);
+        input.popover('show');
+    }
 }

@@ -275,10 +275,11 @@ class CoreController extends AbstractController
             $this->account=$this->retriveAccount($this->accountId);
             $this->core->setFilesystem($this->retriveCore($this->account));
 
+            $this->path=$this->core->cleanPath($this->path);
 
             $contentInDirectory=$this->core->listDirectory($this->path)->toArray();
 
-            $account = $this->em->getRepository(Account::class)->getAccount($this->account);
+             $account = $this->em->getRepository(Account::class)->getAccount($this->account);
 
             // ------- Se añade a cada archivo sus metadatos (si los tiene) ------
             foreach ($contentInDirectory as $archive)
@@ -337,8 +338,9 @@ class CoreController extends AbstractController
             $this->account=$this->retriveAccount($this->accountId);
             $this->core->setFilesystem($this->retriveCore($this->account));
 
+            $this->path=$this->core->cleanPath($this->path);
 
-            $this->core->logger->info('DOWNLOAD | '.' file: '.$this->path.'\\'.$this->name.
+            $this->core->logger->info('DOWNLOAD | '.' file: '.$this->path.'/'.$this->name.
                ' | controller: '.$this->account->getCloud().
                 ' | user:' . $this->account->getUser().
                 ' | path:' . $this->path.
@@ -364,7 +366,9 @@ class CoreController extends AbstractController
             $this->createContext($cloud);
             $this->account=$this->retriveAccount($this->accountId);
             $this->core->setFilesystem($this->retriveCore($this->account));
-            
+
+            $this->path=$this->core->cleanPath($this->path);
+
             $this->core->createDir($this->path,$this->name);
 
             $this->em->getRepository(Metadata::class)->store(
@@ -384,7 +388,7 @@ class CoreController extends AbstractController
                     $this->em->getRepository(Account::class)->getAccount($this->account)
                 ));
 
-            $this->core->logger->info('CREATE_DIR | '.' dir: '.$this->path.'\\'.$this->name.
+            $this->core->logger->info('CREATE_DIR | '.' dir: '.$this->path.'/'.$this->name.
                 ' | controller: '.$this->account->getCloud().
                 ' | user:' . $this->account->getUser().
                 ' | path:' . $this->path.
@@ -411,7 +415,9 @@ class CoreController extends AbstractController
             $this->createContext($cloud);
             $this->account=$this->retriveAccount($this->accountId);
             $this->core->setFilesystem($this->retriveCore($this->account));
-            
+
+            $this->path=$this->core->cleanPath($this->path);
+
             $this->core->createFile($this->path,$this->name);
 
             $this->em->getRepository(Metadata::class)->store(
@@ -429,7 +435,7 @@ class CoreController extends AbstractController
                     null,$this->em->getRepository(Account::class)->getAccount($this->account)
                 ));
 
-            $this->core->logger->info('CREATE_FILE | '.' file: '.$this->path.'\\'.$this->name.
+            $this->core->logger->info('CREATE_FILE | '.' file: '.$this->path.'/'.$this->name.
                 ' | controller: '.$this->account->getCloud().
                 ' | user:' . $this->account->getUser().
                 ' | path:' . $this->path.
@@ -456,11 +462,13 @@ class CoreController extends AbstractController
             $this->createContext($cloud);
             $this->account=$this->retriveAccount($this->accountId);
             $this->core->setFilesystem($this->retriveCore($this->account));
-            
-            $fullPath=rtrim($this->path.'/'.$this->name, '/');
+
+            $this->path=$this->core->cleanPath($this->path);
+
+            $fullPath=$this->path.'/'.$this->name;
 
             $accountBD = $this->em->getRepository(Account::class)->getAccount($this->account);
-            $archivo=$this->core->getArchivo(str_replace('\\', '/', ($fullPath)));
+            $archivo=$this->core->getArchivo($fullPath);
 
             /* --- Se obtiene y configura los metadatadatos del archivo. Si no existen registros
                    previos se crean y si existen se modifican --- */
@@ -468,7 +476,7 @@ class CoreController extends AbstractController
             $metadata = $this->core->getBasicMetadata($archivo,$accountBD);
 
             $metadata->setName(basename($fullPath));
-            $metadata->setPath(dirname($fullPath));
+            $metadata->setPath(dirname($fullPath)==='\\' ? '/' : dirname($fullPath));
             $metadata->setStatus(FileStatus::DELETED->value);
 
             $this->em->getRepository(Metadata::class)->store($metadata);
@@ -510,23 +518,25 @@ class CoreController extends AbstractController
             $this->account=$this->retriveAccount($this->accountId);
             $this->core->setFilesystem($this->retriveCore($this->account));
 
+            $this->path=$this->core->cleanPath($this->path);
+
             // Se obtiene el contenido del fichero en forma UploadedFile
             $content=$this->core->getUploadedFile($this->request->files->get('content'));
 
             $sourcePath=$content->getPathname();
-            $destinationPath=$this->request->get('path');
+            $destinationPath=$this->path;
             
             $this->core->upload($destinationPath,$content);
 
 // Se distingue entre colocar el archivo en root o en un directorio
             if(!empty($destinationPath))
             {
-                $uploadPath=$destinationPath.'\\'.$content->getClientOriginalName();
+                $uploadPath=$destinationPath.'/'.$content->getClientOriginalName();
             } else{
                 $uploadPath=$content->getClientOriginalName();
             }
 
-            $archivo=$this->core->getArchivo(str_replace('\\', '/', ($uploadPath)));
+            $archivo=$this->core->getArchivo($this->core->cleanPath($uploadPath));
 
             $metadata = $this->core->getBasicMetadata($archivo,$this->em->getRepository(Account::class)->getAccount($this->account));
 
@@ -536,7 +546,7 @@ class CoreController extends AbstractController
 
             $this->em->getRepository(Metadata::class)->store($metadata);
 
-            $this->core->logger->info('UPLOAD | '.' file: '.$destinationPath.'\\'.$content->getClientOriginalName().
+            $this->core->logger->info('UPLOAD | '.' file: '.$destinationPath.'/'.$content->getClientOriginalName().
                 ' | controller: '.$this->account->getCloud().
                 ' | user:' . $this->account->getUser().
                 ' | path:' . $this->path.
@@ -563,9 +573,14 @@ class CoreController extends AbstractController
             $this->account=$this->retriveAccount($this->accountId);
             $this->core->setFilesystem($this->retriveCore($this->account));
 
+            $this->path=$this->core->cleanPath($this->path);
+
+            $path = dirname($this->path)==='' || dirname($this->path)==='.' ? '/' : dirname($this->path);
+            $name = basename($this->path);
+
             $account = $this->em->getRepository(Account::class)->getAccount($this->account);
 
-            $fileMetadata=$this->em->getRepository(Metadata::class)->findByExactPathAndAccountNull($account,dirname($this->path),basename($this->path));
+            $fileMetadata=$this->em->getRepository(Metadata::class)->findByExactPathAndAccountNull($account,$path,$name);
 
             $file=$this->core->getAnArchive($this->path);
             if ($fileMetadata)
@@ -575,9 +590,9 @@ class CoreController extends AbstractController
                 $file['extra_metadata']['extra'] = $fileMetadata->getExtra();
             }
 
-           /* $this->core->logger->info('GET_ARCHIVE | '.' archive: '.$this->path.
+           $this->core->logger->info('GET_ARCHIVE | '.' archive: '.$this->path.
                 ' | controller: '.$this->account->getCloud().
-                ' | user:' . $this->account->getUser()); */
+                ' | user:' . $this->account->getUser());
 
             return new JsonResponse($file,Response::HTTP_OK);
         }catch (CloudException $e)
@@ -601,11 +616,16 @@ class CoreController extends AbstractController
             $this->account=$this->retriveAccount($this->accountId);
             $this->core->setFilesystem($this->retriveCore($this->account));
 
+            $this->path=$this->core->cleanPath($this->path);
+
+            $path = dirname($this->path)==='' || dirname($this->path)==='.' ? '/' : dirname($this->path);
+            $name = basename($this->path);
+
             $account = $this->em->getRepository(Account::class)->getAccount($this->account);
 
             $metadata=json_decode($this->request->get('metadata'),true);
 
-            $file=$this->em->getRepository(Metadata::class)->findByExactPathAndAccountNull($account,dirname($this->path),basename($this->path));
+            $file=$this->em->getRepository(Metadata::class)->findByExactPathAndAccountNull($account,$path,$name);
             if($file)
             {
                 $file->setAuthor($metadata['author']);
@@ -615,10 +635,11 @@ class CoreController extends AbstractController
             } else //Si $file no existe es probable que sea una primera modificación de un fichero no indexado
             {
                 $fileMetadata=$this->core->getAnArchive($this->path);
+                $path=dirname($this->core->cleanPath($fileMetadata['path']));
                 $file = new Metadata(
                     basename($fileMetadata['path']),
                     $fileMetadata['extra_metadata']['id']??null,
-                    dirname($this->core->cleanOwncloudPath($fileMetadata['path'])),
+                    $path==='' || $path==='.' ? '/' : $path,
                     $fileMetadata['extra_metadata']['virtual_path']??null,
                     $fileMetadata['type'],
                     $fileMetadata['file_size']??null,
@@ -659,15 +680,20 @@ class CoreController extends AbstractController
 //Configuramos todos los parametros que vamos a necesitar
             $accountId1 = $this->request->get('accountId1') ?? null;
             $accountId2 = $this->request->get('accountId2') ?? null;
-            
-            $sourceFullPath=$this->request->get('sourcePath'); // aa/a.txt
-            $destinationDirectoryPath=$this->request->get('destinationPath'); // algun lugar/aa/
-            $destinationFullPath=$destinationDirectoryPath.'/'.basename($sourceFullPath); // algun lugar/aa/a.txt
-            $destinationCloud=$this->request->get('destinationCloud');
 
             $this->createContext($cloud);
             $sourceAccount=$this->retriveAccount($accountId1);
             $sourceFileSystem=$this->retriveCore($sourceAccount);
+
+            $sourceFullPath=$this->request->get('sourcePath'); // aa/a.txt
+            $sourceFullPath=$this->core->cleanPath($sourceFullPath);
+
+            $destinationDirectoryPath=$this->request->get('destinationPath'); // algun lugar/aa/
+            $destinationDirectoryPath=$this->core->cleanPath($destinationDirectoryPath);
+
+            $destinationFullPath=$destinationDirectoryPath.'/'.basename($sourceFullPath); // algun lugar/aa/a.txt
+            $destinationCloud=$this->request->get('destinationCloud');
+
 
             $this->createContext($destinationCloud);
             $destinationAccount=$this->retriveAccount($accountId2);

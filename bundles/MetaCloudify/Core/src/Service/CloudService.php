@@ -97,6 +97,9 @@ abstract class CloudService
     {
         try {
             $filesystem=$this->getFilesystem();
+
+            $path=$this->pathNormalizer->normalizePath($path);
+
             return $filesystem->listContents($path, false);
 
         } catch (FilesystemException $e) {
@@ -116,9 +119,11 @@ abstract class CloudService
      */
     public function createDir(String $path, String $name): void
     {
-        $newPath = $path. '/'. $name;
-
         $filesystem=$this->getFilesystem();
+
+        $path=$this->pathNormalizer->normalizePath($path);
+
+        $newPath = $path. '/'. $name;
 
         try {
             if($filesystem->directoryExists($newPath))
@@ -146,6 +151,8 @@ abstract class CloudService
     {
 
         $filesystem=$this->getFilesystem();
+
+        $path=$this->pathNormalizer->normalizePath($path);
 
         try {
             if($filesystem->directoryExists($path))
@@ -179,6 +186,8 @@ abstract class CloudService
         try {
             $filesystem=$this->getFilesystem();
 
+            $path=$this->pathNormalizer->normalizePath($path);
+
             $archivo=$this->getArchivo($path);
             if($archivo->isDir())
             {
@@ -205,11 +214,13 @@ abstract class CloudService
     {
         $filesystem=$this->getFilesystem();
 
+        $path=$this->pathNormalizer->normalizePath($path);
+
         $stream = fopen($content->getPathname(), 'r');
 
         if ($stream) {
             try {
-                $filesystem->writeStream($path . "\\" . $content->getClientOriginalName(), $stream);
+                $filesystem->writeStream($path . "/" . $content->getClientOriginalName(), $stream);
             } catch (FilesystemException | UnableToWriteFile $e) {
                 fclose($stream); // Asegurarse de cerrar el recurso en caso de excepción
                 throw new CloudException(ErrorTypes::ERROR_UPLOAD->getErrorMessage().' - '.$e->getMessage(),
@@ -242,6 +253,8 @@ abstract class CloudService
     {
 
         $filesystem=$this->getFilesystem();
+
+        $path=$this->pathNormalizer->normalizePath($path);
 
         try {
             $stream = $filesystem->readStream($path);
@@ -365,7 +378,7 @@ abstract class CloudService
         return new Metadata(
             basename($file->path()),
             $file->extraMetadata()['id']??null,
-            dirname($file->path()),
+            $this->pathNormalizer->normalizePath(dirname($file->path())),
             $file->extraMetadata()['virtual_path']??null,
             $file->type(),
             $fileSize??null,
@@ -380,31 +393,32 @@ abstract class CloudService
     }
 
     /**
-     * @param string $ruta
+     * @param string $path
      * @return StorageAttributes
      * @throws CloudException
      */
-    public function getArchivo(string $ruta): StorageAttributes
+    public function getArchivo(string $path): StorageAttributes
     {
         try {
             $filesystem=$this->getFilesystem();
-            $ruta=$this->pathNormalizer->normalizePath($ruta);
 
-            $contents=$filesystem->listContents(dirname($ruta),false)->toArray();
+            $path=$this->pathNormalizer->normalizePath($path);
 
-            $filteredItems = array_filter($contents, function ($item) use ($ruta) {
+            $contents=$filesystem->listContents(dirname($path),false)->toArray();
+
+            $filteredItems = array_filter($contents, function ($item) use ($path) {
                                 $thisItemRuta=$this->pathNormalizer->normalizePath($item['path']);
-                                return $thisItemRuta === $ruta ||
-                                        $this->cleanOwncloudPath($thisItemRuta)==$ruta;
+                                return $thisItemRuta === $path ||
+                                        $this->cleanPath($thisItemRuta)==$path;
                             });
 
             if (!empty($filteredItems)) {
                 // El primer elemento encontrado (puede haber más si hay duplicados)
                 $item = reset($filteredItems);
                 if ($item instanceof FileAttributes) {
-                    return new FileAttributes($ruta, $item->fileSize(), $item->visibility(), $item->lastModified(), $item->mimeType(), $item->extraMetadata());
+                    return new FileAttributes($path, $item->fileSize(), $item->visibility(), $item->lastModified(), $item->mimeType(), $item->extraMetadata());
                 } elseif ($item instanceof DirectoryAttributes) {
-                    return new DirectoryAttributes($ruta, $item->visibility(), $item->lastModified(), $item->extraMetadata());
+                    return new DirectoryAttributes($path, $item->visibility(), $item->lastModified(), $item->extraMetadata());
                 }
             }
 //Si $filteredItems esta vacio es porque hay un error
@@ -421,18 +435,18 @@ abstract class CloudService
      * @return array
      * @throws CloudException
      */
-    public function getAnArchive(string $ruta): array // ruta=a/b/c.txt
+    public function getAnArchive(string $path): array // ruta=a/b/c.txt
     {
         try {
             $filesystem=$this->getFilesystem();
 
-            $ruta=$this->pathNormalizer->normalizePath($ruta);
+            $path=$this->pathNormalizer->normalizePath($path);
 
-            $contents=$filesystem->listContents(dirname($ruta),false)->toArray();
+            $contents=$filesystem->listContents(dirname($path),false)->toArray();
 
             foreach ($contents as $item) {
-                if ($this->pathNormalizer->normalizePath($item['path'])==$ruta ||
-                    $this->cleanOwncloudPath($this->pathNormalizer->normalizePath($item['path'])) === $ruta) // remote.php/webdav/usuario/a/b/c.txt == /a/b/c.txt
+                if ($this->pathNormalizer->normalizePath($item['path'])==$path ||
+                    $this->cleanPath($this->pathNormalizer->normalizePath($item['path'])) === $path) // remote.php/webdav/usuario/a/b/c.txt == /a/b/c.txt
                 {
                     return json_decode(json_encode($item),true); //El objeto se convierte a un array
                 }
@@ -478,10 +492,14 @@ abstract class CloudService
     {
         try {
             $this->setFilesystem($source);
+
+            $sourcePath=$this->pathNormalizer->normalizePath($sourcePath);
+            $destinationPath=$this->pathNormalizer->normalizePath($destinationPath);
+
             $content=$source->read($sourcePath);
 
             $this->setFilesystem($destination);
-            $destination->write($destinationPath . "\\" . basename($sourcePath), $content);
+            $destination->write($destinationPath . "/" . basename($sourcePath), $content);
         }catch (FilesystemException | Exception $e) {
             throw new CloudException(ErrorTypes::ERROR_COPY->getErrorMessage().' - '.$e->getMessage(),
                 ErrorTypes::ERROR_COPY->getErrorCode());
@@ -490,13 +508,16 @@ abstract class CloudService
     }
 
     /**
+     *
+     * Elimina el prefix de webdav y coloca las barras invertidas.
+     *
      * @param $path
      * @return string
      */
-    function cleanOwncloudPath($path):string {
-        $reult=preg_replace('/^(?:.+?\/)?remote\.php\/dav\/files\/[^\/]+\/(.+)$/', '$1', $path);
-
-        return $reult;
+    function cleanPath($path):string {
+        return $this->pathNormalizer->normalizePath(
+            preg_replace('/^(?:.+?\/)?remote\.php\/dav\/files\/[^\/]+\/(.+)$/', '$1', $path)
+        );
     }
 
     /**
