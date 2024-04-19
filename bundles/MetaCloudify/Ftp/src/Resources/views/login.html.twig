@@ -39,7 +39,8 @@
 
 {% block javascripts %}
     <script src="{{ asset('bundles/metacloudify_home/js/modales.js') }}"></script>
-    <script src="{{ asset('bundles/metacloudifyowncloud/js/login.js') }}"></script>
+    <script src="{{ asset('bundles/metacloudifyftp/js/login.js') }}"></script>
+    <script src="{{ asset('bundles/metacloudify_home/js/localStore.js') }}"></script>
 {% endblock %}
 
 {% block body %}
@@ -83,15 +84,15 @@
                 <h1 class="h3 mb-3 fw-normal">Sign in</h1>
 
                 <div class="form-floating">
-                    <input name="userName" type="text" class="form-control" id="floatingInput" placeholder="name" wfd-id="id0">
-                    <label for="floatingInput">Email / Username</label>
+                    <input type="text" class="form-control" id="floatingBibloa" placeholder="name" wfd-id="id0">
+                    <label for="floatingBibloa">Email / Username</label>
                 </div>
                 <div class="form-floating">
-                    <input name="password" type="password" class="form-control" id="floatingPassword" placeholder="Password" wfd-id="id1">
-                    <label for="floatingPassword">Password</label>
+                    <input type="password" class="form-control" id="floatingBiblob" placeholder="Password" wfd-id="id1">
+                    <label for="floatingBiblob">Password</label>
                 </div>
                 <div class="form-floating">
-                    <input name="URL" type="text" class="form-control" id="floatingURL" placeholder="127.0.0.1" wfd-id="id2">
+                    <input type="text" class="form-control" id="floatingURL" placeholder="127.0.0.1" wfd-id="id2">
                     <label for="floatingURL">URL</label>
                 </div>
 
