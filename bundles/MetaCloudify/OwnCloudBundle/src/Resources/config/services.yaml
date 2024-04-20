@@ -1,0 +1,5 @@
+services:
+  MetaCloudify\OwnCloudBundle\Service\CloudService:
+    public: true
+    autoconfigure: true
+    autowire: true

@@ -1,0 +1,5 @@
+services:
+  MetaCloudify\OneDriveBundle\Service\CloudService:
+    public: true
+    autoconfigure: true
+    autowire: true

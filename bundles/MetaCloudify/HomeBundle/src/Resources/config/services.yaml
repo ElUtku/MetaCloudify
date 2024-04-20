@@ -1,0 +1,10 @@
+services:
+  MetaCloudify\HomeBundle\Service\CloudService:
+    public: true
+    autoconfigure: true
+    autowire: true
+
+  MetaCloudify\HomeBundle\Controller\HomeController:
+    public: true
+    autoconfigure: true
+    autowire: true

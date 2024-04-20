@@ -79,12 +79,12 @@
     "autoload": {
         "psr-4": {
             "App\\": "src/",
-            "MetaCloudify\\Core\\": "bundles/MetaCloudify/Core/src",
-            "MetaCloudify\\OneDrive\\": "bundles/MetaCloudify/OneDrive/src/",
-            "MetaCloudify\\OwnCloud\\": "bundles/MetaCloudify/OwnCloud/src/",
-            "MetaCloudify\\GoogleDrive\\": "bundles/MetaCloudify/GoogleDrive/src/",
-            "MetaCloudify\\Ftp\\": "bundles/MetaCloudify/Ftp/src/",
-            "MetaCloudify\\Home\\": "bundles/MetaCloudify/Home/src/"
+            "MetaCloudify\\CoreBundle\\": "bundles/MetaCloudify/CoreBundle/src",
+            "MetaCloudify\\OneDriveBundle\\": "bundles/MetaCloudify/OneDriveBundle/src/",
+            "MetaCloudify\\OwnCloudBundle\\": "bundles/MetaCloudify/OwnCloudBundle/src/",
+            "MetaCloudify\\GoogleDriveBundle\\": "bundles/MetaCloudify/GoogleDriveBundle/src/",
+            "MetaCloudify\\FtpBundle\\": "bundles/MetaCloudify/FtpBundle/src/",
+            "MetaCloudify\\HomeBundle\\": "bundles/MetaCloudify/HomeBundle/src/"
         }
     },
     "autoload-dev": {

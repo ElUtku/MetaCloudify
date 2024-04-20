@@ -1,0 +1,10 @@
+services:
+  MetaCloudify\CoreBundle\Service\CloudService:
+    public: true
+    autoconfigure: true
+    autowire: true
+
+  MetaCloudify\CoreBundle\Controller\CoreController:
+    public: true
+    autoconfigure: true
+    autowire: true

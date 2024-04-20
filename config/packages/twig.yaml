@@ -1,9 +1,9 @@
 twig:
     default_path: '%kernel.project_dir%/templates'
     paths:
-        '%kernel.project_dir%/bundles/MetaCloudify/OwnCloud/src/Resources/views': MetaCloudifyOwnCloudBundle
-        '%kernel.project_dir%/bundles/MetaCloudify/Ftp/src/Resources/views': MetaCloudifyFtpBundle
-        '%kernel.project_dir%/bundles/MetaCloudify/Home/src/Resources/views': MetaCloudifyHomeBundle
+        '%kernel.project_dir%/bundles/MetaCloudify/OwnCloudBundle/src/Resources/views': MetaCloudifyOwnCloudBundle
+        '%kernel.project_dir%/bundles/MetaCloudify/FtpBundle/src/Resources/views': MetaCloudifyFtpBundle
+        '%kernel.project_dir%/bundles/MetaCloudify/HomeBundle/src/Resources/views': MetaCloudifyHomeBundle
 
 when@test:
     twig:

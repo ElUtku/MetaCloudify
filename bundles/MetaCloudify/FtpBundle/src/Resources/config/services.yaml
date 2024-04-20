@@ -1,0 +1,5 @@
+services:
+  MetaCloudify\FtpBundle\Service\CloudService:
+    public: true
+    autoconfigure: true
+    autowire: true

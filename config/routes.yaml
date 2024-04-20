@@ -6,10 +6,10 @@
 # DESCOMENTAR PARA PROD
 #not_found:
 #  path: /{catchall}
-#  controller: MetaCloudify\Core\Controller\CoreController::notFound
+#  controller: MetaCloudify\CoreBundle\Controller\CoreController::notFound
 #  requirements:
 #    catchall: .*
 
 #error_handler:
 #   path: /error-handler
-#   controller: MetaCloudify\Core\Controller\CoreController::frameworkError
+#   controller: MetaCloudify\CoreBundle\Controller\CoreController::frameworkError

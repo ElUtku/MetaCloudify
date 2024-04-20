@@ -19,9 +19,9 @@ services:
             - '../src/Kernel.php'
 
 imports:
-    - { resource: '../bundles/MetaCloudify/Core/src/Resources/config/services.yaml' }
-    - { resource: '../bundles/MetaCloudify/OwnCloud/src/Resources/config/services.yaml' }
-    - { resource: '../bundles/MetaCloudify/GoogleDrive/src/Resources/config/services.yaml' }
-    - { resource: '../bundles/MetaCloudify/OneDrive/src/Resources/config/services.yaml' }
-    - { resource: '../bundles/MetaCloudify/Ftp/src/Resources/config/services.yaml' }
-    - { resource: '../bundles/MetaCloudify/Home/src/Resources/config/services.yaml' }
+    - { resource: '../bundles/MetaCloudify/CoreBundle/src/Resources/config/services.yaml' }
+    - { resource: '../bundles/MetaCloudify/OwnCloudBundle/src/Resources/config/services.yaml' }
+    - { resource: '../bundles/MetaCloudify/GoogleDriveBundle/src/Resources/config/services.yaml' }
+    - { resource: '../bundles/MetaCloudify/OneDriveBundle/src/Resources/config/services.yaml' }
+    - { resource: '../bundles/MetaCloudify/FtpBundle/src/Resources/config/services.yaml' }
+    - { resource: '../bundles/MetaCloudify/HomeBundle/src/Resources/config/services.yaml' }
