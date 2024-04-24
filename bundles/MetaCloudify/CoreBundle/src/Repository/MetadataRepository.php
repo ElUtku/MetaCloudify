@@ -137,7 +137,7 @@ class MetadataRepository extends EntityRepository
             ->andWhere('m.name = :name')
             ->andWhere('m.account = :account')
             ->andWhere('m.type = :type')
-            ->setParameter('path', $file->getPath())
+            ->setParameter('path', $file->getPath()==='.' || $file->getPath() ==='' ? '/' : $file->getPath())
             ->setParameter('name', $file->getName())
             ->setParameter('account', $file->getAccount())
             ->setParameter('type', $file->getType());

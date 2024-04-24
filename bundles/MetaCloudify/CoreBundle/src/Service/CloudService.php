@@ -515,6 +515,7 @@ abstract class CloudService
      * @return string
      */
     function cleanPath($path):string {
+        $path = $path==='.' || $path === '' ? '/' : $path;
         return $this->pathNormalizer->normalizePath(
             preg_replace('/^(?:.+?\/)?remote\.php\/dav\/files\/[^\/]+\/(.+)$/', '$1', $path)
         );
