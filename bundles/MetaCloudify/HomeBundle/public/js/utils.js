@@ -155,3 +155,11 @@ function sanitizeInput(input) {
         input.popover('show');
     }
 }
+
+function objectToCsv(datos) {
+    let csv = "";
+    Object.entries(datos).forEach(([key, value]) => {
+        csv += `${key}: ${value}\n`;
+    });
+    return csv;
+}

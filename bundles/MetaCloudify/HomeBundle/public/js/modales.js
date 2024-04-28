@@ -6,6 +6,22 @@ $(document).ready(function() {
         $('.mb-3.dynamic').remove(); // Eliminar todos los elementos con la clase 'mb-3' y 'dynamic'
     });
 
+    $("#exportarMetadatos").click(function(){
+        let metadatosJson=obtenerMetadatos(metadata);
+        let csvContent = objectToCsv(metadatosJson);
+        let blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        let url = URL.createObjectURL(blob);
+        let link = document.createElement("a");
+
+        let name = basename($('#modalVerMetadatos').data('path'));
+
+        link.setAttribute("href", url);
+        link.setAttribute("download", name+"-metadatos.csv");
+        link.style.visibility = "hidden";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
 });
 
 function editarModalMetadata() {
@@ -148,19 +164,34 @@ function extraerMetadatosModal(){
     return formData;
 }
 
+let metadata = null;
 function verModalMetadata(path, accountId) {
     let modalVerMetadatos = $('#modalVerMetadatos');
     modalVerMetadatos.data('path', path);
     modalVerMetadatos.data('accountId', accountId);
 
     let contenidoModalVerMetadatos = modalVerMetadatos.find('.modal-body');
-    let metadata = getArchiveMetadata(accountId, path);
+    metadata = getArchiveMetadata(accountId, path);
 
+    let metadatosJson=obtenerMetadatos(metadata);
+
+    let arrayExtra=[];
+    Object.keys(metadatosJson).forEach(key => {
+        let value = metadatosJson[key] ?? '-';
+        arrayExtra.push(`<li><b>${key}</b>: ${value}</li>`);
+    });
+
+    contenidoModalVerMetadatos.html(
+        `<ul>${arrayExtra.join('')}</ul>`
+    );
+    modalVerMetadatos.modal('show');
+}
+
+function obtenerMetadatos(metadata) {
     let author = metadata.extra_metadata.author ?? '-';
-    let arrayExtra = [
-        `<li><b>Author</b>: ${author}</li>`
-    ];
-
+    let metadataObj = {
+        "Autor": author
+    };
 
     let extraObjeto = {};
     if (metadata.extra_metadata.extra && metadata.extra_metadata.extra !== "null") {
@@ -169,13 +200,10 @@ function verModalMetadata(path, accountId) {
 
     Object.keys(extraObjeto).forEach(key => {
         let value = extraObjeto[key] ?? '-';
-        arrayExtra.push(`<li><b>${key}</b>: ${value}</li>`);
+        metadataObj[key] = value;
     });
 
-    contenidoModalVerMetadatos.html(
-        `<ul>${arrayExtra.join('')}</ul>`
-    );
-    modalVerMetadatos.modal('show');
+    return metadataObj;
 }
 
 function optionsSelectAccounId()
