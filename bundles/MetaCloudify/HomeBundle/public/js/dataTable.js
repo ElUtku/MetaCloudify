@@ -151,14 +151,19 @@ function crearTabla(data,account)
             className: 'btn-xs',
             action: function ()
             {
-                let filaSeleccionada = tabla.DataTable().row({ selected: true }).data();
+                modalConfirmaEliminar().then(function(confirm) {
+                    if (confirm)
+                    {
+                        let filaSeleccionada = tabla.DataTable().row({ selected: true }).data();
 
-                if (filaSeleccionada) {
-                    dlt(filaSeleccionada.path,filaSeleccionada.accountId);
-                } else {
-                    // Manejo para cuando no se ha seleccionado ninguna fila
-                    console.log('No se ha seleccionado ninguna fila');
-                }
+                        if (filaSeleccionada) {
+                            dlt(filaSeleccionada.path,filaSeleccionada.accountId);
+                        } else {
+                            // Manejo para cuando no se ha seleccionado ninguna fila
+                            console.log('No se ha seleccionado ninguna fila');
+                        }
+                    }
+                });
             }
         };
     let buttonCopiarArchivo =

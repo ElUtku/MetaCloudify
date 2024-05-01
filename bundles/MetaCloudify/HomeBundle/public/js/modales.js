@@ -266,3 +266,39 @@ function limpiarModalSuccess()
 {
     $('#successContent').html('');
 }
+
+function modalConfirmaEliminar()
+{
+    return new Promise(function(resolve, reject) {
+        $('#deleteModal').modal('show');
+
+        function confirmarEliminacion() {
+            $('#deleteModal').modal('hide');
+            $('#confirmDeleteBtn').off('click', confirmarEliminacion);
+            $('#declineDeleteBtn').off('click', declinarEliminacion);
+            $('#deleteModal').off('hidden.bs.modal', ocultarModal);
+            resolve(true);
+        }
+
+        function declinarEliminacion() {
+            $('#deleteModal').modal('hide');
+            $('#confirmDeleteBtn').off('click', confirmarEliminacion);
+            $('#declineDeleteBtn').off('click', declinarEliminacion);
+            $('#deleteModal').off('hidden.bs.modal', ocultarModal);
+            resolve(false);
+        }
+
+        function ocultarModal() {
+            $('#confirmDeleteBtn').off('click', confirmarEliminacion);
+            $('#declineDeleteBtn').off('click', declinarEliminacion);
+            $('#deleteModal').off('hidden.bs.modal', ocultarModal);
+            resolve(false);
+        }
+
+        // Asociar los manejadores de eventos a los botones
+        $('#confirmDeleteBtn').on('click', confirmarEliminacion);
+        $('#declineDeleteBtn').on('click', declinarEliminacion);
+        $('#deleteModal').on('hidden.bs.modal', ocultarModal);
+    });
+
+}

@@ -262,12 +262,10 @@ class Account
     public function removeMetadata(Metadata $metadata): static
     {
         if ($this->metadata->removeElement($metadata)) {
-            // set the owning side to null (unless already changed)
             if ($metadata->getAccount() === $this) {
                 $metadata->setAccount(null);
             }
         }
-
         return $this;
     }
 }
