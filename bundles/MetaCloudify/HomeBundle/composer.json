@@ -35,7 +35,7 @@
     }
   },
   "scripts": {
-    "post-package-install": [
+    "post-autoload-dump": [
       "MetaCloudify\\HomeBundle\\Resources\\config\\CustomInstallerScript::run"
     ]
   }
