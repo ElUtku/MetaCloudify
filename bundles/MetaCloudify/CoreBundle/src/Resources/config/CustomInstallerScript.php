@@ -21,16 +21,6 @@ class CustomInstallerScript
 
         $newAnnotationsConfig = Yaml::dump($annotationsConfig);
 
-        file_put_contents($annotationsConfigFile, $newAnnotationsConfig);
-
-        $twigConfigFile = $rootDir . '/config/packages/twig.yaml';
-
-        $twigConfig = Yaml::parse(file_get_contents($twigConfigFile));
-
-        $twigConfig['twig']['paths'][$rootDir . '/bundles/MetaCloudify/OwnCloudBundle/src/Resources/views'] = 'MetaCloudifyOwnCloudBundle';
-
-        $newTwigConfig = Yaml::dump($twigConfig);
-
-        file_put_contents($twigConfigFile, $newTwigConfig);
+        file_put_contents($annotationsConfigFile, $newAnnotationsConfig);;
     }
 }

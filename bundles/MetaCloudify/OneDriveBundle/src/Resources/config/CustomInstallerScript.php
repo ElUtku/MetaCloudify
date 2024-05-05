@@ -1,17 +1,28 @@
 <?php
 namespace MetaCloudify\OneDriveBundle\Resources\config;
 
+use Symfony\Component\Yaml\Yaml;
+
 class CustomInstallerScript
 {
     public static function run(): void
     {
-        $rootDir = dirname(__DIR__, 6);
-        $file = $rootDir . '/config/routes/annotations.yaml';
-        $lineToAdd = "\n" .
-            "\nmetacloudify_onedrivebundle:" .
-            "\n    resource: '@MetaCloudifyOneDriveBundle/src/Resources/config/annotations.yaml'" .
-            "\n";
+//Annotations ----------------------
 
-        file_put_contents($file, $lineToAdd, FILE_APPEND);
+        $rootDir = dirname(__DIR__, 6);
+        $annotationsConfigFile = $rootDir . '/config/routes/annotations.yaml';
+
+        $annotationsConfig = Yaml::parse(file_get_contents($annotationsConfigFile));
+
+        $newRoute = [
+            'metacloudify_onedrivebundle' => [
+                'resource' => '@MetaCloudifyOneDriveBundle/src/Resources/config/annotations.yaml'
+            ]
+        ];
+        $annotationsConfig = array_merge($annotationsConfig, $newRoute);
+
+        $newAnnotationsConfig = Yaml::dump($annotationsConfig);
+
+        file_put_contents($annotationsConfigFile, $newAnnotationsConfig);
     }
 }
