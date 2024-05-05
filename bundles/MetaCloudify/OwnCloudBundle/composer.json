@@ -32,5 +32,10 @@
       "type": "composer",
       "url": "https://repo.packagist.com/elutku/"
     }
+  },
+  "scripts": {
+    "post-install-cmd": [
+      "MetaCloudify\\OwnCloudBundle\\Resources\\config\\CustomInstallerScript::run"
+    ]
   }
 }

@@ -49,7 +49,7 @@
   },
   "scripts": {
     "post-install-cmd": [
-      "MetaCloudify\\CoreBundle\\Resources\\config\\CustomInstallScript::run"
+      "MetaCloudify\\CoreBundle\\Resources\\config\\CustomInstallerScript::run"
     ]
   }
 }
