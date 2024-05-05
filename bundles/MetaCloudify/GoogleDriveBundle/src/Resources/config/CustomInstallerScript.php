@@ -8,7 +8,7 @@ class CustomInstallerScript
         $rootDir = dirname(__DIR__, 6);
         $file = $rootDir . '/config/routes/annotations.yaml';
         $lineToAdd = "\n" .
-            "\nmetacloudify_corebundle:" .
+            "\nmetacloudify_googledrivebundle:" .
             "\n    resource: '@MetaCloudifyGoogleDriveBundle/src/Resources/config/annotations.yaml'" .
             "\n";
 

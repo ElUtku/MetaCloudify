@@ -48,7 +48,7 @@
     }
   },
   "scripts": {
-    "install": [
+    "post-package-install": [
       "MetaCloudify\\CoreBundle\\Resources\\config\\CustomInstallerScript::run"
     ]
   }
