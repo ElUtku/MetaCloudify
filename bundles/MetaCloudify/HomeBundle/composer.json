@@ -20,7 +20,9 @@
     }
   ],
   "require": {
-    "metacloudify/corebundle": "^1.0.0"
+    "metacloudify/corebundle": "^1.0.0",
+    "symfony/yaml": "5.4.*",
+    "symfony/asset": "5.4.*"
   },
   "autoload": {
     "psr-4": {

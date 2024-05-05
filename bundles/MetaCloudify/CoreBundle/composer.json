@@ -27,7 +27,8 @@
     "doctrine/doctrine-bundle": "^2.10",
     "doctrine/doctrine-migrations-bundle": "^3.2",
     "doctrine/orm": "^2.16",
-    "symfony/monolog-bundle": "^3.10.0"
+    "symfony/monolog-bundle": "^3.10.0",
+    "symfony/yaml": "5.4.*"
   },
   "autoload": {
     "psr-4": {

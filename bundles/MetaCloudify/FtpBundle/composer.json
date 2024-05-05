@@ -20,7 +20,9 @@
     "metacloudify/corebundle": "^1.0.0",
     "league/flysystem-ftp": "3.0",
     "league/flysystem-sftp-v3": "3.0",
-    "ext-ftp": "*"
+    "ext-ftp": "*",
+    "symfony/yaml": "5.4.*",
+    "symfony/asset": "5.4.*"
   },
   "autoload": {
     "psr-4": {

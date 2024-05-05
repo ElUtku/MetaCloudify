@@ -20,7 +20,8 @@
     "metacloudify/core": "^1.0.0",
     "google/apiclient": "^2.15",
     "league/oauth2-google": "^4.0",
-    "masbug/flysystem-google-drive-ext": "v2.2.2"
+    "masbug/flysystem-google-drive-ext": "v2.2.2",
+    "symfony/yaml": "5.4.*"
   },
   "autoload": {
     "psr-4": {
