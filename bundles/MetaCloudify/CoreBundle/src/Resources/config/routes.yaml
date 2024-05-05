@@ -1,0 +1,74 @@
+Home_index:
+  path: /
+  controller: MetaCloudify\CoreBundle\Controller\CoreController::drive
+  methods: GET
+
+login:
+  path: /{cloud}/login
+  controller: MetaCloudify\CoreBundle\Controller\CoreController::login
+  methods: GET|POST
+
+login_token:
+  path: /{cloud}/login/token
+  controller: MetaCloudify\CoreBundle\Controller\CoreController::loginPost
+  methods: GET|POST
+
+login_web:
+  path: /{cloud}/login/web
+  controller: MetaCloudify\CoreBundle\Controller\CoreController::loginWeb
+  methods: GET
+
+logout:
+  path: /{cloud}/logout
+  controller: MetaCloudify\CoreBundle\Controller\CoreController::logout
+  methods: GET
+
+drive:
+  path: /{cloud}/drive
+  controller: MetaCloudify\CoreBundle\Controller\CoreController::drive
+  methods: GET
+
+download:
+  path: /{cloud}/drive/download
+  controller: MetaCloudify\CoreBundle\Controller\CoreController::download
+  methods: GET
+
+createDir:
+  path: /{cloud}/drive/createDir
+  controller: MetaCloudify\CoreBundle\Controller\CoreController::createDir
+  methods: POST
+
+createFile:
+  path: /{cloud}/drive/createFile
+  controller: MetaCloudify\CoreBundle\Controller\CoreController::createFile
+  methods: POST
+
+delete:
+  path: /{cloud}/drive/delete
+  controller: MetaCloudify\CoreBundle\Controller\CoreController::delete
+  methods: DELETE
+
+upload:
+  path: /{cloud}/drive/upload
+  controller: MetaCloudify\CoreBundle\Controller\CoreController::upload
+  methods: POST
+
+getArchive:
+  path: /{cloud}/drive/getArchive
+  controller: MetaCloudify\CoreBundle\Controller\CoreController::getArchive
+  methods: GET
+
+editMetadata:
+  path: /{cloud}/drive/editMetadata
+  controller: MetaCloudify\CoreBundle\Controller\CoreController::editMetadata
+  methods: PUT|PATCH
+
+copy:
+  path: /{cloud}/copy
+  controller: MetaCloudify\CoreBundle\Controller\CoreController::copy
+  methods: POST
+
+move:
+  path: /{cloud}/move
+  controller: MetaCloudify\CoreBundle\Controller\CoreController::move
+  methods: PUT|PATCH

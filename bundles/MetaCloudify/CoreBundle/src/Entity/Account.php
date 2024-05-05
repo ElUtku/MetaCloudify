@@ -266,6 +266,7 @@ class Account
                 $metadata->setAccount(null);
             }
         }
+        
         return $this;
     }
 }
