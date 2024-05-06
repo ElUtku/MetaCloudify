@@ -1,14 +1,13 @@
 {
   "name": "metacloudify/ftpbundle",
   "description": "Servicio FTP para metacloudify",
-  "type": "symfony-bundle",
+  "type": "library",
   "keywords": [
     "ftp",
     "service",
     "metacloudify"
   ],
-  "minimum-stability": "stable",
-  "prefer-stable": true,
+  "minimum-stability": "dev",
   "authors": [
     {
       "name": "ElUtku",

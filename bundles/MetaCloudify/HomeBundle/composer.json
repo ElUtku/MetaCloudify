@@ -1,7 +1,7 @@
 {
   "name": "metacloudify/homebundle",
   "description": "Kit de aplicacion web",
-  "type": "symfony-bundle",
+  "type": "library",
   "keywords": [
     "front",
     "home",
@@ -10,8 +10,7 @@
     "file",
     "explorer"
   ],
-  "minimum-stability": "stable",
-  "prefer-stable": true,
+  "minimum-stability": "dev",
   "authors": [
     {
       "name": "ElUtku",

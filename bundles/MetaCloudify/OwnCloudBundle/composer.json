@@ -1,7 +1,7 @@
 {
   "name": "metacloudify/owncloudbudnle",
   "description": "Servicio OwnCloud para metacloudify",
-  "type": "symfony-bundle",
+  "type": "library",
   "keywords": [
     "OwnCloud",
     "service",
@@ -14,8 +14,7 @@
       "homepage": "https://github.com/ElUtku"
     }
   ],
-  "minimum-stability": "stable",
-  "prefer-stable": true,
+  "minimum-stability": "dev",
   "require": {
     "metacloudify/core": "^1.0.0",
     "league/flysystem-webdav": "^3.0",

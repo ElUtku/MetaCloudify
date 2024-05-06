@@ -1,7 +1,7 @@
 {
   "name": "metacloudify/corebundle",
   "description": "Operaciones para servicios en la nube",
-  "type": "symfony-bundle",
+  "type": "library",
   "authors": [
     {
       "name": "ElUtku",
@@ -9,8 +9,7 @@
       "homepage": "https://github.com/ElUtku"
     }
   ],
-  "minimum-stability": "stable",
-  "prefer-stable": true,
+  "minimum-stability": "dev",
   "keywords": [
     "cloud",
     "metadata",

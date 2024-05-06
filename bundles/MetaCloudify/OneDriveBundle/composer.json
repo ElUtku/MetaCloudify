@@ -1,7 +1,7 @@
 {
   "name": "metacloudify/onedrivebundle",
   "description": "Servicio OneDrive para metacloudify",
-  "type": "symfony-bundle",
+  "type": "library",
   "keywords": [
     "OneDrive",
     "service",
@@ -14,8 +14,7 @@
       "homepage": "https://github.com/ElUtku"
     }
   ],
-  "minimum-stability": "stable",
-  "prefer-stable": true,
+  "minimum-stability": "dev",
   "require": {
     "metacloudify/corebunle": "^1.0.0",
     "justus/flysystem-onedrive": "^2.0",

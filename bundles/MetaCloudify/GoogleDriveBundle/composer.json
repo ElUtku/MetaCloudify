@@ -1,14 +1,13 @@
 {
   "name": "metacloudify/googledrivebundle",
   "description": "Servicio GoogleDrive para metacloudify",
-  "type": "symfony-bundle",
+  "type": "library",
   "keywords": [
     "GoogleDrive",
     "service",
     "metacloudify"
   ],
-  "minimum-stability": "stable",
-  "prefer-stable": true,
+  "minimum-stability": "dev",
   "authors": [
     {
       "name": "ElUtku",
