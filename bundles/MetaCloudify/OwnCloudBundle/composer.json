@@ -16,7 +16,7 @@
   ],
   "minimum-stability": "dev",
   "require": {
-    "metacloudify/core": "^1.0.0",
+    "metacloudify/corebundle": "^1.0.0",
     "league/flysystem-webdav": "^3.0",
     "sabre/dav": ">=4.6.0",
     "symfony/yaml": "5.4.*",
