@@ -14,7 +14,37 @@ class HomeController extends AbstractController
      */
     public function index(): Response
     {
-        return $this->render('@MetaCloudifyHomeBundle/index.html.twig');
+        $bundles = $this->getParameter('kernel.bundles');
+
+        $ftpAvailable = false;
+        $googleDriveAvailable = false;
+        $oneDriveAvailable = false;
+        $ownCloudAvailable = false;
+
+// Se Verifica qué bundles están instalados y actualizar las variables correspondientes
+        if (isset($bundles['MetaCloudifyFtpBundle'])) {
+            $ftpAvailable = true;
+        }
+
+        if (isset($bundles['MetaCloudifyGoogleDriveBundle'])) {
+            $googleDriveAvailable = true;
+        }
+
+        if (isset($bundles['MetaCloudifyOneDriveBundle'])) {
+            $oneDriveAvailable = true;
+        }
+
+        if (isset($bundles['MetaCloudifyOwnCloudBundle'])) {
+            $ownCloudAvailable = true;
+        }
+
+        // Renderizar la plantilla Twig con las variables disponibles
+        return $this->render('@MetaCloudifyHomeBundle/index.html.twig', [
+            'ftpAvailable' => $ftpAvailable,
+            'googleDriveAvailable' => $googleDriveAvailable,
+            'oneDriveAvailable' => $oneDriveAvailable,
+            'ownCloudAvailable' => $ownCloudAvailable,
+        ]);
     }
 
     /**
