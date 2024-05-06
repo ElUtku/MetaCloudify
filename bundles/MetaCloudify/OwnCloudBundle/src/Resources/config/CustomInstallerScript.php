@@ -32,7 +32,7 @@ class CustomInstallerScript
         $twigConfigFile = $rootDir . '/config/packages/twig.yaml';
 
         $twigConfig = Yaml::parse(file_get_contents($twigConfigFile));
-        $twigConfig['twig']['paths'][$rootDir . '/bundles/MetaCloudify/OwnCloudBundle/src/Resources/views'] = 'MetaCloudifyOwnCloudBundle';
+        $twigConfig['twig']['paths']['%kernel.project_dir%/vendor/MetaCloudify/OwnCloudBundle/src/Resources/views'] = 'MetaCloudifyOwnCloudBundle';
 
         $newTwigConfig = "\n";
         $newTwigConfig .= Yaml::dump($twigConfig);
