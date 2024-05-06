@@ -1,7 +1,7 @@
 {
   "name": "metacloudify/onedrivebundle",
   "description": "Servicio OneDrive para metacloudify",
-  "type": "library",
+  "type": "symfony-bundle",
   "keywords": [
     "OneDrive",
     "service",

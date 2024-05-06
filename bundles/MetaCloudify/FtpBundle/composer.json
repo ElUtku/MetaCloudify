@@ -1,7 +1,7 @@
 {
   "name": "metacloudify/ftpbundle",
   "description": "Servicio FTP para metacloudify",
-  "type": "library",
+  "type": "symfony-bundle",
   "keywords": [
     "ftp",
     "service",

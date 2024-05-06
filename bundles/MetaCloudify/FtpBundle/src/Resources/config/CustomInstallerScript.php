@@ -7,9 +7,10 @@ class CustomInstallerScript
 {
     public static function run(): void
     {
+        $rootDir = dirname(__DIR__, 6);
+        require_once $rootDir.'/vendor/autoload.php';
 //Annotations ----------------------
 
-        $rootDir = dirname(__DIR__, 6);
         $annotationsConfigFile = $rootDir . '/config/routes/annotations.yaml';
 
         $annotationsConfig = Yaml::parse(file_get_contents($annotationsConfigFile));

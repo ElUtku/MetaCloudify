@@ -1,7 +1,7 @@
 {
   "name": "metacloudify/owncloudbudnle",
   "description": "Servicio OwnCloud para metacloudify",
-  "type": "library",
+  "type": "symfony-bundle",
   "keywords": [
     "OwnCloud",
     "service",

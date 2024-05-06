@@ -1,7 +1,7 @@
 {
   "name": "metacloudify/homebundle",
   "description": "Kit de aplicacion web",
-  "type": "library",
+  "type": "symfony-bundle",
   "keywords": [
     "front",
     "home",
