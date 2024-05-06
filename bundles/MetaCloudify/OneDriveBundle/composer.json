@@ -16,7 +16,7 @@
   ],
   "minimum-stability": "dev",
   "require": {
-    "metacloudify/corebunle": "^1.0.0",
+    "metacloudify/corebundle": "^1.0.0",
     "justus/flysystem-onedrive": "^2.0",
     "shitware-ltd/flysystem-msgraph": "^1.2.0",
     "stevenmaguire/oauth2-microsoft": "^2.2",
@@ -35,7 +35,7 @@
     }
   },
   "scripts": {
-    "post-package-install": [
+    "post-install-cmd": [
       "MetaCloudify\\OneDriveBundle\\Resources\\config\\CustomInstallerScript::run"
     ]
   }

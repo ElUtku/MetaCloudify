@@ -35,7 +35,7 @@
     }
   },
   "scripts": {
-    "post-package-install": [
+    "post-install-cmd": [
       "MetaCloudify\\GoogleDriveBundle\\Resources\\config\\CustomInstallerScript::run"
     ]
   }
