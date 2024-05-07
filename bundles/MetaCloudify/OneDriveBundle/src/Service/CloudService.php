@@ -206,7 +206,7 @@ class CloudService extends Core
             $account->setId(is_int($array['id']) ? $array['id'] : -1);
             $account->setCloud(CloudTypes::OneDrive->value);
             $account->setUser($array['displayName'] ?? $array['user']);
-            $account->setEmail($array['mail'] ?? $array['email']);
+            $account->setEmail($array['mail'] ?? $array['email'] ?? null);
             $account->setOpenid($array['openid'] ?? $array['id']);
             $account->setLastIp($array['last_ip'] ?? '');
             $account->setLastSession($array['last_session'] ?? new DateTime());
