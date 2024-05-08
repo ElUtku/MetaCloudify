@@ -1,0 +1,13 @@
+clientId: 'xxxxtu_idxxxxx'
+clientSecret: 'xxxxtu_secretoxxxxx'
+redirectUriLogin: 'http://tu_direccion/onedrive/login'
+redirectUriLoginToken: 'http://tu_direccion/onedrive/login/token'
+urlAuthorize: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize'
+urlAccessToken: 'https://login.microsoftonline.com/common/oauth2/v2.0/token'
+urlResourceOwnerDetails: 'https://outlook.office.com/api/v2.0/me'
+scopes:
+  - 'User.Read'
+  - 'openid'
+  - 'Files.ReadWrite.All'
+  - 'offline_access'
+  - 'Mail.Read'
