@@ -523,7 +523,7 @@ class CoreController extends AbstractController
             // Se obtiene el contenido del fichero en forma UploadedFile
             $content=$this->core->getUploadedFile($this->request->files->get('content'));
 
-            $sourcePath=$content->getPathname();
+            //$sourcePath=$content->getPathname();
             $destinationPath=$this->path;
             
             $this->core->upload($destinationPath,$content);

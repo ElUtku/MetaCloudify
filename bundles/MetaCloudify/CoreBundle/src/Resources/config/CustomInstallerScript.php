@@ -23,6 +23,6 @@ class CustomInstallerScript
 
         $newAnnotationsConfig = Yaml::dump($annotationsConfig);
 
-        file_put_contents($annotationsConfigFile, $newAnnotationsConfig);;
+        file_put_contents($annotationsConfigFile, $newAnnotationsConfig);
     }
 }

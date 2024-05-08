@@ -431,7 +431,6 @@ abstract class CloudService
     }
 
     /**
-     * @param string $ruta
      * @return array
      * @throws CloudException
      */

@@ -12,12 +12,14 @@ $(document).ready(function() {
 
         if(currentTheme === 'dark'){
             htmlElement.attr('data-bs-theme', 'light');
-            buttonIcon.removeClass('bi-sun').addClass('bi-moon-fill');
+            buttonIcon.removeClass('bi-sun');
+            buttonIcon.addClass('bi-moon-fill')
             logoHorizontalBlanco.addClass('filter-invert');
             logoNubeBlanco.addClass('filter-invert');
         } else {
             htmlElement.attr('data-bs-theme', 'dark');
-            buttonIcon.removeClass('bi-moon-fill').addClass('bi-sun');
+            buttonIcon.removeClass('bi-moon-fill');
+            buttonIcon.addClass('bi-sun');
             logoHorizontalBlanco.removeClass('filter-invert');
             logoNubeBlanco.removeClass('filter-invert');
         }

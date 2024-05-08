@@ -57,7 +57,7 @@ function loadData(accountId,path) {
         success: function (data) {
             cargarDatos(account,path,data);
         },
-        error: function (xhr, status, error) {
+        error: function (xhr) {
             console.error(xhr.status,xhr.responseJSON);
             mostrarModalErrores(xhr);
         },
@@ -195,7 +195,7 @@ function upload(accountId) {
             }
             $('#loading-progress-bar').modal('hide');
         },
-        error: function (xhr, status, error) {
+        error: function (xhr) {
             limpiarModalErrores();
             mostrarModalErrores(xhr);
             $('#loading-progress-bar').modal('hide');
@@ -282,7 +282,7 @@ function logout(accountId)
             deleteSessionAccount(accountId);
             location.reload();
         },
-        error: function (xhr, status, error) {
+        error: function (xhr) {
             limpiarModalErrores();
             mostrarModalErrores(xhr);
         }

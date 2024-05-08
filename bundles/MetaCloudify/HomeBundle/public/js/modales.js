@@ -199,8 +199,7 @@ function obtenerMetadatos(metadata) {
     }
 
     Object.keys(extraObjeto).forEach(key => {
-        let value = extraObjeto[key] ?? '-';
-        metadataObj[key] = value;
+        metadataObj[key] = extraObjeto[key] ?? '-';
     });
 
     return metadataObj;
@@ -222,7 +221,7 @@ function optionsSelectAccounId()
 
 
     // Mostrar el modal y devolver una promesa
-    return new Promise(function(resolve, reject) {
+    return new Promise(function(resolve) {
         $('#accountModal').modal('show');
 
         // Resolver la promesa cuando el usuario confirme la selección
@@ -269,36 +268,39 @@ function limpiarModalSuccess()
 
 function modalConfirmaEliminar()
 {
-    return new Promise(function(resolve, reject) {
-        $('#deleteModal').modal('show');
+    return new Promise(function(resolve) {
+        let delteModal=$('#deleteModal');
+        let confirmDeleteBtn=$('#confirmDeleteBtn');
+        let declineDeleteBtn=$('#declineDeleteBtn');
+        delteModal.modal('show');
 
         function confirmarEliminacion() {
-            $('#deleteModal').modal('hide');
-            $('#confirmDeleteBtn').off('click', confirmarEliminacion);
-            $('#declineDeleteBtn').off('click', declinarEliminacion);
-            $('#deleteModal').off('hidden.bs.modal', ocultarModal);
+            delteModal.modal('hide');
+            confirmDeleteBtn.off('click', confirmarEliminacion);
+            declineDeleteBtn.off('click', declinarEliminacion);
+            delteModal.off('hidden.bs.modal', ocultarModal);
             resolve(true);
         }
 
         function declinarEliminacion() {
-            $('#deleteModal').modal('hide');
-            $('#confirmDeleteBtn').off('click', confirmarEliminacion);
-            $('#declineDeleteBtn').off('click', declinarEliminacion);
-            $('#deleteModal').off('hidden.bs.modal', ocultarModal);
+            delteModal.modal('hide');
+            confirmDeleteBtn.off('click', confirmarEliminacion);
+            declineDeleteBtn.off('click', declinarEliminacion);
+            delteModal.off('hidden.bs.modal', ocultarModal);
             resolve(false);
         }
 
         function ocultarModal() {
-            $('#confirmDeleteBtn').off('click', confirmarEliminacion);
-            $('#declineDeleteBtn').off('click', declinarEliminacion);
-            $('#deleteModal').off('hidden.bs.modal', ocultarModal);
+            confirmDeleteBtn.off('click', confirmarEliminacion);
+            declineDeleteBtn.off('click', declinarEliminacion);
+            delteModal.off('hidden.bs.modal', ocultarModal);
             resolve(false);
         }
 
         // Asociar los manejadores de eventos a los botones
-        $('#confirmDeleteBtn').on('click', confirmarEliminacion);
-        $('#declineDeleteBtn').on('click', declinarEliminacion);
-        $('#deleteModal').on('hidden.bs.modal', ocultarModal);
+        confirmDeleteBtn.on('click', confirmarEliminacion);
+        declineDeleteBtn.on('click', declinarEliminacion);
+        delteModal.on('hidden.bs.modal', ocultarModal);
     });
 
 }

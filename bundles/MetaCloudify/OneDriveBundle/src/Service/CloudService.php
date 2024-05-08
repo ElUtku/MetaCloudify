@@ -186,7 +186,7 @@ class CloudService extends Core
             $this->getUserInfo($account->getToken());
         }catch (CloudException $e)
         {
-            throw new CloudException($account->getUser().' - '.ErrorTypes::TOKEN_EXPIRED->getErrorMessage(),
+            throw new CloudException($account->getUser().' - '.ErrorTypes::TOKEN_EXPIRED->getErrorMessage(). ' - '.$e->getMessage(),
                 ErrorTypes::TOKEN_EXPIRED->getErrorCode());
         }
     }

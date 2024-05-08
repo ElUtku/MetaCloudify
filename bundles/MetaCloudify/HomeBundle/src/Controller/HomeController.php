@@ -5,7 +5,6 @@ namespace MetaCloudify\HomeBundle\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use MetaCloudify\HomeBundle\Service\CloudService;
 
 class HomeController extends AbstractController
 {
