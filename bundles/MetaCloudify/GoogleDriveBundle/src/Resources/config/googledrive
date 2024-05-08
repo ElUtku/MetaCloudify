@@ -1,0 +1,12 @@
+clientId: 'xxxxtu_idxxxxx'
+clientSecret: 'xxxxtu_secretoxxxxx'
+redirectUriLogin: 'http://tu_direccion/googledrive/login'
+redirectUriLoginToken: 'http://tu_direccion/googledrive/login/token'
+scopes:
+  - 'https://www.googleapis.com/auth/drive.appdata'
+  - 'https://www.googleapis.com/auth/drive.appfolder'
+  - 'https://www.googleapis.com/auth/drive.install'
+  - 'https://www.googleapis.com/auth/drive.file'
+  - 'https://www.googleapis.com/auth/drive.readonly'
+  - 'https://www.googleapis.com/auth/drive'
+  - 'https://www.googleapis.com/auth/userinfo.profile'
