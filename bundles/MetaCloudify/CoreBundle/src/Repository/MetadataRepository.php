@@ -210,12 +210,12 @@ class MetadataRepository extends EntityRepository
             ->where('m.account = :account')
             ->setParameter('account', $account);
 
-        if ($visibility !== null && $author !== '') {
+        if (!empty($visibility)) {
             $qb->andWhere('m.visibility = :visibility')
                 ->setParameter('visibility', $visibility);
         }
 
-        if ($author !== null && $author !== '') {
+        if (!empty($author)) {
             $qb->andWhere('m.author = :author')
                 ->setParameter('author', $author);
         }

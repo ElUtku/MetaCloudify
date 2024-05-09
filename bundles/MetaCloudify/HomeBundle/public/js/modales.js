@@ -43,7 +43,8 @@ function editarModalMetadata() {
 // Campo select para 'visibility'
     let visibilityFormGroup = $('<div class="form-group"></div>');
     let labelSelect = $('<label for="visibility" class="form-label">Visibility</label>');
-    let visibilitySelect = $('<select class="form-select mb-3" id="visibility" name="visibility">\
+    let visibilitySelect = $('<select class="form-select mb-3" id="visibility" name="visibility" tabindex="-1">\
+                                <option selected value="">-</option>\
                                 <option value="private">Private</option>\
                                 <option value="public">Public</option>\
                               </select>');
