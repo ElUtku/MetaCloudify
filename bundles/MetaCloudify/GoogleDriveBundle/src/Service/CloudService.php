@@ -213,9 +213,9 @@ class CloudService extends Core
 
             $service = new Drive($client);
             $service->about->get(['fields' => 'user']);
-        }catch (GoogleException $e)
+        }catch (GoogleException)
         {
-            throw new CloudException($account->getUser().' - '.ErrorTypes::TOKEN_EXPIRED->getErrorMessage(). ' - '.$e->getMessage(),
+            throw new CloudException($account->getUser().' - '.ErrorTypes::TOKEN_EXPIRED->getErrorMessage(),
                 ErrorTypes::TOKEN_EXPIRED->getErrorCode());
         }
     }

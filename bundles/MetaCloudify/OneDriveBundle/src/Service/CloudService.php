@@ -232,8 +232,8 @@ class CloudService extends Core
         $graph->setAccessToken($access_token);
         $adapter = new Adapter($graph, 'me');
         return new Filesystem($adapter);
-        } catch (Exception $e){
-            throw new CloudException(ErrorTypes::ERROR_CONSTRUIR_FILESYSTEM->getErrorMessage().' - '.$e->getMessage(),
+        } catch (Exception){
+            throw new CloudException(ErrorTypes::ERROR_CONSTRUIR_FILESYSTEM->getErrorMessage(),
                                      ErrorTypes::ERROR_CONSTRUIR_FILESYSTEM->getErrorCode());
         }
     }

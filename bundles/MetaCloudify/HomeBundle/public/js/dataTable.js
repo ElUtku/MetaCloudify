@@ -31,6 +31,9 @@ function crearTabla(data,account)
             className: 'btn btn-xs',
             action: function ()
             {
+                tabla.off('click', 'td:nth-child(2) '); //Evento de buscarMetadatos
+                desactivarBtnBuscarMetadata();
+
                 tabla.DataTable().rows( { selected: true } ).deselect()
                 recargasCuentas();
             }
@@ -41,16 +44,22 @@ function crearTabla(data,account)
             className: 'btn btn-xs',
             action: function ()
             {
+                tabla.off('click', 'td:nth-child(2) '); //Evento de buscarMetadatos
+                desactivarBtnBuscarMetadata();
+
                 tabla.DataTable().rows( { selected: true } ).deselect()
                 back(account);
             }
         };
     let buttonCrearCarpeta =
         {
-            text: '<i class="bi bi-folder-fill me-2"></i>Crear carpeta',
-            className: 'btn btn-xs',
+            text: '<i class="bi bi-folder-fill me-2 "></i>Crear carpeta',
+            className: 'btn btn-xs btn-crearCarpeta',
             action: function ()
             {
+                tabla.off('click', 'td:nth-child(2) '); //Evento de buscarMetadatos
+                desactivarBtnBuscarMetadata();
+
                 let accounts = getAccounts();
                 if (account.pathActual===account.root && Object.keys(accounts).length!==1)
                 {
@@ -75,10 +84,13 @@ function crearTabla(data,account)
         };
     let buttonCrearFichero =
         {
-            text: '<i class="bi bi-file-text-fill me-2"></i>Crear fichero',
-            className: 'btn btn-xs',
+            text: '<i class="bi bi-file-text-fill me-2 "></i>Crear fichero',
+            className: 'btn btn-xs btn-crearFichero',
             action: function ()
             {
+                tabla.off('click', 'td:nth-child(2) '); //Evento de buscarMetadatos
+                desactivarBtnBuscarMetadata();
+
                 let accounts = getAccounts();
                 if (account.pathActual===account.root && Object.keys(accounts).length!==1)
                 {
@@ -105,12 +117,15 @@ function crearTabla(data,account)
     let buttonSubirArchivo =
         {
             text: '<i class="bi bi-upload me-2"></i>Subir archivo',
-            className: 'btn btn-xs',
+            className: 'btn btn-xs btn-subir',
             action: function ()
             {
                 let accounts = getAccounts();
                 if (account.pathActual===account.root && Object.keys(accounts).length!==1)
                 {
+                    tabla.off('click', 'td:nth-child(2) '); //Evento de buscarMetadatos
+                    desactivarBtnBuscarMetadata();
+
                     optionsSelectAccounId().then(function(accountId) {
                         //Off desvincula el boton cada vez que se recrea la tabla
                         $('#formFile-explorer').off('change').on('change', function() {
@@ -135,6 +150,7 @@ function crearTabla(data,account)
             className: 'btn-xs',
             action: function ()
             {
+
                 let filaSeleccionada = tabla.DataTable().row({ selected: true }).data();
 
                 if (filaSeleccionada) {
@@ -152,6 +168,14 @@ function crearTabla(data,account)
             action: function ()
             {
                 $('#modalBuscarMetadatos').modal('show');
+
+                tabla.off('click', 'td:nth-child(2) '); //Hay que desvincular el elemtno para que no se repita
+                tabla.on('click', 'td:nth-child(2) ', function () {
+
+                    let data = tabla.DataTable().row(this.parentNode).data();
+                    $('#ruta-p-explorer').html(data.path);
+                });
+
             }
         };
     let buttonEliminarArchivo =
@@ -181,6 +205,7 @@ function crearTabla(data,account)
             className: 'btn btn-secondary btn-xs btn-copiar',
             action: function ()
             {
+
                 if (pegar===false) {
                     let filaSeleccionada = tabla.DataTable().row({ selected: true }).data();
                     if(filaSeleccionada)
@@ -221,6 +246,7 @@ function crearTabla(data,account)
             className: 'btn btn-secondary btn-xs btn-mover',
             action: function ()
             {
+
                 if (pegar===false) {
                     let filaSeleccionada = tabla.DataTable().row({ selected: true }).data();
                     if(filaSeleccionada)
@@ -325,7 +351,7 @@ function crearTabla(data,account)
         initComplete: function () { //Se modifica el bloque ruta- definido en dom:
             $('div.ruta-explorer').html('' +
                 '<div id="divUpload" class="m-1 d-flex align-items-center">\n' +
-                '<pre id="ruta-p-explorer" ></pre>\n'+
+                '<pre>Ruta: <div class="d-inline-flex" id="ruta-p-explorer"></div></pre>\n'+
                 '</div>');
         },
         stateSave: true,
@@ -506,4 +532,21 @@ function descartivarBtnMover()
 
     btnCancelar.removeClass('btn-danger');
     btnCancelar.addClass('btn-secondary');
+}
+
+function activarBtnBuscarMetadata()
+{
+    let tabla=$('#explorer').DataTable();
+
+    tabla.button('.btn-subir').disable();
+    tabla.button('.btn-crearCarpeta').disable();
+    tabla.button('.btn-crearFichero').disable();
+}
+function desactivarBtnBuscarMetadata()
+{
+    let tabla=$('#explorer').DataTable();
+
+    tabla.button('.btn-subir').enable();
+    tabla.button('.btn-crearCarpeta').enable();
+    tabla.button('.btn-crearFichero').enable();
 }

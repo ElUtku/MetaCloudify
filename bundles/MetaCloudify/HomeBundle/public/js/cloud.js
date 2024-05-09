@@ -362,6 +362,7 @@ function guardarMetadata(path, accountId)
 
 function buscadorMetadatos()
 {
+    $('#loading-modal').modal('show');
 
     let formData = extraerBuscarMetadatosModal();
 
@@ -390,13 +391,19 @@ function buscadorMetadatos()
                 limpiarModalErrores();
                 mostrarModalErrores('No se han encontrado resultados.');
             }
+
+            activarBtnBuscarMetadata(); //Se desactivan los botnoes subir y crear si la tabla se crea y hay ficheors para mostrar
+
         },
         error: function (xhr,status,error) {
             let tabla=$('#explorer');
-            tabla.DataTable().destroy();
+            tabla.DataTable().clear().draw();
             console.error(error);
             limpiarModalErrores();
             mostrarModalErrores(xhr);
+        }, complete: function ()
+        {
+            $('#loading-modal').modal('hide');
         }
     });
 }
@@ -422,6 +429,9 @@ function copy(sourcePath,sourceAccountId,destinationAccountId)
             destinationCloud: account2.controller
         },
         success: function (data) {
+            desactivarBtnBuscarMetadata();
+            tabla.off('click', 'td:nth-child(2) '); //Evento de buscarMetadatos
+
             if(account2.pathActual===account2.root)
             {
                 recargasCuentas();
@@ -460,6 +470,9 @@ function move(sourcePath,sourceAccountId,destinationAccountId)
             destinationCloud: account2.controller
         },
         success: function (data) {
+            desactivarBtnBuscarMetadata();
+            tabla.off('click', 'td:nth-child(2) '); //Evento de buscarMetadatos
+
             if(account2.pathActual===account2.root)
             {
                 recargasCuentas();
@@ -492,6 +505,6 @@ function cargarDatos(account,path,data)
 
     manejarActualizacionTabla(data,account);
 
-    $("#ruta-p-explorer").html('Ruta: '+path);
+    $("#ruta-p-explorer").html(path);
 }
 
