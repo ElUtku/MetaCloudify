@@ -185,4 +185,60 @@ class MetadataRepository extends EntityRepository
 
         return $qb->getQuery()->getOneOrNullResult();
     }
+
+    /**
+     * @param Account $account
+     * @param ?String $visibility
+     * @param ?String $author
+     * @param ?array $extra
+     * @return array
+     */
+    public function searchMetadata(Account $account, ?string $visibility, ?string $author, ?array $extra): array
+    {
+        $qb = $this->createQueryBuilder('m');
+        $qb->select(
+            'm.extra AS extra',
+            'm.size AS file_size',
+            'm.author AS author',
+            'm.lastModified AS last_modified',
+            'm.mime_type AS mime_type',
+            'm.path AS path',
+            'm.name AS name',
+            'm.type AS type',
+            'm.visibility AS visibility'
+        )
+            ->where('m.account = :account')
+            ->setParameter('account', $account);
+
+        if ($visibility !== null) {
+            $qb->andWhere('m.visibility = :visibility')
+                ->setParameter('visibility', $visibility);
+        }
+
+        if ($author !== null && $author !== '') {
+            $qb->andWhere('m.author = :author')
+                ->setParameter('author', $author);
+        }
+
+        if ($extra !== null) {
+
+            $extraConditions = [];
+
+            foreach ($extra as $key => $value) {
+                // Crear una condición para buscar la clave y el valor en el campo extra
+                $extraConditions[] = "m.extra LIKE :key{$key} AND m.extra LIKE :value{$key}";
+                $qb->setParameter("key{$key}", '%'.$key.'%');
+                $qb->setParameter("value{$key}", '%'.$value.'%');
+            }
+
+            $qb->andWhere('(' . implode(' AND ', $extraConditions) . ')');
+        }
+
+        $qb->andWhere($qb->expr()->in('m.status', ['new', 'modified']));
+
+        return $qb->getQuery()->getArrayResult();
+    }
+
+
+
 }

@@ -1,0 +1,27 @@
+<div class="modal-sm modal fade" id="modalNuevoCampoBuscar" tabindex="-1" role="dialog" aria-labelledby="modalNuevoCampoBuscarLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalNuevoCampoBuscarLabel">Nuevo Campo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Contenido del modal -->
+                <form>
+                    <div class="mb-3">
+                        <label for="nuevoCampoNombreBuscar" class="form-label">Nombre del Campo</label>
+                        <input type="text" class="form-control" id="nuevoCampoNombreBuscar" name="nombreCampo" data-bs-container="body" data-bs-toggle="popover" data-bs-placement="right" data-bs-content="No se permite los carateres especiales.">
+                    </div>
+                    <div class="mb-3">
+                        <label for="nuevoValorCampoBuscar" class="form-label">Valor del Campo</label>
+                        <input type="text" class="form-control" id="nuevoValorCampoBuscar" name="valorCampo" data-bs-container="body" data-bs-toggle="popover" data-bs-placement="right" data-bs-content="No se permite los carateres especiales.">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="agregarNuevoCampoBuscar()" data-bs-toggle="modal" data-bs-target="#modalBuscarMetadatos">Guardar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>

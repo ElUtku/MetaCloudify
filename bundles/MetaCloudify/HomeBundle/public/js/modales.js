@@ -121,6 +121,41 @@ function agregarNuevoCampo() {
     nuevoValorCampo.val('');
 }
 
+
+function agregarNuevoCampoBuscar() {
+
+    let contenidoModalEditarMetadatos=$('#modalBuscarMetadatos .modal-body');
+
+    let nuevoCampoNombre=$('#nuevoCampoNombreBuscar');
+    let nuevoValorCampo=$('#nuevoValorCampoBuscar');
+
+// Se obtiene el nombre y el valor del nuevo campo del modal
+    let nombreCampo = sanitizeText(nuevoCampoNombre.val());
+    let valorCampo = sanitizeText(nuevoValorCampo.val());
+
+// Se crea el campo input para el nuevo campo y agregarlo al modal de metadatos
+    let newFormGroup = $('<div class="form-group"></div>');
+    let headerFormGroup = $('<div class="d-flex align-items-center justify-content-between"></div>')
+    let labelInput=$('<label for="' + nombreCampo + '" class="form-label">' + nombreCampo + '</label>');
+    let nuevoCampoInput = $('<input type="text" class="form-control mb-3" id="' + nombreCampo + '" name="' + nombreCampo + '">');
+    nuevoCampoInput.val(valorCampo);
+
+    headerFormGroup.append(labelInput)
+    headerFormGroup.append(crearBotonEliminar(nuevoCampoInput));
+
+    newFormGroup.append(headerFormGroup);
+    newFormGroup.append(nuevoCampoInput);
+
+    contenidoModalEditarMetadatos.append(newFormGroup);
+
+// Cerrar el modal de nuevo campo
+    $('#modalNuevoCampoBuscar').modal('hide');
+
+// Se limpian los campos del modal de nuevo campo para la próxima vez
+    nuevoCampoNombre.val('');
+    nuevoValorCampo.val('');
+}
+
 // Función para crear un botón de eliminar
 function crearBotonEliminar(input) {
     let botonEliminar = $('<button type="button" class="btn btn-danger btn-sm p-1 border-0 mb-2"><i class="bi bi-trash"></i></button>');
@@ -139,6 +174,41 @@ function extraerMetadatosModal(){
 
 // Iterar sobre los elementos del formulario en el modal (se seleccionan los inputs y el select)
     $('#modalEditarMetadatos .modal-body input, #modalEditarMetadatos .modal-body select').each(function() {
+        let fieldName = $(this).attr('name');
+        let fieldValue = sanitizeText($(this).val()??'');
+
+        if (fieldName === 'author' || fieldName === 'visibility') {
+            formData[fieldName] = fieldValue;
+        } else {
+            // Se agrega el campo al objeto extra con su respectivo nombre y valor
+            if (!formData.hasOwnProperty('extra')) {
+                formData.extra = {};
+                extraFieldsFound = true; // Se encontraron campos adicionales
+            }
+            formData.extra[fieldName] = fieldValue;
+        }
+    });
+
+// Si no se encontraron campos adicionales, establecer extra en null
+    if (!extraFieldsFound) {
+        formData.extra = null;
+    }
+
+// Convertir el objeto formData a JSON
+    formData = JSON.stringify(formData);
+    return formData;
+}
+
+
+function extraerBuscarMetadatosModal(){
+
+    let formData = {};
+
+// Bandera para verificar si se han encontrado campos adicionales aparte de 'author' y 'visibility'
+    let extraFieldsFound = false;
+
+// Iterar sobre los elementos del formulario en el modal (se seleccionan los inputs y el select)
+    $('#modalBuscarMetadatos .modal-body input, #modalBuscarMetadatos .modal-body select').each(function() {
         let fieldName = $(this).attr('name');
         let fieldValue = sanitizeText($(this).val()??'');
 

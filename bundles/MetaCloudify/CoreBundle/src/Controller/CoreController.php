@@ -604,6 +604,48 @@ class CoreController extends AbstractController
 
     /**
      *
+     * Busca todos los archvios con metadatos que coincidan con los parametros especificados
+     *
+     * @Route("/searchMetadata", name="searchMetadata", methods={"GET"})
+     */
+    public function searchMetadata(): Response
+    {
+        try {
+            $filters=json_decode($this->request->get('filters'),true);
+            $filesMetadata=array();
+            foreach ($this->session->get('accounts') as $accountId => $account) {
+                $this->createContext($account['cloud']);
+                $this->account=$this->retriveAccount($accountId);
+                $accountBD = $this->em->getRepository(Account::class)->getAccount($this->account);
+
+                $result=$this->em->getRepository(Metadata::class)->searchMetadata($accountBD,$filters['visibility'],$filters['author'],$filters['extra']);
+                foreach ($result as $file) {
+                    $file['extra_metadata']['author']=$file['author'];
+                    $file['extra_metadata']['extra']=$file['extra'];
+                    $file['last_modified'] = $file['last_modified']->getTimestamp();
+                    $file['path'].='/'.$file['name'];
+                    $file['accountId']=$accountId;
+                    unset($file['name']);
+                    unset($file['date']);
+                    unset($file['author']);
+                    unset($file['extra']);
+                    $filesMetadata[] = $file;
+                }
+            }
+
+            $this->core->logger->info('Search Metadata | '.' archive: '.$this->path.
+                ' | controller: '.$this->account->getCloud().
+                ' | user:' . $this->account->getUser());
+
+            return new JsonResponse($filesMetadata,Response::HTTP_OK);
+        }catch (CloudException $e)
+        {
+            return new JsonResponse($e->getMessage(),$e->getCode());
+        }
+    }
+
+    /**
+     *
      * Guarda los nuevos metadatos de un archvio en base de datos
      *
      * @Route("/{cloud}/drive/editMetadata", name="editMetadata", methods={"PUT","PATCH"})

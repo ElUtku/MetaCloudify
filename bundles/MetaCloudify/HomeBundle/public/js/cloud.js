@@ -353,9 +353,54 @@ function guardarMetadata(path, accountId)
         },
         error: function (xhr, status, error) {
             console.error(error);
+            limpiarModalErrores();
+            mostrarModalErrores(xhr);
+            lastMetadataArchive = null;        }
+    });
+}
+
+
+function buscadorMetadatos()
+{
+
+    let formData = extraerBuscarMetadatosModal();
+
+    $.ajax({
+        url: 'searchMetadata',
+        method: 'GET',
+        data: {
+            filters: formData,
+        },
+        success: function (data) {
+            if(data.length>0)
+            {
+                $.each(data, function(index, file) {
+                    let account=getAccount(file.accountId)
+                    let isFirstIteration = index === 0;
+                    if (isFirstIteration) {
+                        refrescarTabla([file], account, true);
+                    } else {
+                        refrescarTabla([file], account, false);
+                    }
+                })
+            } else
+            {
+                let tabla=$('#explorer');
+                tabla.DataTable().clear().draw();
+                limpiarModalErrores();
+                mostrarModalErrores('No se han encontrado resultados.');
+            }
+        },
+        error: function (xhr,status,error) {
+            let tabla=$('#explorer');
+            tabla.DataTable().destroy();
+            console.error(error);
+            limpiarModalErrores();
+            mostrarModalErrores(xhr);
         }
     });
 }
+
 
 function copy(sourcePath,sourceAccountId,destinationAccountId)
 {

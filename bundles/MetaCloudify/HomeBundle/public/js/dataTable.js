@@ -145,6 +145,15 @@ function crearTabla(data,account)
                 }
             }
         };
+    let buttonBuscarPorMetadatos =
+        {
+            text: '<i class="bi bi-binoculars me-2"></i>Buscar metadatos',
+            className: 'btn-xs',
+            action: function ()
+            {
+                $('#modalBuscarMetadatos').modal('show');
+            }
+        };
     let buttonEliminarArchivo =
         {
             text: '<i class="bi bi-trash me-2"></i>Elimiar archivo',
@@ -308,6 +317,7 @@ function crearTabla(data,account)
             buttonSubirArchivo,
             buttonEliminarArchivo,
             buttonVerMetadatos,
+            buttonBuscarPorMetadatos,
             buttonCopiarArchivo,
             buttonMoverArchivo,
             buttonCancelPaste,
