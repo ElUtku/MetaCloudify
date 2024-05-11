@@ -430,7 +430,8 @@ function copy(sourcePath,sourceAccountId,destinationAccountId)
         },
         success: function (data) {
             desactivarBtnBuscarMetadata();
-            tabla.off('click', 'td:nth-child(2) '); //Evento de buscarMetadatos
+            //let tabla=$('#explorer');
+            //tabla.DataTable.off('click', 'td:nth-child(2) '); //Evento de buscarMetadatos
 
             if(account2.pathActual===account2.root)
             {
@@ -471,7 +472,8 @@ function move(sourcePath,sourceAccountId,destinationAccountId)
         },
         success: function (data) {
             desactivarBtnBuscarMetadata();
-            tabla.off('click', 'td:nth-child(2) '); //Evento de buscarMetadatos
+            //let tabla=$('#explorer');
+            //tabla.DataTable.off('click', 'td:nth-child(2) '); //Evento de buscarMetadatos
 
             if(account2.pathActual===account2.root)
             {

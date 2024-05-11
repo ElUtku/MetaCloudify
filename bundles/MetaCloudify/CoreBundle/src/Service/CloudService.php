@@ -99,7 +99,11 @@ abstract class CloudService
             $filesystem=$this->getFilesystem();
 
             $path=$this->pathNormalizer->normalizePath($path);
-
+            if(!$filesystem->directoryExists($path))
+            {
+                throw new CloudException(ErrorTypes::DIRECTORIO_NO_EXISTE->getErrorMessage(),
+                    ErrorTypes::DIRECTORIO_NO_EXISTE->getErrorCode());
+            }
             return $filesystem->listContents($path, false);
 
         } catch (FilesystemException $e) {

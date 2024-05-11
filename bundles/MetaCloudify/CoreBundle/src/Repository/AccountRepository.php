@@ -2,13 +2,16 @@
 
 namespace MetaCloudify\CoreBundle\Repository;
 
+use Doctrine\DBAL\Exception\DriverException;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 
+use GuzzleHttp\Exception\ConnectException;
 use MetaCloudify\CoreBundle\Entity\Account;
 use MetaCloudify\CoreBundle\Resources\ErrorTypes;
 use MetaCloudify\CoreBundle\Service\CloudException;
+use Throwable;
 
 /**
  * @extends EntityRepository<Account>
@@ -58,7 +61,7 @@ class AccountRepository extends EntityRepository
             $em=$this->getEntityManager();
             $em->persist($account);
             $em->flush();
-        }catch (Exception $e)
+        }catch (ConnectException |Exception $e)
         {
             throw new CloudException(ErrorTypes::ERROR_LOG_ACCOUNT->getErrorMessage().' - '.$e->getMessage(),
                                     ErrorTypes::ERROR_LOG_ACCOUNT->getErrorCode());
@@ -74,7 +77,7 @@ class AccountRepository extends EntityRepository
         try {
             $em=$this->getEntityManager();
             $em->flush();
-        }catch (Exception $e)
+        }catch (ConnectException | Exception $e)
         {
             throw new CloudException(ErrorTypes::ERROR_LOG_ACCOUNT->getErrorMessage().' - '.$e->getMessage(),
                 ErrorTypes::ERROR_LOG_ACCOUNT->getErrorCode());
@@ -84,22 +87,28 @@ class AccountRepository extends EntityRepository
     /**
      * @param Account $account
      * @return Account|null
-     * @throws NonUniqueResultException
+     * @throws NonUniqueResultException | CloudException
      */
     public function getAccount(Account $account): Account|null
     {
-        $qb = $this->createQueryBuilder('a');
+        try {
+            $qb = $this->createQueryBuilder('a');
 
-        $qb->where('a.openid = :openid')
-            ->setParameter('openid', $account->getOpenid());
+            $qb->where('a.openid = :openid')
+                ->setParameter('openid', $account->getOpenid());
 
-        if (!$account->getOpenid()) {
-            $qb->orWhere('a.URL = :url')
-                ->andWhere('a.user = :user')
-                ->setParameter('url', $account->getURL())
-                ->setParameter('user', $account->getUser());
+            if (!$account->getOpenid()) {
+                $qb->orWhere('a.URL = :url')
+                    ->andWhere('a.user = :user')
+                    ->setParameter('url', $account->getURL())
+                    ->setParameter('user', $account->getUser());
+            }
+
+            return $qb->getQuery()->getOneOrNullResult();
         }
-
-        return $qb->getQuery()->getOneOrNullResult();
+        catch (ConnectException | DriverException | Exception $e)
+        {
+            throw new CloudException($e->getMessage());
+        }
     }
 }

@@ -279,7 +279,7 @@ class CoreController extends AbstractController
 
             $contentInDirectory=$this->core->listDirectory($this->path)->toArray();
 
-             $account = $this->em->getRepository(Account::class)->getAccount($this->account);
+            $account = $this->em->getRepository(Account::class)->getAccount($this->account);
 
             // ------- Se añade a cada archivo sus metadatos (si los tiene) ------
             foreach ($contentInDirectory as $archive)
