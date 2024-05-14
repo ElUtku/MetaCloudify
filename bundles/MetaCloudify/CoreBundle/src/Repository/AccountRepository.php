@@ -11,6 +11,7 @@ use GuzzleHttp\Exception\ConnectException;
 use MetaCloudify\CoreBundle\Entity\Account;
 use MetaCloudify\CoreBundle\Resources\ErrorTypes;
 use MetaCloudify\CoreBundle\Service\CloudException;
+use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
 /**
@@ -108,7 +109,7 @@ class AccountRepository extends EntityRepository
         }
         catch (ConnectException | DriverException | Exception $e)
         {
-            throw new CloudException($e->getMessage());
+            throw new CloudException($e->getMessage(), Response::HTTP_SERVICE_UNAVAILABLE);
         }
     }
 }

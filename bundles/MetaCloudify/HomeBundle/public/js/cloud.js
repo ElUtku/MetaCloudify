@@ -133,7 +133,7 @@ function createFile(name,accountId)
     });
 }
 
-function dlt(path,accountId)
+function dlt(path,accountId, fila)
 {
     $('#loading-modal').modal('show');
 
@@ -148,14 +148,9 @@ function dlt(path,accountId)
             name: basename(path),
             accountId: accountId
         },
-        success: function (data) {
-            if(account.pathActual===account.root)
-            {
-                recargasCuentas();
-            } else
-            {
-                cargarDatos(account,dirname(path),data);
-            }
+        success: function () {
+            let tabla=$('#explorer');
+            tabla.DataTable().row(fila).remove().draw(false);
         },
         error: function (xhr, status, error) {
             console.error(error);

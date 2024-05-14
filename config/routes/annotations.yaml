@@ -1,31 +1,18 @@
 controllers:
     resource: ../../src/Controller/
     type: annotation
-
 kernel:
     resource: ../../src/Kernel.php
     type: annotation
-
 metacloudify_corebundle:
-    # loads routes from the given routing file stored in some bundle
     resource: '@MetaCloudifyCoreBundle/src/Resources/config/annotations.yaml'
-
 metacloudify_onedrivebundle:
-    # loads routes from the given routing file stored in some bundle
     resource: '@MetaCloudifyOneDriveBundle/src/Resources/config/annotations.yaml'
-
 metacloudify_owncloudbundle:
-    # loads routes from the given routing file stored in some bundle
     resource: '@MetaCloudifyOwnCloudBundle/src/Resources/config/annotations.yaml'
-
 metacloudify_googledrivebundle:
-    # loads routes from the given routing file stored in some bundle
     resource: '@MetaCloudifyGoogleDriveBundle/src/Resources/config/annotations.yaml'
-
 metacloudify_ftpbundle:
-    # loads routes from the given routing file stored in some bundle
     resource: '@MetaCloudifyFtpBundle/src/Resources/config/annotations.yaml'
-
 metacloudify_homebundle:
-    # loads routes from the given routing file stored in some bundle
     resource: '@MetaCloudifyHomeBundle/src/Resources/config/annotations.yaml'

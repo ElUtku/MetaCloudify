@@ -99,7 +99,7 @@ abstract class CloudService
             $filesystem=$this->getFilesystem();
 
             $path=$this->pathNormalizer->normalizePath($path);
-            if(!$filesystem->directoryExists($path))
+            if(($path!="" || $path!=".") && !$filesystem->directoryExists($path))
             {
                 throw new CloudException(ErrorTypes::DIRECTORIO_NO_EXISTE->getErrorMessage(),
                     ErrorTypes::DIRECTORIO_NO_EXISTE->getErrorCode());
@@ -220,6 +220,12 @@ abstract class CloudService
 
         $path=$this->pathNormalizer->normalizePath($path);
 
+        if(empty($content->getPathname()))
+        {
+            throw new CloudException(ErrorTypes::ARCHIVO_LIMITE_TAMANO->getErrorMessage(),
+                ErrorTypes::ARCHIVO_LIMITE_TAMANO->getErrorCode());
+        }
+
         $stream = fopen($content->getPathname(), 'r');
 
         if ($stream) {
@@ -237,12 +243,25 @@ abstract class CloudService
     }
 
     /**
-     * @param UploadedFile $content
+     * @param ?UploadedFile $content
      * @return UploadedFile
+     * @throws CloudException
      */
-    public function getUploadedFile(UploadedFile $content): UploadedFile
+    public function getUploadedFile(?UploadedFile $content): UploadedFile
     {
-        return $content;
+        try {
+            if(empty($content))
+            {
+                throw new CloudException(ErrorTypes::BAD_CONTENT->getErrorMessage(),
+                    ErrorTypes::BAD_CONTENT->getErrorCode());
+            }
+
+            return $content;
+        }catch (Exception $e)
+        {
+            throw new CloudException(ErrorTypes::BAD_CONTENT->getErrorMessage().' - '.$e->getMessage(),
+                ErrorTypes::BAD_CONTENT->getErrorCode());
+        }
     }
 
     /**
@@ -408,7 +427,7 @@ abstract class CloudService
 
             $path=$this->pathNormalizer->normalizePath($path);
 
-            $contents=$filesystem->listContents(dirname($path),false)->toArray();
+            $contents=$this->listDirectory(dirname($path))->toArray();
 
             $filteredItems = array_filter($contents, function ($item) use ($path) {
                                 $thisItemRuta=$this->pathNormalizer->normalizePath($item['path']);
@@ -493,20 +512,44 @@ abstract class CloudService
      */
     public function copy(Filesystem $source, Filesystem $destination, String $sourcePath, String $destinationPath): void
     {
-        try {
+
             $this->setFilesystem($source);
+            $filesystem=$this->getFilesystem();
 
             $sourcePath=$this->pathNormalizer->normalizePath($sourcePath);
             $destinationPath=$this->pathNormalizer->normalizePath($destinationPath);
 
-            $content=$source->read($sourcePath);
+            try {
+                if($filesystem->directoryExists($destinationPath))
+                {
+                    if($filesystem->fileExists($destinationPath . "/" . basename($sourcePath)))
+                    {
+                        throw new CloudException(ErrorTypes::FICHERO_YA_EXISTE->getErrorMessage(),
+                            ErrorTypes::FICHERO_YA_EXISTE->getErrorCode());
+                    } else{
 
-            $this->setFilesystem($destination);
-            $destination->write($destinationPath . "/" . basename($sourcePath), $content);
-        }catch (FilesystemException | Exception $e) {
-            throw new CloudException(ErrorTypes::ERROR_COPY->getErrorMessage().' - '.$e->getMessage(),
-                ErrorTypes::ERROR_COPY->getErrorCode());
-        }
+                        try {
+
+                        $content=$source->read($sourcePath);
+
+                        $this->setFilesystem($destination);
+                        $destination->write($destinationPath . "/" . basename($sourcePath), $content);
+
+                        } catch (FilesystemException | UnableToCreateDirectory $e) {
+                            throw new CloudException(ErrorTypes::ERROR_CREAR_FICHERO->getErrorMessage().' - '.$e->getMessage(),
+                                ErrorTypes::ERROR_CREAR_FICHERO->getErrorCode());
+                        }
+
+                    }
+                }else{
+                    throw new CloudException(ErrorTypes::DIRECTORIO_NO_EXISTE->getErrorMessage(),
+                        ErrorTypes::DIRECTORIO_NO_EXISTE->getErrorCode());
+                }
+
+            }catch (FilesystemException | Exception $e) {
+                throw new CloudException(ErrorTypes::ERROR_COPY->getErrorMessage().' - '.$e->getMessage(),
+                    ErrorTypes::ERROR_COPY->getErrorCode());
+            }
 
     }
 

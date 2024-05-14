@@ -10,7 +10,7 @@ enum ErrorTypes: string
     case ERROR_CONSTRUIR_OBJETO = 'Error al construir el objeto.';
     case ERROR_CONSTRUIR_FILESYSTEM= 'Error al construir el filesystem.';
     case ERROR_OBTENER_USUARIO= 'Error al obtener la inforamcion del usuario.';
-    case DIRECTORIO_NO_EXISTE ='El directorio especificado no existe.';
+    case DIRECTORIO_NO_EXISTE ='La ruta especificada no existe.';
     case ERROR_UPLOAD ='El arhivo no ha podido ser escrito en el servidor.';
     case BAD_CONTENT ='Error al leer el contenido del archivo.';
     case ERROR_LIST_CONTENT='Error al listar al recuperar los archivos.';
@@ -34,6 +34,10 @@ enum ErrorTypes: string
     case TOKEN_EXPIRED = 'El token de la sesión actual ha caducado';
     case URL_FAIL = 'La url no existe';
     case ERROR_CREDENTIALS = 'Las credenciales introducidas no son correctas.';
+    case ARCHIVO_LIMITE_TAMANO = 'El tamaño del archivo es demasiado grande.';
+    case BAD_JSON = 'Los datos proporcionados no tienen un formato correcto.';
+    case NO_CUENTAS_SESION = 'No hay cuentas en la sesión.';
+
     /**
      * @return int
      */
@@ -70,6 +74,9 @@ enum ErrorTypes: string
             ErrorTypes::TOKEN_EXPIRED => 401,
             ErrorTypes::URL_FAIL => 404,
             ErrorTypes::ERROR_CREDENTIALS => 401,
+            ErrorTypes::ARCHIVO_LIMITE_TAMANO =>413,
+            ErrorTypes::BAD_JSON => 400,
+            ErrorTypes::NO_CUENTAS_SESION => 401
         };
     }
 
@@ -85,7 +92,7 @@ enum ErrorTypes: string
             ErrorTypes::ERROR_CONSTRUIR_OBJETO => 'Error al construir el objeto',
             ErrorTypes::ERROR_CONSTRUIR_FILESYSTEM => 'Error al construir el filesystem',
             ErrorTypes::ERROR_OBTENER_USUARIO => 'Error al obtener la inforamcion del usuario',
-            ErrorTypes::DIRECTORIO_NO_EXISTE => 'El directorio especificado no existe',
+            ErrorTypes::DIRECTORIO_NO_EXISTE => 'La ruta especificada no existe',
             ErrorTypes::ERROR_UPLOAD => 'El arhivo no ha podido ser escrito en el servidor',
             ErrorTypes::BAD_CONTENT => 'Error al leer el contenido del archivo',
             ErrorTypes::ERROR_LIST_CONTENT => 'Error al listar al recuperar los archivos',
@@ -109,6 +116,10 @@ enum ErrorTypes: string
             ErrorTypes::TOKEN_EXPIRED => 'El token de la sesión actual ha caducado.',
             ErrorTypes::URL_FAIL => 'La url no existe.',
             ErrorTypes::ERROR_CREDENTIALS => 'Las credenciales introducidas no son correctas.',
+            ErrorTypes::ARCHIVO_LIMITE_TAMANO => 'El tamaño del archivo es demasiado grande',
+            ErrorTypes::BAD_JSON => 'Los datos proporcionados no tienen un formato correcto',
+            ErrorTypes::NO_CUENTAS_SESION => 'No hay cuentas en la sesion'
+
         };
     }
 }

@@ -187,14 +187,16 @@ function crearTabla(data,account)
                 modalConfirmaEliminar().then(function(confirm) {
                     if (confirm)
                     {
-                        let filaSeleccionada = tabla.DataTable().row({ selected: true }).data();
+                        let filasSeleccionadas = tabla.DataTable().rows({ selected: true }).data().toArray();
+                        let filasIndices = tabla.DataTable().rows({ selected: true }).indexes();
 
-                        if (filaSeleccionada) {
-                            dlt(filaSeleccionada.path,filaSeleccionada.accountId);
-                        } else {
-                            // Manejo para cuando no se ha seleccionado ninguna fila
-                            console.log('No se ha seleccionado ninguna fila');
-                        }
+                        filasSeleccionadas.forEach(function(fila, index, array) {
+                            if (fila) {
+                                dlt(fila.path, fila.accountId, filasIndices[index]);
+                            } else {
+                                console.log('No se ha seleccionado ninguna fila');
+                            }
+                        });
                     }
                 });
             }

@@ -96,7 +96,7 @@ class CoreController extends AbstractController
      */
     private function retriveAccount(String $accountId): Account
     {
-        if($this->session->has('accounts'))
+        if($this->session->has('accounts') && !empty($this->session->get('accounts')[$accountId]))
         {
             $account=$this->core->arrayToObject($this->session->get('accounts')[$accountId]);
             $this->core->testConection($account);
@@ -369,7 +369,11 @@ class CoreController extends AbstractController
 
             $this->path=$this->core->cleanPath($this->path);
 
-            $this->core->createDir($this->path,$this->name);
+            if(empty($this->name))
+            {
+                throw new CloudException(ErrorTypes::ERROR_CREAR_DIRECTORIO->getErrorMessage(),
+                    ErrorTypes::ERROR_CREAR_DIRECTORIO->getErrorCode());
+            }
 
             $this->em->getRepository(Metadata::class)->store(
                 new Metadata(
@@ -387,6 +391,9 @@ class CoreController extends AbstractController
                     null,
                     $this->em->getRepository(Account::class)->getAccount($this->account)
                 ));
+
+            $this->core->createDir($this->path,$this->name);
+
 
             $this->core->logger->info('CREATE_DIR | '.' dir: '.$this->path.'/'.$this->name.
                 ' | controller: '.$this->account->getCloud().
@@ -418,7 +425,11 @@ class CoreController extends AbstractController
 
             $this->path=$this->core->cleanPath($this->path);
 
-            $this->core->createFile($this->path,$this->name);
+            if(empty($this->name))
+            {
+                throw new CloudException(ErrorTypes::ERROR_CREAR_FICHERO->getErrorMessage(),
+                    ErrorTypes::ERROR_CREAR_FICHERO->getErrorCode());
+            }
 
             $this->em->getRepository(Metadata::class)->store(
                 new Metadata($this->name,
@@ -434,6 +445,8 @@ class CoreController extends AbstractController
                     FileStatus::NEW->value,
                     null,$this->em->getRepository(Account::class)->getAccount($this->account)
                 ));
+
+            $this->core->createFile($this->path,$this->name);
 
             $this->core->logger->info('CREATE_FILE | '.' file: '.$this->path.'/'.$this->name.
                 ' | controller: '.$this->account->getCloud().
@@ -525,8 +538,8 @@ class CoreController extends AbstractController
 
             //$sourcePath=$content->getPathname();
             $destinationPath=$this->path;
-            
-            $this->core->upload($destinationPath,$content);
+
+            $accountBD = $this->em->getRepository(Account::class)->getAccount($this->account);
 
 // Se distingue entre colocar el archivo en root o en un directorio
             if(!empty($destinationPath))
@@ -536,9 +549,11 @@ class CoreController extends AbstractController
                 $uploadPath=$content->getClientOriginalName();
             }
 
+            $this->core->upload($destinationPath,$content);
+
             $archivo=$this->core->getArchivo($this->core->cleanPath($uploadPath));
 
-            $metadata = $this->core->getBasicMetadata($archivo,$this->em->getRepository(Account::class)->getAccount($this->account));
+            $metadata = $this->core->getBasicMetadata($archivo,$accountBD);
 
             $metadata->setName($content->getClientOriginalName());
             $metadata->setPath($destinationPath);
@@ -613,12 +628,19 @@ class CoreController extends AbstractController
         try {
             $filters=json_decode($this->request->get('filters'),true);
             $filesMetadata=array();
+
+            if(!$this->session->has('accounts'))
+            {
+                throw new CloudException(ErrorTypes::NO_CUENTAS_SESION->getErrorMessage(),
+                    ErrorTypes::NO_CUENTAS_SESION->getErrorCode());
+            }
+
             foreach ($this->session->get('accounts') as $accountId => $account) {
                 $this->createContext($account['cloud']);
                 $this->account=$this->retriveAccount($accountId);
                 $accountBD = $this->em->getRepository(Account::class)->getAccount($this->account);
 
-                $result=$this->em->getRepository(Metadata::class)->searchMetadata($accountBD,$filters['visibility'],$filters['author'],$filters['extra']);
+                $result=$this->em->getRepository(Metadata::class)->searchMetadata($accountBD,$filters['visibility']??null,$filters['author']??null,$filters['extra']??null);
                 foreach ($result as $file) {
                     $file['extra_metadata']['author']=$file['author'];
                     $file['extra_metadata']['extra']=$file['extra'];
@@ -666,6 +688,11 @@ class CoreController extends AbstractController
             $account = $this->em->getRepository(Account::class)->getAccount($this->account);
 
             $metadata=json_decode($this->request->get('metadata'),true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new CloudException(ErrorTypes::BAD_JSON->getErrorMessage().' - '. json_last_error_msg(),
+                ErrorTypes::BAD_JSON->getErrorCode());
+            }
 
             $file=$this->em->getRepository(Metadata::class)->findByExactPathAndAccountNull($account,$path,$name);
             if($file)
