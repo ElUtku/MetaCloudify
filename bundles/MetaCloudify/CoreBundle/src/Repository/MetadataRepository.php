@@ -226,9 +226,9 @@ class MetadataRepository extends EntityRepository
 
             foreach ($extra as $key => $value) {
                 // Crear una condición para buscar la clave y el valor en el campo extra
-                $extraConditions[] = "m.extra LIKE :key{$key} AND m.extra LIKE :value{$key}";
-                $qb->setParameter("key{$key}", '%'.$key.'%');
-                $qb->setParameter("value{$key}", '%'.$value.'%');
+                $extraConditions[] = "m.extra LIKE :key$key AND m.extra LIKE :value$key";
+                $qb->setParameter("key$key", '%'.$key.'%');
+                $qb->setParameter("value$key", '%'.$value.'%');
             }
 
             $qb->andWhere('(' . implode(' AND ', $extraConditions) . ')');
@@ -238,7 +238,5 @@ class MetadataRepository extends EntityRepository
 
         return $qb->getQuery()->getArrayResult();
     }
-
-
 
 }

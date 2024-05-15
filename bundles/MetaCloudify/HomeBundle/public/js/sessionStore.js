@@ -2,7 +2,7 @@ function storeNewAccount(accountId,accountUser,controller,root)
 {
     let storedAccounts = JSON.parse(sessionStorage.getItem('storedAccounts')) || {};
     if (!storedAccounts[accountId]) {
-        let account = new Account(
+        storedAccounts[accountId] = new Account(
             accountId, //accountId
             controller, // controller
             accountUser, // user
@@ -10,7 +10,6 @@ function storeNewAccount(accountId,accountUser,controller,root)
             root,      // pathActual
             root       // parent
         );
-        storedAccounts[accountId] = account;
         sessionStorage.setItem('storedAccounts', JSON.stringify(storedAccounts));
     }
 }

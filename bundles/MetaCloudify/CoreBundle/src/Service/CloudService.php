@@ -423,8 +423,6 @@ abstract class CloudService
     public function getArchivo(string $path): StorageAttributes
     {
         try {
-            $filesystem=$this->getFilesystem();
-
             $path=$this->pathNormalizer->normalizePath($path);
 
             $contents=$this->listDirectory(dirname($path))->toArray();
@@ -446,7 +444,7 @@ abstract class CloudService
             }
 //Si $filteredItems esta vacio es porque hay un error
             throw new Exception();
-        } catch (FilesystemException | Exception $e) {
+        } catch (Exception $e) {
 
             throw new CloudException(ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorMessage().' - '.$e->getMessage(),
                 ErrorTypes::ERROR_GET_NATIVE_METADATA->getErrorCode());
@@ -454,6 +452,7 @@ abstract class CloudService
     }
 
     /**
+     * @param string $path
      * @return array
      * @throws CloudException
      */

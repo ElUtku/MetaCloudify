@@ -2,9 +2,7 @@
 
 namespace MetaCloudify\CoreBundle\Repository;
 
-use Doctrine\DBAL\Exception\DriverException;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 
 use GuzzleHttp\Exception\ConnectException;
@@ -12,7 +10,6 @@ use MetaCloudify\CoreBundle\Entity\Account;
 use MetaCloudify\CoreBundle\Resources\ErrorTypes;
 use MetaCloudify\CoreBundle\Service\CloudException;
 use Symfony\Component\HttpFoundation\Response;
-use Throwable;
 
 /**
  * @extends EntityRepository<Account>
@@ -45,7 +42,7 @@ class AccountRepository extends EntityRepository
                 $this->updateAcount();
             }
             return $accountExists;
-        }catch (CloudException | NonUniqueResultException $e) {
+        }catch (CloudException $e) {
             throw new CloudException(ErrorTypes::ERROR_LOG_ACCOUNT->getErrorMessage().' - '.$e->getMessage(),
                 ErrorTypes::ERROR_LOG_ACCOUNT->getErrorCode());
         }
@@ -88,7 +85,7 @@ class AccountRepository extends EntityRepository
     /**
      * @param Account $account
      * @return Account|null
-     * @throws NonUniqueResultException | CloudException
+     * @throws CloudException
      */
     public function getAccount(Account $account): Account|null
     {
@@ -107,7 +104,7 @@ class AccountRepository extends EntityRepository
 
             return $qb->getQuery()->getOneOrNullResult();
         }
-        catch (ConnectException | DriverException | Exception $e)
+        catch (ConnectException | Exception $e)
         {
             throw new CloudException($e->getMessage(), Response::HTTP_SERVICE_UNAVAILABLE);
         }

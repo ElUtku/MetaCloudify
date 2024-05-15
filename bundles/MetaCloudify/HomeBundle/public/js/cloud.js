@@ -268,8 +268,8 @@ function download(path, name, accountId) {
             $('#loading-modal').modal('show');
         },
         success: function (data) {
-            var blob = new Blob([data]);
-            var link = document.createElement('a');
+            let blob = new Blob([data]);
+            let link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
             link.download = name;
             link.click();

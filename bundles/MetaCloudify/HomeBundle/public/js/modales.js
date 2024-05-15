@@ -283,9 +283,9 @@ function optionsSelectAccounId()
     select.empty(); // Limpiar opciones anteriores
 
 
-    for (var accountId in accounts) {
+    for (let accountId in accounts) {
         if (accounts.hasOwnProperty(accountId)) {
-            var account = accounts[accountId];
+            let account = accounts[accountId];
             select.append('<option value="' + account.accountId + '">' + account.user + ' - '+  account.controller +'</option>');
         }
     }
@@ -328,7 +328,7 @@ function limpiarModalErrores()
 
 function mostrarModalSuccess(data)
 {
-    var successElement = $('<li>').text(data);
+    let successElement = $('<li>').text(data);
     successElement.appendTo('#successContent');
     $('#successModal').modal('show');
 }

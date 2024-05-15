@@ -126,7 +126,7 @@ function crearTabla(data,account)
                 let filaSeleccionada = tabla.DataTable().row({ selected: true }).data();
 
                 if (filaSeleccionada) {
-                    verModalMetadata(filaSeleccionada.path,filaSeleccionada.accountId);
+                    verModalMetadata(filaSeleccionada.path,filaSeleccionada.accountId).then();
                 } else {
                     // Manejo para cuando no se ha seleccionado ninguna fila
                     console.log('No se ha seleccionado ninguna fila');

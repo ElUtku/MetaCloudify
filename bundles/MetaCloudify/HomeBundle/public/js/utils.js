@@ -133,7 +133,7 @@ function manejarActualizacionTabla(data, account) {
 function sanitizeText(text) {
 
 // Se eliminan caracteres especiales excepto letras, números, guion bajo, punto, coma y guion
-    var sanitizedText = text.replace(/[^a-zA-Z0-9_.,\-]/g, '');
+    let sanitizedText = text.replace(/[^a-zA-Z0-9_.,\-]/g, '');
 
 // Si no se condigue escapar se codifican caracteres especiales para evitar XSS
     sanitizedText = encodeURIComponent(sanitizedText);
