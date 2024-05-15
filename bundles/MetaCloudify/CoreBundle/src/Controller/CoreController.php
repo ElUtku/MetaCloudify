@@ -9,6 +9,7 @@ use Doctrine\Persistence\ManagerRegistry;
 
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -534,38 +535,47 @@ class CoreController extends AbstractController
             $this->path=$this->core->cleanPath($this->path);
 
             // Se obtiene el contenido del fichero en forma UploadedFile
-            $content=$this->core->getUploadedFile($this->request->files->get('content'));
+            $files=$this->request->files->all();
 
             //$sourcePath=$content->getPathname();
             $destinationPath=$this->path;
 
             $accountBD = $this->em->getRepository(Account::class)->getAccount($this->account);
 
-// Se distingue entre colocar el archivo en root o en un directorio
-            if(!empty($destinationPath))
-            {
-                $uploadPath=$destinationPath.'/'.$content->getClientOriginalName();
-            } else{
-                $uploadPath=$content->getClientOriginalName();
+            foreach ($files as $file) {
+                if ($file instanceof UploadedFile) {
+
+                    // Se distingue entre colocar el archivo en root o en un directorio
+                    if (!empty($destinationPath)) {
+                        $uploadPath = $destinationPath . '/' . $file->getClientOriginalName();
+                    } else {
+                        $uploadPath = $file->getClientOriginalName();
+                    }
+
+                    $this->core->upload($destinationPath, $file);
+
+                    $archivo = $this->core->getArchivo($this->core->cleanPath($uploadPath));
+
+                    $metadata = $this->core->getBasicMetadata($archivo, $accountBD);
+
+                    $metadata->setName($file->getClientOriginalName());
+                    $metadata->setPath($destinationPath);
+                    $metadata->setStatus(FileStatus::NEW->value);
+
+                    $this->em->getRepository(Metadata::class)->store($metadata);
+
+                    $this->core->logger->info('UPLOAD | '.' file: '.$uploadPath.
+                        ' | controller: '.$this->account->getCloud().
+                        ' | user:' . $this->account->getUser().
+                        ' | path:' . $this->path.
+                        ' | name:' . $this->name);
+
+                } else
+                {
+                    throw new CloudException(ErrorTypes::ERROR_UPLOAD->getErrorMessage(),
+                    ErrorTypes::ERROR_UPLOAD->getErrorCode());
+                }
             }
-
-            $this->core->upload($destinationPath,$content);
-
-            $archivo=$this->core->getArchivo($this->core->cleanPath($uploadPath));
-
-            $metadata = $this->core->getBasicMetadata($archivo,$accountBD);
-
-            $metadata->setName($content->getClientOriginalName());
-            $metadata->setPath($destinationPath);
-            $metadata->setStatus(FileStatus::NEW->value);
-
-            $this->em->getRepository(Metadata::class)->store($metadata);
-
-            $this->core->logger->info('UPLOAD | '.' file: '.$destinationPath.'/'.$content->getClientOriginalName().
-                ' | controller: '.$this->account->getCloud().
-                ' | user:' . $this->account->getUser().
-                ' | path:' . $this->path.
-                ' | name:' . $this->name);
 
             return $this->drive($cloud);
         }catch (CloudException $e)

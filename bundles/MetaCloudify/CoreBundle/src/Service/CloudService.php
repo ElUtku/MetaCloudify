@@ -512,17 +512,13 @@ abstract class CloudService
      */
     public function copy(Filesystem $source, Filesystem $destination, String $sourcePath, String $destinationPath): void
     {
-
-            $this->setFilesystem($source);
-            $filesystem=$this->getFilesystem();
-
             $sourcePath=$this->pathNormalizer->normalizePath($sourcePath);
             $destinationPath=$this->pathNormalizer->normalizePath($destinationPath);
 
             try {
-                if($filesystem->directoryExists($destinationPath))
+                if($destination->directoryExists($destinationPath))
                 {
-                    if($filesystem->fileExists($destinationPath . "/" . basename($sourcePath)))
+                    if($destination->fileExists($destinationPath . "/" . basename($sourcePath)))
                     {
                         throw new CloudException(ErrorTypes::FICHERO_YA_EXISTE->getErrorMessage(),
                             ErrorTypes::FICHERO_YA_EXISTE->getErrorCode());
@@ -530,10 +526,9 @@ abstract class CloudService
 
                         try {
 
-                        $content=$source->read($sourcePath);
+                            $content=$source->read($sourcePath);
 
-                        $this->setFilesystem($destination);
-                        $destination->write($destinationPath . "/" . basename($sourcePath), $content);
+                            $destination->write($destinationPath . "/" . basename($sourcePath), $content);
 
                         } catch (FilesystemException | UnableToCreateDirectory $e) {
                             throw new CloudException(ErrorTypes::ERROR_CREAR_FICHERO->getErrorMessage().' - '.$e->getMessage(),
@@ -561,10 +556,11 @@ abstract class CloudService
      * @return string
      */
     function cleanPath($path):string {
-        $path = $path==='.' || $path === '' ? '/' : $path;
-        return $this->pathNormalizer->normalizePath(
+        $path = $this->pathNormalizer->normalizePath(
             preg_replace('/^(?:.+?\/)?remote\.php\/dav\/files\/[^\/]+\/(.+)$/', '$1', $path)
         );
+
+        return $path==='.' || $path === '' ? '/' : $path;
     }
 
     /**

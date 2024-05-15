@@ -51,99 +51,71 @@ function crearTabla(data,account)
                 back(account);
             }
         };
-    let buttonCrearCarpeta =
-        {
-            text: '<i class="bi bi-folder-fill me-2 "></i>Crear carpeta',
-            className: 'btn btn-xs btn-crearCarpeta',
-            action: function ()
-            {
-                tabla.off('click', 'td:nth-child(2) '); //Evento de buscarMetadatos
-                desactivarBtnBuscarMetadata();
+    let buttonCrearCarpeta = {
+        text: '<i class="bi bi-folder-fill me-2 "></i>Crear carpeta',
+        className: 'btn btn-xs btn-crearCarpeta',
+        action: function() {
 
-                let accounts = getAccounts();
-                if (account.pathActual===account.root && Object.keys(accounts).length!==1)
-                {
-                    $('#newNameButton').off('click');
-                    optionsSelectAccounId().then(function(accountId) {
-                        $('#newNameButton').on('click', function() {
-                            let newName = sanitizeText($("#newName").val()); // Sanitizar el valor del input
-                            createDir(newName, accountId);
-                        });
-                        $('#newDirFileModal').modal('show');
-                    });
+            tabla.off('click', 'td:nth-child(2)');
+            desactivarBtnBuscarMetadata();
 
-                } else
-                {
-                    $('#newNameButton').off('click');
-                    $('#newNameButton').on('click', function() {
-                        let newName = sanitizeText($("#newName").val())
-                        createDir(newName, account.accountId);
-                    });                    $('#newDirFileModal').modal('show');
-                }
-            }
-        };
-    let buttonCrearFichero =
-        {
-            text: '<i class="bi bi-file-text-fill me-2 "></i>Crear fichero',
-            className: 'btn btn-xs btn-crearFichero',
-            action: function ()
-            {
-                tabla.off('click', 'td:nth-child(2) '); //Evento de buscarMetadatos
-                desactivarBtnBuscarMetadata();
+            let accounts = getAccounts();
 
-                let accounts = getAccounts();
-                if (account.pathActual===account.root && Object.keys(accounts).length!==1)
-                {
-                    optionsSelectAccounId().then(function(accountId) {
-                        $('#newNameButton').off('click');
-                        $('#newNameButton').on('click', function() {
-                            let newName = sanitizeText($("#newName").val());
-                            createFile(newName, accountId);
-                        });
-                        $('#newDirFileModal').modal('show');
-                    });
+// Se determina el ID de la cuenta
+            let accountIdPromise = account.pathActual === account.root && Object.keys(accounts).length !== 1 ?
+                optionsSelectAccounId() :
+                Promise.resolve(account.accountId);
 
-                } else
-                {
-                    $('#newNameButton').off('click');
-                    $('#newNameButton').on('click', function() {
-                        let newName = sanitizeText($("#newName").val());
-                        createFile(newName, account.accountId);
-                    });
-                    $('#newDirFileModal').modal('show');
-                }
-            }
-        };
-    let buttonSubirArchivo =
-        {
-            text: '<i class="bi bi-upload me-2"></i>Subir archivo',
-            className: 'btn btn-xs btn-subir',
-            action: function ()
-            {
-                let accounts = getAccounts();
-                if (account.pathActual===account.root && Object.keys(accounts).length!==1)
-                {
-                    tabla.off('click', 'td:nth-child(2) '); //Evento de buscarMetadatos
-                    desactivarBtnBuscarMetadata();
+            accountIdPromise.then(function(accountId) {
+                $('#newNameButton').off('click').on('click', function() {
+                    let newName = sanitizeText($("#newName").val()); // Sanitizar el valor del input
+                    createDir(newName, accountId);
+                });
+                $('#newDirFileModal').modal('show');
+            });
+        }
+    };
+    let buttonCrearFichero = {
+        text: '<i class="bi bi-file-text-fill me-2 "></i>Crear fichero',
+        className: 'btn btn-xs btn-crearFichero',
+        action: function() {
 
-                    optionsSelectAccounId().then(function(accountId) {
-                        //Off desvincula el boton cada vez que se recrea la tabla
-                        $('#formFile-explorer').off('change').on('change', function() {
-                            upload(accountId);
-                        });
-                        $('#formFile-explorer').trigger('click');
-                    });
+            tabla.off('click', 'td:nth-child(2) ');
+            desactivarBtnBuscarMetadata();
 
-                } else
-                {
-                    //Off desvincula el boton cada vez que se recrea la tabla
-                    $('#formFile-explorer').off('change').on('change', function() {
-                        upload(account.accountId);
-                    });
-                    $('#formFile-explorer').trigger('click');
-                }
-            }
-        };
+            let accounts = getAccounts();
+
+// Se determina el ID de la cuenta
+            let accountIdPromise = account.pathActual === account.root && Object.keys(accounts).length !== 1
+                ? optionsSelectAccounId()
+                : Promise.resolve(account.accountId);
+
+            accountIdPromise.then(function(accountId) {
+                $('#newNameButton').off('click').on('click', function() {
+                    let newName = sanitizeText($("#newName").val());
+                    createFile(newName, accountId);
+                });
+                $('#newDirFileModal').modal('show');
+            });
+        }
+    };
+    let buttonSubirArchivo = {
+        text: '<i class="bi bi-upload me-2"></i>Subir archivo',
+        className: 'btn btn-xs btn-subir',
+        action: function() {
+
+            let accounts = getAccounts();
+            let accountIdPromise = account.pathActual === account.root && Object.keys(accounts).length!==1
+                                                    ? optionsSelectAccounId()
+                                                    : Promise.resolve(account.accountId);
+
+            accountIdPromise.then(function(accountId) {
+                $('#formFile-explorer').off('change').on('change', function() {
+                    upload(accountId);
+                }).trigger('click');
+            });
+        }
+    };
     let buttonVerMetadatos =
         {
             text: '<i class="bi bi-search me-2"></i>Ver Metadatos',
