@@ -24,7 +24,7 @@ $(document).ready(function() {
     });
 });
 
-function editarModalMetadata() {
+async function editarModalMetadata() {
 
     let modalVerMetadatos = $('#modalVerMetadatos');
     let modalEditarMetadatos = $('#modalEditarMetadatos');
@@ -35,7 +35,7 @@ function editarModalMetadata() {
     modalEditarMetadatos.data('path', path);
     modalEditarMetadatos.data('accountId', accountId);
 
-    let metadata = lastMetadataArchive??getArchiveMetadata(accountId, path);
+    let metadata = lastMetadataArchive ?? await getArchiveMetadata(accountId, path);
 
 // Limpia el contenido existente en el modal body
     contenidoModalEditarMetadatos.empty();
@@ -236,13 +236,13 @@ function extraerBuscarMetadatosModal(){
 }
 
 let metadata = null;
-function verModalMetadata(path, accountId) {
+async function verModalMetadata(path, accountId) {
     let modalVerMetadatos = $('#modalVerMetadatos');
     modalVerMetadatos.data('path', path);
     modalVerMetadatos.data('accountId', accountId);
 
     let contenidoModalVerMetadatos = modalVerMetadatos.find('.modal-body');
-    metadata = getArchiveMetadata(accountId, path);
+    metadata = await getArchiveMetadata(accountId, path);
 
     let metadatosJson=obtenerMetadatos(metadata);
 

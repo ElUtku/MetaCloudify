@@ -162,7 +162,7 @@ function crearTabla(data,account)
                         let filasSeleccionadas = tabla.DataTable().rows({ selected: true }).data().toArray();
                         let filasIndices = tabla.DataTable().rows({ selected: true }).indexes();
 
-                        filasSeleccionadas.forEach(function(fila, index, array) {
+                        filasSeleccionadas.forEach(function(fila, index) {
                             if (fila) {
                                 dlt(fila.path, fila.accountId, filasIndices[index]);
                             } else {
@@ -331,7 +331,7 @@ function crearTabla(data,account)
         stateSave: true,
         info: false,
         ordering: true,
-        select: true,
+        select: 'single',
         order: [[4, 'desc']],
         paging: false,
         data: data,

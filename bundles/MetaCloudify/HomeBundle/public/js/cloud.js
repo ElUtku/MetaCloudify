@@ -329,37 +329,34 @@ function back(account)
 
 let lastMetadataArchive = null;
 function getArchiveMetadata(accountId, path) {
+    return new Promise(function(resolve, reject) {
+        path = cleanPath(path);
+        let account = getAccount(accountId);
 
-    path=cleanPath(path);
-
-    let account = getAccount(accountId);
-
-    $.ajax({
-        url: account.controller + '/drive/getArchive',
-        method: 'GET',
-        async: false, // Debe ser sincrónico para que el modal pueda leer los datos devueltos
-        data: {
-            path: path,
-            accountId: accountId,
-        },
-        beforeSend: function() {
-            $('#loading-modal').modal('show');
-        },
-        success: function (data) {
-            lastMetadataArchive = data;
-        },
-        error: function (xhr, status, error) {
-            console.error(error);
-            limpiarModalErrores();
-            mostrarModalErrores(xhr);
-            lastMetadataArchive = null;
-        },
-        complete: function() {
-            $('#loading-modal').modal('hide');
-        },
+        $.ajax({
+            url: account.controller + '/drive/getArchive',
+            method: 'GET',
+            data: {
+                path: path,
+                accountId: accountId,
+            },
+            beforeSend: function() {
+                $('#loading-modal').modal('show');
+            },
+            success: function(data) {
+                $('#loading-modal').modal('hide');
+                lastMetadataArchive=data;
+                resolve(data);
+            },
+            error: function(xhr, status, error) {
+                $('#loading-modal').modal('hide');
+                console.error(error);
+                limpiarModalErrores();
+                mostrarModalErrores(xhr);
+                reject(error);
+            },
+        });
     });
-
-    return lastMetadataArchive;
 }
 
 function guardarMetadata(path, accountId)
