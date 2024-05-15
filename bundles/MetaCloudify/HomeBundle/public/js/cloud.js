@@ -329,7 +329,7 @@ function back(account)
 
 let lastMetadataArchive = null;
 function getArchiveMetadata(accountId, path) {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function(resolve) {
         path = cleanPath(path);
         let account = getAccount(accountId);
 
@@ -353,7 +353,6 @@ function getArchiveMetadata(accountId, path) {
                 console.error(error);
                 limpiarModalErrores();
                 mostrarModalErrores(xhr);
-                reject(error);
             },
         });
     });
