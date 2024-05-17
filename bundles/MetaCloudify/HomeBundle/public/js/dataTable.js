@@ -100,7 +100,7 @@ function crearTabla(data,account)
         }
     };
     let buttonSubirArchivo = {
-        text: '<i class="bi bi-upload me-2"></i>Subir archivo',
+        text: '<i class="bi bi-upload me-2"></i>Subir archivos',
         className: 'btn btn-xs btn-subir',
         action: function() {
 
@@ -152,7 +152,7 @@ function crearTabla(data,account)
         };
     let buttonEliminarArchivo =
         {
-            text: '<i class="bi bi-trash me-2"></i>Elimiar archivo',
+            text: '<i class="bi bi-trash me-2"></i>Elimiar',
             className: 'btn-xs',
             action: function ()
             {
