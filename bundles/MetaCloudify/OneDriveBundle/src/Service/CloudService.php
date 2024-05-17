@@ -30,7 +30,7 @@ class CloudService extends Core
      */
     public function login(SessionInterface $session,Request $request): Account
     {
-        $config = Yaml::parseFile(__DIR__.'\..\Resources\config\onedrive.yaml'); //Configuraicon de la nube
+        $config = Yaml::parseFile(__DIR__.'/../Resources/config/onedrive.yaml'); //Configuraicon de la nube
 
         $provider = new Microsoft([
             // Required
@@ -93,7 +93,7 @@ class CloudService extends Core
      */
     public function loginPost(SessionInterface $session, Request $request): Account | String
     {
-        $config = Yaml::parseFile(__DIR__.'\..\Resources\config\onedrive.yaml'); //Configuraicon de la nube
+        $config = Yaml::parseFile(__DIR__.'/../Resources/config/onedrive.yaml'); //Configuraicon de la nube
 
         $provider = new Microsoft([
             // Required

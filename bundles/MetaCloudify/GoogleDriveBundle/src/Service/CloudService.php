@@ -35,7 +35,7 @@ class CloudService extends Core
      */
     public function login(SessionInterface $session, Request $request): Account
     {
-        $config = Yaml::parseFile(__DIR__.'\..\Resources\config\googledrive.yaml');
+        $config = Yaml::parseFile(__DIR__.'/../Resources/config/googledrive.yaml');
 
         $provider = new Google([
             'clientId'     => $config['clientId'],
@@ -99,7 +99,7 @@ class CloudService extends Core
     public function loginPost(SessionInterface $session, Request $request): Account | String
     {
 
-        $config = Yaml::parseFile(__DIR__.'\..\Resources\config\googledrive.yaml');
+        $config = Yaml::parseFile(__DIR__.'/../Resources/config/googledrive.yaml');
 
         $provider = new Google([
             'clientId'     => $config['clientId'],
@@ -184,7 +184,7 @@ class CloudService extends Core
     public function constructFilesystem(Account $account): Filesystem
     {
         try {
-            $config = Yaml::parseFile(__DIR__.'\..\Resources\config\googledrive.yaml');
+            $config = Yaml::parseFile(__DIR__.'/../Resources/config/googledrive.yaml');
 
             $client = new Google_Client($config);
             $client->setAccessToken($account->getToken());
@@ -206,7 +206,7 @@ class CloudService extends Core
     public function testConection(Account $account): void
     {
         try {
-            $config = Yaml::parseFile(__DIR__.'\..\Resources\config\googledrive.yaml');
+            $config = Yaml::parseFile(__DIR__.'/../Resources/config/googledrive.yaml');
 
             $client = new Google_Client($config);
             $client->setAccessToken($account->getToken());
