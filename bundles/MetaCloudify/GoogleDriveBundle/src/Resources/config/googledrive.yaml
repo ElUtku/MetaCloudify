@@ -1,5 +1,5 @@
-clientId: '423818169355-mjhnjfqs6ue9m2ni9eldol8h8oibgr8f.apps.googleusercontent.com'
-clientSecret: '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'
+clientId: 'xxxxx_tu_id_xxxxxxxx'
+clientSecret: 'xxxxx_tu_secretoxxxxxx'
 redirectUriLogin: 'http://localhost/MetaCloudify/public/index.php/googledrive/login'
 redirectUriLoginToken: 'http://localhost/MetaCloudify/public/index.php/googledrive/login/token'
 scopes:
