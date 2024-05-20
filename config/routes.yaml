@@ -1,6 +1,6 @@
-#index:
-#    path: /
-#    controller: App\Controller\DefaultController::index
+index:
+    path: /
+    controller: MetaCloudify\HomeBundle\Controller\HomeController::index
 
 
 # DESCOMENTAR PARA PROD
