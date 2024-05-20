@@ -152,7 +152,7 @@ function crearTabla(data,account)
         };
     let buttonEliminarArchivo =
         {
-            text: '<i class="bi bi-trash me-2"></i>Elimiar',
+            text: '<i class="bi bi-trash me-2"></i>Eliminar',
             className: 'btn-xs',
             action: function ()
             {
