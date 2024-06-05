@@ -23,6 +23,9 @@ class AccountRepository extends EntityRepository
 {
 
     /**
+     *
+     * Registra los datos de la cuenta en la BBDD (hora e ip). Si no existe se crea la entrada.
+     *
      * @param Account $account
      * @return Account|null
      * @throws CloudException
@@ -49,6 +52,9 @@ class AccountRepository extends EntityRepository
     }
 
     /**
+     *
+     * Da de alta una nueva cuenta en la BBDD.
+     *
      * @param Account $account
      * @return void
      * @throws CloudException
@@ -67,6 +73,9 @@ class AccountRepository extends EntityRepository
     }
 
     /**
+     *
+     * Guarda los cambios en la base de datos.
+     *
      * @return void
      * @throws CloudException
      */
@@ -83,6 +92,9 @@ class AccountRepository extends EntityRepository
     }
 
     /**
+     *
+     * Consulta parametrizada para recueprar una cuenta.
+     *
      * @param Account $account
      * @return Account|null
      * @throws CloudException

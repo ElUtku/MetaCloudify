@@ -24,6 +24,9 @@ class MetadataRepository extends EntityRepository
 {
 
     /**
+     *
+     * Actualiza el estado de un fichero en la BBDD y si no existe se crea la nueva entrada.
+     *
      * @param Metadata $fileMetadata
      * @return void
      * @throws CloudException
@@ -59,6 +62,9 @@ class MetadataRepository extends EntityRepository
 
 
     /**
+     *
+     * Establece el "status" del fichero y sus hijos a delete.
+     *
      * @param Metadata $fileMetadata
      * @return void
      * @throws CloudException
@@ -81,6 +87,9 @@ class MetadataRepository extends EntityRepository
 
 
     /**
+     *
+     * Crea una nueva entrada en base a otra ya existente
+     *
      * @param Metadata $destiantionMetadataFile
      * @param Metadata $originalCloudMetadataFile
      * @return void
@@ -96,6 +105,9 @@ class MetadataRepository extends EntityRepository
     }
 
     /**
+     *
+     * Recupera un fichero
+     *
      * @param Metadata $file
      * @return Metadata
      * @throws CloudException
@@ -125,6 +137,9 @@ class MetadataRepository extends EntityRepository
     }
 
     /**
+     *
+     * Recupera un fichero mediante consultas paremetrizadas
+     *
      * @param Metadata $file
      * @return Metadata|null
      * @throws NonUniqueResultException
@@ -147,6 +162,9 @@ class MetadataRepository extends EntityRepository
     }
 
     /**
+     *
+     * Encuentra todos los ficheros que coinicida con la cuenta y la ruta proporcionadas.
+     *
      * @param Account $account
      * @param String $path
      * @return float|int|mixed|string
@@ -165,6 +183,9 @@ class MetadataRepository extends EntityRepository
 
 
     /**
+     *
+     * Encuentra un fichero para una cuenta en concreto.
+     *
      * @param Account $account
      * @param String $path
      * @param String $name
@@ -187,6 +208,9 @@ class MetadataRepository extends EntityRepository
     }
 
     /**
+     *
+     * Busca todos los ficheros que coincidan con los parametros proporcionados como metadatos.
+     *
      * @param Account $account
      * @param ?String $visibility
      * @param ?String $author

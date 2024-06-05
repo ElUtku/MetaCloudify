@@ -4,6 +4,9 @@ namespace MetaCloudify\CoreBundle\Service;
 
 use Exception;
 
+/**
+ * Lanza excepciones y las escirbe en el fichero de log.
+ */
 class CloudException extends Exception
 {
     private MetaCloudifyLogger $logger;

@@ -249,6 +249,10 @@ class Account
         return $this->metadata;
     }
 
+    /**
+     * @param Metadata $metadata
+     * @return $this
+     */
     public function addMetadata(Metadata $metadata): static
     {
         if (!$this->metadata->contains($metadata)) {
@@ -259,6 +263,10 @@ class Account
         return $this;
     }
 
+    /**
+     * @param Metadata $metadata
+     * @return $this
+     */
     public function removeMetadata(Metadata $metadata): static
     {
         if ($this->metadata->removeElement($metadata)) {

@@ -195,7 +195,7 @@ class CloudService extends Core
      * Convierte un array al objeto de la clase
      *
      * @param $array | Array con los parametros de la cuenta (Existen dos verisones, si se invoca desde getUserInfo los
-     *                 parametros tienen un nombre y si se invoca desde sesion, tienen otro.)
+     *                 parametros tienen un nombre distinto de si se invoca desde sesion.)
      * @return Account
      * @throws CloudException
      */

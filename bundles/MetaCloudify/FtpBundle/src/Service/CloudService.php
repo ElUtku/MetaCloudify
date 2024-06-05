@@ -45,6 +45,9 @@ class CloudService extends Core
     }
 
     /**
+     *
+     * Convierte un array en un objeto de tipo Account
+     *
      * @param $array
      * @return Account
      * @throws CloudException

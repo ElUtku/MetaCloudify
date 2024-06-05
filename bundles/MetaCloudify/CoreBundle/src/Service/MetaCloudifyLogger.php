@@ -6,6 +6,10 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 
+
+/**
+ * Crea y registra interacciones con el sistema en un fichero metacloudify.log
+ */
 class MetaCloudifyLogger implements LoggerInterface
 {
     private Logger $logger;

@@ -50,6 +50,9 @@ class CloudService extends Core
     }
 
     /**
+     *
+     * Convierte un array en un objeto de tipo Account
+     *
      * @param $array
      * @return Account
      * @throws CloudException
@@ -74,6 +77,9 @@ class CloudService extends Core
 
 
     /**
+     *
+     * Metodo personalizado que sobreescribe el original para subir archivos a webdav.
+     *
      * @param String $path
      * @param UploadedFile $content
      * @return void

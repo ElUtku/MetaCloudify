@@ -265,6 +265,7 @@ abstract class CloudService
     }
 
     /**
+     *
      *  Descarga culaquier tipo de archivos.
      *
      * @param String $path
@@ -297,6 +298,9 @@ abstract class CloudService
     }
 
     /**
+     *
+     * Elimina la cuenta de la sesion
+     *
      * @param SessionInterface $session
      * @param Request $request
      * @return void
@@ -329,6 +333,9 @@ abstract class CloudService
     }
 
     /**
+     *
+     * Rercuepra y establece una cuenta de la sesion.
+     *
      * @param SessionInterface $session
      * @param Account $account
      * @return string
@@ -367,6 +374,9 @@ abstract class CloudService
     }
 
     /**
+     *
+     * Metodo para autenticacion por token.
+     *
      * @param SessionInterface $session
      * @param Request $request
      * @return Account | String
@@ -416,6 +426,9 @@ abstract class CloudService
     }
 
     /**
+     *
+     * Devuelve el archivo tipado como fichero o directorio que se encuntre en la ruta proporiconada.
+     *
      * @param string $path
      * @return StorageAttributes
      * @throws CloudException
@@ -452,6 +465,9 @@ abstract class CloudService
     }
 
     /**
+     *
+     * Busca y devuelve un tipo de archivo sin tipar, como un array.
+     *
      * @param string $path
      * @return array
      * @throws CloudException
@@ -481,6 +497,9 @@ abstract class CloudService
     }
 
     /**
+     *
+     * Devuelve un archivo tipado como fichero o directorio
+     *
      * @param $item
      * @return StorageAttributes
      * @throws CloudException
@@ -563,6 +582,9 @@ abstract class CloudService
     }
 
     /**
+     *
+     * Metodo de autenticación
+     *
      * @param SessionInterface $session
      * @param Request $request
      * @return Account
@@ -571,6 +593,9 @@ abstract class CloudService
     public abstract function login(SessionInterface $session, Request $request): Account;
 
     /**
+     *
+     * Construye el filesystem asociado a la cuenta.
+     *
      * @param Account $account
      * @return Filesystem
      * @throws CloudException
@@ -578,6 +603,9 @@ abstract class CloudService
     public abstract function constructFilesystem(Account $account): Filesystem;
 
     /**
+     *
+     * Comprueba que la conexion con el servidor sigue siendo valida
+     *
      * @param Account $account
      * @return void
      * @throws CloudException
